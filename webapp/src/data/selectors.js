@@ -22,3 +22,11 @@ export function getNewsItemsForWeekAndRegion(db, weekId, regionId) {
     .map(key => db[key])
     .filter(item => normalizeRegionLabel(item.region) === regionId);
 }
+
+export function getCompanyItemsForWeekAndRegion(db, weekId, regionId) {
+  const prefix = `mkg:content:entreprises:${weekId}:`;
+  return Object.keys(db)
+    .filter(key => key.startsWith(prefix))
+    .map(key => db[key])
+    .filter(item => normalizeRegionLabel(item.region) === regionId);
+}

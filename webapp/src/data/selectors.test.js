@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion } from './selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion } from './selectors.js';
 
 const DB = {
   'mkg:week:w2': { id: 'w2', label: 'Semaine 2', order: 1 },
@@ -11,6 +11,8 @@ const DB = {
   'mkg:content:news:w1:n1': { id: 'n1', region: 'JP — ASIE —', title: 'BoJ maintient ses taux', description: 'Détail.' },
   'mkg:content:news:w1:n2': { id: 'n2', region: 'EU — EUROPE —', title: 'BCE relève ses taux', description: 'Détail.' },
   'mkg:content:entreprises:w1:c1': { id: 'c1', name: 'Some Co', region: 'Asie' },
+  'mkg:content:entreprises:w1:c2': { id: 'c2', name: 'Reliance Industries', region: 'BRICS', yahooSymbol: 'RELIANCE.NS', flag: '🇮🇳', country: 'Inde', marketCap: '210 Md$', bullets: ['Point clé 1'] },
+  'mkg:content:entreprises:w2:c3': { id: 'c3', name: 'Toyota', region: 'Asie' },
 };
 
 describe('getWeeks', () => {
@@ -64,5 +66,33 @@ describe('getNewsItemsForWeekAndRegion', () => {
   it('does not include entreprises items even though they also have a region field', () => {
     const items = getNewsItemsForWeekAndRegion(DB, 'w1', 'asia');
     expect(items.some(i => i.id === 'c1')).toBe(false);
+  });
+});
+
+describe('getCompanyItemsForWeekAndRegion', () => {
+  it('returns only company items for the given week and region', () => {
+    const items = getCompanyItemsForWeekAndRegion(DB, 'w1', 'asia');
+    expect(items).toHaveLength(1);
+    expect(items[0].name).toBe('Some Co');
+  });
+
+  it('matches a different region correctly', () => {
+    const items = getCompanyItemsForWeekAndRegion(DB, 'w1', 'brics-uk');
+    expect(items).toHaveLength(1);
+    expect(items[0].name).toBe('Reliance Industries');
+  });
+
+  it('does not leak items from a different week', () => {
+    const items = getCompanyItemsForWeekAndRegion(DB, 'w1', 'asia');
+    expect(items.some(i => i.name === 'Toyota')).toBe(false);
+  });
+
+  it('does not include the news item even though it shares the mkg:content: root and would also normalize to asia', () => {
+    const items = getCompanyItemsForWeekAndRegion(DB, 'w1', 'asia');
+    expect(items.some(i => i.id === 'n1')).toBe(false);
+  });
+
+  it('returns an empty array when nothing matches', () => {
+    expect(getCompanyItemsForWeekAndRegion(DB, 'w1', 'north-america')).toEqual([]);
   });
 });
