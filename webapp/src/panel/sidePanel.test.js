@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { initSidePanel } from './sidePanel.js';
 
 describe('initSidePanel', () => {
-  let labelEl, indicesEl, newsEl, companiesEl, compareEl, panel;
+  let labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, panel;
 
   beforeEach(() => {
     labelEl = document.createElement('div');
@@ -11,7 +11,9 @@ describe('initSidePanel', () => {
     newsEl = document.createElement('div');
     companiesEl = document.createElement('div');
     compareEl = document.createElement('div');
-    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl });
+    portfolioLabelEl = document.createElement('div');
+    portfolioEl = document.createElement('div');
+    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl });
   });
 
   it('sets the region label', () => {
@@ -115,5 +117,64 @@ describe('initSidePanel', () => {
 
     panel.showRegion('Europe', { marketItems: [], newsItems: [], companyItems: [] });
     expect(compareEl.children.length).toBe(0);
+  });
+
+  it('renders the portfolio region label and table rows', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [], companyItems: [],
+      portfolioRegionLabel: 'Asie',
+      portfolioEntries: [{ id: 'p1', date: '12/03', entreprise: 'Evergreen Marine', stagiaire: 'Léa', symbol: '2603.TW', depuis: 5.2, ytd: 5.0 }],
+    });
+    expect(portfolioLabelEl.textContent).toBe('Asie');
+    expect(portfolioEl.querySelectorAll('tbody tr')).toHaveLength(1);
+  });
+
+  it('defaults portfolioEntries to an empty list and portfolioRegionLabel to an empty string when omitted', () => {
+    expect(() => panel.showRegion('Asie', { marketItems: [], newsItems: [] })).not.toThrow();
+    expect(portfolioLabelEl.textContent).toBe('');
+    expect(portfolioEl.querySelectorAll('tbody tr')).toHaveLength(0);
+  });
+
+  it('clicking a sortable column header re-sorts and re-renders the table', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [], companyItems: [],
+      portfolioRegionLabel: 'Asie',
+      portfolioEntries: [
+        { id: 'p1', date: '20/06', entreprise: 'A', stagiaire: 'X', symbol: 'A', depuis: 1, ytd: 1 },
+        { id: 'p2', date: '01/01', entreprise: 'B', stagiaire: 'Y', symbol: 'B', depuis: 2, ytd: 2 },
+      ],
+    });
+    // Default state is date ascending, so 01/01 (B) sorts first before any click.
+    expect(portfolioEl.querySelector('tbody tr td:nth-child(2)').textContent).toBe('B');
+
+    // Clicking the already-sorted DATE column reverses to descending: 20/06 (A) now sorts first.
+    const dateHeader = [...portfolioEl.querySelectorAll('th')].find(th => th.textContent.startsWith('DATE'));
+    dateHeader.click();
+    expect(portfolioEl.querySelector('tbody tr td:nth-child(2)').textContent).toBe('A');
+  });
+
+  it('preserves the sort preference across a subsequent showRegion call (does not reset like the comparator)', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [], companyItems: [],
+      portfolioRegionLabel: 'Asie',
+      portfolioEntries: [
+        { id: 'p1', date: '20/06', entreprise: 'A', stagiaire: 'X', symbol: 'A', depuis: 1, ytd: 1 },
+        { id: 'p2', date: '01/01', entreprise: 'B', stagiaire: 'Y', symbol: 'B', depuis: 2, ytd: 2 },
+      ],
+    });
+    // Clicking DATE (the default-sorted column) reverses date sort from ascending to descending.
+    portfolioEl.querySelector('th').click();
+
+    panel.showRegion('Europe', {
+      marketItems: [], newsItems: [], companyItems: [],
+      portfolioRegionLabel: 'Europe',
+      portfolioEntries: [
+        { id: 'p3', date: '20/06', entreprise: 'C', stagiaire: 'X', symbol: 'C', depuis: 1, ytd: 1 },
+        { id: 'p4', date: '01/01', entreprise: 'D', stagiaire: 'Y', symbol: 'D', depuis: 2, ytd: 2 },
+      ],
+    });
+    // Date descending persisted: 20/06 (C) sorts before 01/01 (D) in Europe's own data.
+    const firstRowEntreprise = portfolioEl.querySelector('tbody tr td:nth-child(2)').textContent;
+    expect(firstRowEntreprise).toBe('C');
   });
 });

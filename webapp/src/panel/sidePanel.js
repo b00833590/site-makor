@@ -1,5 +1,7 @@
 import { renderCompanies, renderComparison } from './companyList.js';
 import { toggleCompanySelection } from './compareSelection.js';
+import { sortPortfolioEntries, nextSort } from './portfolioSort.js';
+import { renderPortfolioTable } from './portfolioTable.js';
 
 function renderIndices(container, items) {
   container.replaceChildren();
@@ -42,9 +44,12 @@ function renderNews(container, items) {
   }
 }
 
-export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl }) {
+export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl }) {
   let selectedCompanyIds = [];
   let currentCompanyItems = [];
+  let currentPortfolioEntries = [];
+  let sortField = 'date';
+  let sortDirection = 'asc';
 
   function renderCompanySection() {
     renderCompanies(companiesEl, currentCompanyItems, selectedCompanyIds, handleToggleCompare);
@@ -56,13 +61,28 @@ export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compare
     renderCompanySection();
   }
 
-  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [] }) {
+  function renderPortfolioSection() {
+    const sorted = sortPortfolioEntries(currentPortfolioEntries, sortField, sortDirection);
+    renderPortfolioTable(portfolioEl, sorted, { sortField, sortDirection, onSort: handleSort });
+  }
+
+  function handleSort(clickedField) {
+    const next = nextSort(sortField, sortDirection, clickedField);
+    sortField = next.field;
+    sortDirection = next.direction;
+    renderPortfolioSection();
+  }
+
+  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [] }) {
     labelEl.textContent = regionLabel;
     renderIndices(indicesEl, marketItems);
     renderNews(newsEl, newsItems);
     currentCompanyItems = companyItems;
     selectedCompanyIds = [];
     renderCompanySection();
+    portfolioLabelEl.textContent = portfolioRegionLabel;
+    currentPortfolioEntries = portfolioEntries;
+    renderPortfolioSection();
   }
 
   return { showRegion };
