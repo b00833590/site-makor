@@ -41,6 +41,37 @@ describe('renderPortfolioTable', () => {
     expect(onSort).toHaveBeenCalledWith('ytd');
   });
 
+  it('marks DATE/DEPUIS/YTD headers as sortable', () => {
+    const container = document.createElement('div');
+    renderPortfolioTable(container, ENTRIES, { sortField: 'date', sortDirection: 'asc', onSort: () => {} });
+    const headers = [...container.querySelectorAll('thead th')];
+    for (const label of ['DATE', 'DEPUIS', 'YTD']) {
+      const th = headers.find(h => h.textContent.startsWith(label));
+      expect(th.className).toBe('portfolio-sortable');
+    }
+  });
+
+  it('does not mark ENTREPRISE/STAGIAIRE/SYMBOLE headers as sortable', () => {
+    const container = document.createElement('div');
+    renderPortfolioTable(container, ENTRIES, { sortField: 'date', sortDirection: 'asc', onSort: () => {} });
+    const headers = [...container.querySelectorAll('thead th')];
+    for (const label of ['ENTREPRISE', 'STAGIAIRE', 'SYMBOLE']) {
+      const th = headers.find(h => h.textContent.startsWith(label));
+      expect(th.className).toBe('');
+    }
+  });
+
+  it('does not call onSort when clicking ENTREPRISE/STAGIAIRE/SYMBOLE headers', () => {
+    const container = document.createElement('div');
+    const onSort = vi.fn();
+    renderPortfolioTable(container, ENTRIES, { sortField: 'date', sortDirection: 'asc', onSort });
+    const headers = [...container.querySelectorAll('thead th')];
+    for (const label of ['ENTREPRISE', 'STAGIAIRE', 'SYMBOLE']) {
+      headers.find(h => h.textContent.startsWith(label)).click();
+    }
+    expect(onSort).not.toHaveBeenCalled();
+  });
+
   it('renders an empty percentage cell rather than "undefined%" for a missing depuis/ytd value', () => {
     const container = document.createElement('div');
     renderPortfolioTable(container, [{ id: 'p3', date: '01/01', entreprise: 'X', stagiaire: 'Y', symbol: 'Z' }], { sortField: 'date', sortDirection: 'asc', onSort: () => {} });

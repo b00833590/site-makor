@@ -7,6 +7,7 @@ const COLUMNS = [
   { field: 'ytd', label: 'YTD' },
 ];
 const PERCENT_FIELDS = new Set(['depuis', 'ytd']);
+const SORTABLE_FIELDS = new Set(['date', 'depuis', 'ytd']);
 
 export function renderPortfolioTable(container, entries, { sortField, sortDirection, onSort }) {
   container.replaceChildren();
@@ -18,10 +19,14 @@ export function renderPortfolioTable(container, entries, { sortField, sortDirect
   const headRow = document.createElement('tr');
   for (const col of COLUMNS) {
     const th = document.createElement('th');
-    th.className = 'portfolio-sortable';
-    const indicator = sortField === col.field ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '';
-    th.textContent = col.label + indicator;
-    th.addEventListener('click', () => onSort(col.field));
+    if (SORTABLE_FIELDS.has(col.field)) {
+      th.className = 'portfolio-sortable';
+      const indicator = sortField === col.field ? (sortDirection === 'asc' ? ' ▲' : ' ▼') : '';
+      th.textContent = col.label + indicator;
+      th.addEventListener('click', () => onSort(col.field));
+    } else {
+      th.textContent = col.label;
+    }
     headRow.appendChild(th);
   }
   thead.appendChild(headRow);
