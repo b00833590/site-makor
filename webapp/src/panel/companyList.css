@@ -1,0 +1,87 @@
+.panel-company-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.panel-company-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-company-name {
+  font-weight: bold;
+  color: #fff;
+}
+
+.panel-compare-toggle {
+  background: transparent;
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 3px 6px;
+}
+
+.panel-compare-toggle.active {
+  background: rgba(201, 151, 31, 0.35);
+}
+
+.panel-company-sub {
+  color: #767c8c;
+  margin-top: 4px;
+}
+
+.panel-company-cap {
+  color: #b7bdd6;
+  margin-top: 4px;
+}
+
+.panel-company-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.panel-company-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-company-stat-label {
+  color: #767c8c;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.panel-company-stat-value {
+  color: #fff;
+}
+
+.panel-company-bullets {
+  margin: 8px 0 0;
+  padding-left: 16px;
+  color: #b7bdd6;
+}
+
+.panel-compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.panel-compare-table th,
+.panel-compare-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 5px 4px;
+  text-align: left;
+  color: #fff;
+}
