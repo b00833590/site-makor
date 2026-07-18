@@ -22,6 +22,7 @@ describe('getPortfolioEntriesForRegion', () => {
 
   it('translates north-america to amerique-du-nord-canada and returns an empty array when nothing matches', () => {
     expect(getPortfolioEntriesForRegion(DB, 'north-america')).toEqual([]);
+    expect(getPortfolioRegion(DB, 'north-america')).toEqual({ id: 'amerique-du-nord-canada', label: 'Amérique du Nord / Canada', color: '#e14b3f' });
   });
 
   it('returns an empty array for an unmapped region id instead of throwing', () => {
