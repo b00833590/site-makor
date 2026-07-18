@@ -64,5 +64,5 @@ html, body {
 }
 
 .arrow-next {
-  right: 20px;
+  right: calc(var(--panel-width, 340px) + 20px);
 }

@@ -6,10 +6,18 @@
   <title>Makor Morning News — Globe</title>
 </head>
 <body>
+  <div id="week-timeline" class="week-timeline"></div>
   <div id="globe-container"></div>
   <div id="region-indicator" class="region-indicator"></div>
   <button id="arrow-prev" class="arrow-btn arrow-prev" aria-label="Région précédente">‹</button>
   <button id="arrow-next" class="arrow-btn arrow-next" aria-label="Région suivante">›</button>
+  <aside class="side-panel">
+    <div id="panel-region-label" class="panel-region-label"></div>
+    <div class="panel-section-label">Indices régionaux</div>
+    <div id="panel-indices"></div>
+    <div class="panel-section-label">News macro</div>
+    <div id="panel-news"></div>
+  </aside>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
