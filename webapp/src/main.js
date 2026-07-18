@@ -1,11 +1,12 @@
 import './styles/globe.css';
 import './panel/sidePanel.css';
+import './panel/companyList.css';
 import './timeline/weekTimeline.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion } from './data/selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion } from './data/selectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
 
@@ -19,6 +20,8 @@ const panel = initSidePanel({
   labelEl: document.getElementById('panel-region-label'),
   indicesEl: document.getElementById('panel-indices'),
   newsEl: document.getElementById('panel-news'),
+  companiesEl: document.getElementById('panel-companies'),
+  compareEl: document.getElementById('panel-compare'),
 });
 
 let db = {};
@@ -38,6 +41,7 @@ function renderPanelForCurrentSelection() {
   panel.showRegion(region.label, {
     marketItems: getMarketItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
     newsItems: getNewsItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+    companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
   });
 }
 
