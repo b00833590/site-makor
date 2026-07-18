@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "firebase": "^12.16.0",
     "globe.gl": "^2.46.1"
   },
   "devDependencies": {
