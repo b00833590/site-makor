@@ -37,7 +37,7 @@ function buildBulletsList(item) {
   return bullets;
 }
 
-export function renderCompanies(container, items, selectedIds, onToggle) {
+export function renderCompanies(container, items, selectedIds, { onToggle, onOpenChart }) {
   container.replaceChildren();
   for (const item of items) {
     const card = document.createElement('div');
@@ -50,6 +50,13 @@ export function renderCompanies(container, items, selectedIds, onToggle) {
     name.className = 'panel-company-name';
     name.textContent = item.name;
 
+    const chartBtn = document.createElement('button');
+    chartBtn.type = 'button';
+    chartBtn.className = 'panel-chart-toggle';
+    chartBtn.textContent = '📈';
+    chartBtn.setAttribute('aria-label', `Graphique ${item.name}`);
+    chartBtn.addEventListener('click', () => onOpenChart(item));
+
     const compareBtn = document.createElement('button');
     compareBtn.type = 'button';
     compareBtn.className = 'panel-compare-toggle' + (selectedIds.includes(item.id) ? ' active' : '');
@@ -57,7 +64,7 @@ export function renderCompanies(container, items, selectedIds, onToggle) {
     compareBtn.setAttribute('aria-label', `Comparer ${item.name}`);
     compareBtn.addEventListener('click', () => onToggle(item.id));
 
-    header.append(name, compareBtn);
+    header.append(name, chartBtn, compareBtn);
 
     const sub = document.createElement('div');
     sub.className = 'panel-company-sub';

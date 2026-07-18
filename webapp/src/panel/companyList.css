@@ -33,6 +33,21 @@
   background: rgba(201, 151, 31, 0.35);
 }
 
+.panel-chart-toggle {
+  background: transparent;
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 3px 6px;
+}
+
+.panel-chart-toggle:hover {
+  background: rgba(201, 151, 31, 0.2);
+}
+
 .panel-company-sub {
   color: #767c8c;
   margin-top: 4px;

@@ -16,7 +16,7 @@ const COMPANY_B = {
 describe('renderCompanies', () => {
   it('renders one card per company with name, symbol/flag/country and market cap', () => {
     const container = document.createElement('div');
-    renderCompanies(container, [COMPANY_A], [], () => {});
+    renderCompanies(container, [COMPANY_A], [], { onToggle: () => {}, onOpenChart: () => {} });
     const card = container.querySelector('.panel-company-card');
     expect(card.querySelector('.panel-company-name').textContent).toBe('Reliance Industries');
     expect(card.querySelector('.panel-company-sub').textContent).toBe('RELIANCE.NS · 🇮🇳 · Inde');
@@ -25,14 +25,14 @@ describe('renderCompanies', () => {
 
   it('renders the 4-stat grid with values', () => {
     const container = document.createElement('div');
-    renderCompanies(container, [COMPANY_A], [], () => {});
+    renderCompanies(container, [COMPANY_A], [], { onToggle: () => {}, onOpenChart: () => {} });
     const values = [...container.querySelectorAll('.panel-company-stat-value')].map(el => el.textContent);
     expect(values).toEqual(['12%', '14x', '1 450', '1 600']);
   });
 
   it('renders one bullet item per bullet, none when the list is empty', () => {
     const container = document.createElement('div');
-    renderCompanies(container, [COMPANY_A, COMPANY_B], [], () => {});
+    renderCompanies(container, [COMPANY_A, COMPANY_B], [], { onToggle: () => {}, onOpenChart: () => {} });
     const cards = container.querySelectorAll('.panel-company-card');
     expect(cards[0].querySelectorAll('.panel-company-bullets li')).toHaveLength(2);
     expect(cards[1].querySelectorAll('.panel-company-bullets li')).toHaveLength(0);
@@ -40,7 +40,7 @@ describe('renderCompanies', () => {
 
   it('marks the compare toggle active only for selected company ids', () => {
     const container = document.createElement('div');
-    renderCompanies(container, [COMPANY_A, COMPANY_B], ['b'], () => {});
+    renderCompanies(container, [COMPANY_A, COMPANY_B], ['b'], { onToggle: () => {}, onOpenChart: () => {} });
     const toggles = container.querySelectorAll('.panel-compare-toggle');
     expect(toggles[0].classList.contains('active')).toBe(false);
     expect(toggles[1].classList.contains('active')).toBe(true);
@@ -49,23 +49,39 @@ describe('renderCompanies', () => {
   it('calls onToggle with the company id when its compare button is clicked', () => {
     const container = document.createElement('div');
     const onToggle = vi.fn();
-    renderCompanies(container, [COMPANY_A], [], onToggle);
+    renderCompanies(container, [COMPANY_A], [], { onToggle, onOpenChart: () => {} });
     container.querySelector('.panel-compare-toggle').click();
     expect(onToggle).toHaveBeenCalledWith('a');
   });
 
   it('clears previous cards on re-render', () => {
     const container = document.createElement('div');
-    renderCompanies(container, [COMPANY_A, COMPANY_B], [], () => {});
-    renderCompanies(container, [COMPANY_A], [], () => {});
+    renderCompanies(container, [COMPANY_A, COMPANY_B], [], { onToggle: () => {}, onOpenChart: () => {} });
+    renderCompanies(container, [COMPANY_A], [], { onToggle: () => {}, onOpenChart: () => {} });
     expect(container.querySelectorAll('.panel-company-card')).toHaveLength(1);
   });
 
   it('never interprets stored content as HTML', () => {
     const container = document.createElement('div');
-    renderCompanies(container, [{ ...COMPANY_A, name: '<img src=x onerror=alert(1)>' }], [], () => {});
+    renderCompanies(container, [{ ...COMPANY_A, name: '<img src=x onerror=alert(1)>' }], [], { onToggle: () => {}, onOpenChart: () => {} });
     expect(container.querySelector('.panel-company-name').textContent).toBe('<img src=x onerror=alert(1)>');
     expect(container.querySelector('img')).toBeNull();
+  });
+
+  it('renders a chart button for each company', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY_A], [], { onToggle: () => {}, onOpenChart: () => {} });
+    const chartBtn = container.querySelector('.panel-chart-toggle');
+    expect(chartBtn).not.toBeNull();
+    expect(chartBtn.getAttribute('aria-label')).toBe('Graphique Reliance Industries');
+  });
+
+  it('calls onOpenChart with the full company item when its chart button is clicked', () => {
+    const container = document.createElement('div');
+    const onOpenChart = vi.fn();
+    renderCompanies(container, [COMPANY_A], [], { onToggle: () => {}, onOpenChart });
+    container.querySelector('.panel-chart-toggle').click();
+    expect(onOpenChart).toHaveBeenCalledWith(COMPANY_A);
   });
 });
 
