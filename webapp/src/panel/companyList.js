@@ -96,7 +96,13 @@ export function renderComparison(container, items, selectedIds) {
 
   addRow('', a.name, b.name);
   for (const [labelField, valueField, defaultLabel] of STAT_FIELDS) {
-    addRow(a[labelField] || defaultLabel, a[valueField], b[valueField]);
+    const labelA = a[labelField] || defaultLabel;
+    const labelB = b[labelField] || defaultLabel;
+    if (labelA === labelB) {
+      addRow(defaultLabel, a[valueField], b[valueField]);
+    } else {
+      addRow(defaultLabel, `${labelA}: ${a[valueField] ?? ''}`, `${labelB}: ${b[valueField] ?? ''}`);
+    }
   }
 
   container.appendChild(table);

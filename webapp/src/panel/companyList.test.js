@@ -93,4 +93,13 @@ describe('renderComparison', () => {
     renderComparison(container, [COMPANY_A, COMPANY_B], ['a']);
     expect(container.children).toHaveLength(0);
   });
+
+  it('shows both companies own label when they differ for the same stat field, instead of one shared label', () => {
+    const container = document.createElement('div');
+    const withDivergentLabel = { ...COMPANY_B, salesGrowthLabel: 'EV/EBITDA', salesGrowth: '4,55x' };
+    renderComparison(container, [COMPANY_A, withDivergentLabel], ['a', 'b']);
+    const text = container.querySelector('.panel-compare-table').textContent;
+    expect(text).toContain('Croissance CA: 12%');
+    expect(text).toContain('EV/EBITDA: 4,55x');
+  });
 });
