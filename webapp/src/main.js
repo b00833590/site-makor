@@ -57,23 +57,28 @@ prevBtn.addEventListener('click', () => scene.goToPrevRegion());
 nextBtn.addEventListener('click', () => scene.goToNextRegion());
 
 async function bootstrap() {
-  const client = createFirestoreClient();
-  db = await loadAllWithRetry(() => client.loadAllOnce());
+  try {
+    const client = createFirestoreClient();
+    db = await loadAllWithRetry(() => client.loadAllOnce());
 
-  const weeks = getWeeks(db);
-  activeWeekId = weeks.length ? weeks[weeks.length - 1].id : null;
+    const weeks = getWeeks(db);
+    activeWeekId = weeks.length ? weeks[weeks.length - 1].id : null;
 
-  initWeekTimeline({
-    container: timelineEl,
-    weeks,
-    activeWeekId,
-    onSelect: weekId => {
-      activeWeekId = weekId;
-      renderPanelForCurrentSelection();
-    },
-  });
+    initWeekTimeline({
+      container: timelineEl,
+      weeks,
+      activeWeekId,
+      onSelect: weekId => {
+        activeWeekId = weekId;
+        renderPanelForCurrentSelection();
+      },
+    });
 
-  renderPanelForCurrentSelection();
+    renderPanelForCurrentSelection();
+  } catch (error) {
+    console.error('Failed to load Firestore data', error);
+    panel.showRegion('Données indisponibles', { marketItems: [], newsItems: [] });
+  }
 }
 
 bootstrap();
