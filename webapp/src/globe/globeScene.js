@@ -42,7 +42,12 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
     onRegionSelect(regionId);
   }
 
-  selectRegion(initialRegionId);
+  // Update the position indicator for the initial region without stopping
+  // auto-rotate or animating the camera — that only happens on real user
+  // interaction (marker click or arrow navigation), so the globe is still
+  // visibly auto-rotating on first render.
+  currentRegionId = initialRegionId;
+  onRegionSelect(initialRegionId);
 
   return {
     goToNextRegion: () => selectRegion(nextRegionId(regions, currentRegionId)),
