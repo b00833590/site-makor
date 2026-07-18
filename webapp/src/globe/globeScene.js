@@ -1,0 +1,57 @@
+import Globe from 'globe.gl';
+import { cameraForRegion } from './camera.js';
+import { nextRegionId, prevRegionId } from './cycle.js';
+
+const EARTH_TEXTURE_URL = '/textures/earth-blue-marble.jpg';
+const SKY_TEXTURE_URL = '/textures/night-sky.png';
+const CAMERA_TRANSITION_MS = 1200;
+const MARKER_COLOR = '#e0b53d';
+
+export function initGlobeScene(container, { regions, initialRegionId, onRegionSelect }) {
+  let currentRegionId = initialRegionId;
+
+  const points = regions.flatMap(region =>
+    region.points.map(point => ({ ...point, regionId: region.id }))
+  );
+
+  const world = Globe()(container)
+    .globeImageUrl(EARTH_TEXTURE_URL)
+    .backgroundImageUrl(SKY_TEXTURE_URL)
+    .pointsData(points)
+    .pointLat('lat')
+    .pointLng('lng')
+    .pointColor(() => MARKER_COLOR)
+    .pointAltitude(0.015)
+    .pointRadius(0.35)
+    .pointLabel('name')
+    .onPointClick(point => selectRegion(point.regionId));
+
+  world.controls().autoRotate = true;
+  world.controls().autoRotateSpeed = 0.4;
+
+  window.addEventListener('resize', () => {
+    world.width(container.clientWidth).height(container.clientHeight);
+  });
+
+  function selectRegion(regionId) {
+    const region = regions.find(r => r.id === regionId);
+    if (!region) return;
+    currentRegionId = regionId;
+    world.controls().autoRotate = false;
+    world.pointOfView(cameraForRegion(region), CAMERA_TRANSITION_MS);
+    onRegionSelect(regionId);
+  }
+
+  // Update the position indicator for the initial region without stopping
+  // auto-rotate or animating the camera — that only happens on real user
+  // interaction (marker click or arrow navigation), so the globe is still
+  // visibly auto-rotating on first render.
+  currentRegionId = initialRegionId;
+  onRegionSelect(initialRegionId);
+
+  return {
+    goToNextRegion: () => selectRegion(nextRegionId(regions, currentRegionId)),
+    goToPrevRegion: () => selectRegion(prevRegionId(regions, currentRegionId)),
+    goToRegion: regionId => selectRegion(regionId),
+  };
+}
