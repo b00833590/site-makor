@@ -2,8 +2,8 @@ import Globe from 'globe.gl';
 import { cameraForRegion } from './camera.js';
 import { nextRegionId, prevRegionId } from './cycle.js';
 
-const EARTH_TEXTURE_URL = 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
-const SKY_TEXTURE_URL = 'https://unpkg.com/three-globe/example/img/night-sky.png';
+const EARTH_TEXTURE_URL = '/textures/earth-blue-marble.jpg';
+const SKY_TEXTURE_URL = '/textures/night-sky.png';
 const CAMERA_TRANSITION_MS = 1200;
 const MARKER_COLOR = '#e0b53d';
 
