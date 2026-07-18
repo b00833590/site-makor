@@ -3,13 +3,15 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { initSidePanel } from './sidePanel.js';
 
 describe('initSidePanel', () => {
-  let labelEl, indicesEl, newsEl, panel;
+  let labelEl, indicesEl, newsEl, companiesEl, compareEl, panel;
 
   beforeEach(() => {
     labelEl = document.createElement('div');
     indicesEl = document.createElement('div');
     newsEl = document.createElement('div');
-    panel = initSidePanel({ labelEl, indicesEl, newsEl });
+    companiesEl = document.createElement('div');
+    compareEl = document.createElement('div');
+    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl });
   });
 
   it('sets the region label', () => {
@@ -60,5 +62,58 @@ describe('initSidePanel', () => {
     });
     expect(newsEl.querySelector('h3').textContent).toBe('<img src=x onerror=alert(1)>');
     expect(newsEl.querySelector('img')).toBeNull();
+  });
+
+  it('renders company cards into companiesEl', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [],
+      companyItems: [{ id: 'a', name: 'Toyota', bullets: [] }],
+    });
+    expect(companiesEl.querySelector('.panel-company-name').textContent).toBe('Toyota');
+  });
+
+  it('defaults companyItems to an empty list when omitted', () => {
+    expect(() => panel.showRegion('Asie', { marketItems: [], newsItems: [] })).not.toThrow();
+    expect(companiesEl.children.length).toBe(0);
+  });
+
+  it('clicking a compare toggle marks it active and re-renders', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [],
+      companyItems: [{ id: 'a', name: 'Toyota', bullets: [] }],
+    });
+    companiesEl.querySelector('.panel-compare-toggle').click();
+    expect(companiesEl.querySelector('.panel-compare-toggle').classList.contains('active')).toBe(true);
+  });
+
+  it('shows a comparison table once 2 companies are selected', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [],
+      companyItems: [
+        { id: 'a', name: 'Toyota', bullets: [] },
+        { id: 'b', name: 'Honda', bullets: [] },
+      ],
+    });
+    const toggles = companiesEl.querySelectorAll('.panel-compare-toggle');
+    toggles[0].click();
+    toggles[1].click();
+    expect(compareEl.querySelector('.panel-compare-table')).not.toBeNull();
+  });
+
+  it('resets the comparator selection when showRegion is called again', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [],
+      companyItems: [
+        { id: 'a', name: 'Toyota', bullets: [] },
+        { id: 'b', name: 'Honda', bullets: [] },
+      ],
+    });
+    const toggles = companiesEl.querySelectorAll('.panel-compare-toggle');
+    toggles[0].click();
+    toggles[1].click();
+    expect(compareEl.querySelector('.panel-compare-table')).not.toBeNull();
+
+    panel.showRegion('Europe', { marketItems: [], newsItems: [], companyItems: [] });
+    expect(compareEl.children.length).toBe(0);
   });
 });

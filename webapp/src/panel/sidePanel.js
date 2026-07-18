@@ -1,3 +1,6 @@
+import { renderCompanies, renderComparison } from './companyList.js';
+import { toggleCompanySelection } from './compareSelection.js';
+
 function renderIndices(container, items) {
   container.replaceChildren();
   for (const item of items) {
@@ -39,11 +42,27 @@ function renderNews(container, items) {
   }
 }
 
-export function initSidePanel({ labelEl, indicesEl, newsEl }) {
-  function showRegion(regionLabel, { marketItems, newsItems }) {
+export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl }) {
+  let selectedCompanyIds = [];
+  let currentCompanyItems = [];
+
+  function renderCompanySection() {
+    renderCompanies(companiesEl, currentCompanyItems, selectedCompanyIds, handleToggleCompare);
+    renderComparison(compareEl, currentCompanyItems, selectedCompanyIds);
+  }
+
+  function handleToggleCompare(companyId) {
+    selectedCompanyIds = toggleCompanySelection(selectedCompanyIds, companyId);
+    renderCompanySection();
+  }
+
+  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [] }) {
     labelEl.textContent = regionLabel;
     renderIndices(indicesEl, marketItems);
     renderNews(newsEl, newsItems);
+    currentCompanyItems = companyItems;
+    selectedCompanyIds = [];
+    renderCompanySection();
   }
 
   return { showRegion };
