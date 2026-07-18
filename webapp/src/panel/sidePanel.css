@@ -1,0 +1,74 @@
+:root {
+  --panel-width: 340px;
+}
+
+.side-panel {
+  position: fixed;
+  top: 44px;
+  right: 0;
+  bottom: 0;
+  width: var(--panel-width);
+  background: rgba(12, 18, 36, 0.97);
+  border-left: 1px solid rgba(224, 181, 61, 0.3);
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  color: #fff;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  z-index: 4;
+}
+
+.panel-region-label {
+  color: var(--gold-light, #e0b53d);
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.panel-section-label {
+  color: #767c8c;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 14px 0 6px;
+}
+
+.panel-index-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+}
+
+.panel-index-name {
+  flex: 1;
+}
+
+.panel-index-change.positive {
+  color: #1c8a4b;
+}
+
+.panel-index-change.negative {
+  color: #c0392b;
+}
+
+.panel-news-block {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.panel-news-block h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.panel-news-block p {
+  margin: 0;
+  font-size: 12px;
+  color: #b7bdd6;
+}
