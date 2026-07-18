@@ -1,0 +1,36 @@
+.week-timeline {
+  position: fixed;
+  top: 44px;
+  left: 0;
+  bottom: 0;
+  width: 34px;
+  background: rgba(15, 23, 48, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 4;
+}
+
+.week-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.week-dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.week-dot.active {
+  width: 11px;
+  height: 11px;
+  background: var(--gold-light, #e0b53d);
+  box-shadow: 0 0 10px 4px rgba(224, 181, 61, 0.8);
+}
