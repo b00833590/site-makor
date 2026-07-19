@@ -177,4 +177,33 @@ describe('initSidePanel', () => {
     const firstRowEntreprise = portfolioEl.querySelector('tbody tr td:nth-child(2)').textContent;
     expect(firstRowEntreprise).toBe('C');
   });
+
+  it('applies live quote overrides to matching portfolio entries and re-renders the table', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [], companyItems: [],
+      portfolioRegionLabel: 'Asie',
+      portfolioEntries: [
+        { id: 'p1', date: '20/06', entreprise: 'A', stagiaire: 'X', symbol: 'A', depuis: 1, ytd: 1 },
+        { id: 'p2', date: '01/01', entreprise: 'B', stagiaire: 'Y', symbol: 'B', depuis: 2, ytd: 2 },
+      ],
+    });
+
+    panel.updateLiveQuotes({ p1: { depuis: 9.9, ytd: 8.8 } });
+
+    const rows = [...portfolioEl.querySelectorAll('tbody tr')];
+    const rowA = rows.find(r => r.cells[1].textContent === 'A'); // ENTREPRISE column
+    expect(rowA.textContent).toContain('9.9%');
+    expect(rowA.textContent).toContain('8.8%');
+  });
+
+  it('ignores overrides for entry ids not present in the currently shown portfolio', () => {
+    panel.showRegion('Asie', {
+      marketItems: [], newsItems: [], companyItems: [],
+      portfolioRegionLabel: 'Asie',
+      portfolioEntries: [{ id: 'p1', date: '20/06', entreprise: 'A', stagiaire: 'X', symbol: 'A', depuis: 1, ytd: 1 }],
+    });
+
+    expect(() => panel.updateLiveQuotes({ 'stale-id': { depuis: 9.9, ytd: 8.8 } })).not.toThrow();
+    expect(portfolioEl.querySelector('tbody tr').textContent).toContain('1%');
+  });
 });
