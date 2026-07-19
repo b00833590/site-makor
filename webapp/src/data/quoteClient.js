@@ -19,3 +19,14 @@ export async function fetchQuoteHistory(symbol, sinceISO, fetchFn = fetch) {
     return null;
   }
 }
+
+export async function fetchQuoteSince(symbol, sinceISO, fetchFn = fetch) {
+  try {
+    const response = await fetchFn(buildQuoteUrl('quoteSince', { symbol, since: sinceISO }));
+    const data = await response.json();
+    if (data.error) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}

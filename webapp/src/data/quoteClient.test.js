@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { buildQuoteUrl, fetchQuoteHistory } from './quoteClient.js';
+import { buildQuoteUrl, fetchQuoteHistory, fetchQuoteSince } from './quoteClient.js';
 
 describe('buildQuoteUrl', () => {
   it('builds a URL with the action and all params as query string entries', () => {
@@ -48,6 +48,40 @@ describe('fetchQuoteHistory', () => {
       json: () => Promise.reject(new Error('invalid json')),
     });
     const result = await fetchQuoteHistory('AAPL', '2026-01-15', fakeFetch);
+    expect(result).toBeNull();
+  });
+});
+
+describe('fetchQuoteSince', () => {
+  it('returns the parsed sinceChange/ytdChange on success', async () => {
+    const fakeFetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ sinceChange: 3.4, ytdChange: -1.2 }),
+    });
+    const result = await fetchQuoteSince('NVT', '2026-01-15', fakeFetch);
+    expect(result).toEqual({ sinceChange: 3.4, ytdChange: -1.2 });
+    const calledUrl = new URL(fakeFetch.mock.calls[0][0]);
+    expect(calledUrl.searchParams.get('action')).toBe('quoteSince');
+  });
+
+  it('returns null when the API responds with an error field', async () => {
+    const fakeFetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ error: 'symbol not found' }),
+    });
+    const result = await fetchQuoteSince('BADSYM', '2026-01-15', fakeFetch);
+    expect(result).toBeNull();
+  });
+
+  it('returns null when the fetch itself rejects (network failure)', async () => {
+    const fakeFetch = vi.fn().mockRejectedValue(new Error('network down'));
+    const result = await fetchQuoteSince('NVT', '2026-01-15', fakeFetch);
+    expect(result).toBeNull();
+  });
+
+  it('returns null when the response body is not valid JSON', async () => {
+    const fakeFetch = vi.fn().mockResolvedValue({
+      json: () => Promise.reject(new Error('invalid json')),
+    });
+    const result = await fetchQuoteSince('NVT', '2026-01-15', fakeFetch);
     expect(result).toBeNull();
   });
 });
