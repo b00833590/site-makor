@@ -7,6 +7,10 @@ function round2(value) {
   return Math.round(value * ROUND_FACTOR) / ROUND_FACTOR;
 }
 
+function isFiniteNumber(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
 export function portfolioEntrySymbol(entry) {
   return (entry.symbol && entry.symbol.trim()) || null;
 }
@@ -25,11 +29,13 @@ export async function fetchPortfolioLiveQuotes(entries, fetchQuoteSinceFn, {
     if (!symbol) continue;
 
     const sinceISO = ddmmToISOThisYear(entry.date, now);
+    if (!sinceISO) continue;
+
     const quote = await fetchQuoteSinceFn(symbol, sinceISO);
     if (quote) {
       overrides[entry.id] = {
-        depuis: quote.sinceChange === undefined ? entry.depuis : round2(quote.sinceChange),
-        ytd: quote.ytdChange === undefined ? entry.ytd : round2(quote.ytdChange),
+        depuis: isFiniteNumber(quote.sinceChange) ? round2(quote.sinceChange) : entry.depuis,
+        ytd: isFiniteNumber(quote.ytdChange) ? round2(quote.ytdChange) : entry.ytd,
       };
     }
 

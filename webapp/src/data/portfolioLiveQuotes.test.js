@@ -56,6 +56,21 @@ describe('fetchPortfolioLiveQuotes', () => {
     expect(overrides).toEqual({ p1: { depuis: 1, ytd: 4 } });
   });
 
+  it('falls back to the entry\'s existing depuis/ytd when the API returns null instead of omitting a field', async () => {
+    const entries = [{ id: 'p1', date: '16/07', symbol: 'NVT', depuis: 1, ytd: 1 }];
+    const fetchQuoteSinceFn = vi.fn().mockResolvedValue({ sinceChange: null, ytdChange: 4 });
+    const overrides = await fetchPortfolioLiveQuotes(entries, fetchQuoteSinceFn, { now: NOW, delayMs: 0 });
+    expect(overrides).toEqual({ p1: { depuis: 1, ytd: 4 } });
+  });
+
+  it('skips entries whose date cannot be parsed, without calling fetch for them', async () => {
+    const entries = [{ id: 'p1', date: 'n/a', symbol: 'NVT', depuis: 1, ytd: 1 }];
+    const fetchQuoteSinceFn = vi.fn();
+    const overrides = await fetchPortfolioLiveQuotes(entries, fetchQuoteSinceFn, { now: NOW, delayMs: 0 });
+    expect(fetchQuoteSinceFn).not.toHaveBeenCalled();
+    expect(overrides).toEqual({});
+  });
+
   it('stops iterating once shouldContinue returns false', async () => {
     const entries = [
       { id: 'p1', date: '16/07', symbol: 'NVT', depuis: 1, ytd: 1 },
