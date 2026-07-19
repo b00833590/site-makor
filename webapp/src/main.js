@@ -13,6 +13,7 @@ import { getPortfolioEntriesForRegion, getPortfolioRegion } from './data/portfol
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
+import { startPortfolioLiveRefresh } from './panel/portfolioLiveRefresh.js';
 
 const container = document.getElementById('globe-container');
 const indicator = document.getElementById('region-indicator');
@@ -43,6 +44,7 @@ const panel = initSidePanel({
 let db = {};
 let activeWeekId = null;
 let activeRegionId = 'asia';
+let liveRefreshHandle = null;
 
 function updateIndicator(regionId) {
   const region = REGIONS.find(r => r.id === regionId);
@@ -63,6 +65,12 @@ function renderPanelForCurrentSelection() {
     companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
     portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
     portfolioEntries,
+  });
+
+  if (liveRefreshHandle) liveRefreshHandle.stop();
+  liveRefreshHandle = startPortfolioLiveRefresh({
+    getEntries: () => portfolioEntries,
+    onOverrides: overrides => panel.updateLiveQuotes(overrides),
   });
 }
 
