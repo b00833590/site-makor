@@ -85,5 +85,12 @@ export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compare
     renderPortfolioSection();
   }
 
-  return { showRegion };
+  function updateLiveQuotes(overrides) {
+    currentPortfolioEntries = currentPortfolioEntries.map(entry =>
+      overrides[entry.id] ? { ...entry, ...overrides[entry.id] } : entry
+    );
+    renderPortfolioSection();
+  }
+
+  return { showRegion, updateLiveQuotes };
 }
