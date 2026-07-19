@@ -13,7 +13,7 @@ describe('initSidePanel', () => {
     compareEl = document.createElement('div');
     portfolioLabelEl = document.createElement('div');
     portfolioEl = document.createElement('div');
-    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl });
+    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart: () => {} });
   });
 
   it('sets the region label', () => {

@@ -2,6 +2,7 @@ import './styles/globe.css';
 import './panel/sidePanel.css';
 import './panel/companyList.css';
 import './panel/portfolioTable.css';
+import './panel/chartModal.css';
 import './timeline/weekTimeline.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
@@ -10,6 +11,7 @@ import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.
 import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion } from './data/selectors.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
+import { initCompanyChartModal } from './panel/chartModal.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
 
 const container = document.getElementById('globe-container');
@@ -17,6 +19,15 @@ const indicator = document.getElementById('region-indicator');
 const prevBtn = document.getElementById('arrow-prev');
 const nextBtn = document.getElementById('arrow-next');
 const timelineEl = document.getElementById('week-timeline');
+
+const chartModal = initCompanyChartModal({
+  modalEl: document.getElementById('chart-modal'),
+  titleEl: document.getElementById('chart-modal-title'),
+  bodyEl: document.getElementById('chart-modal-body'),
+});
+document.getElementById('chart-modal-close').addEventListener('click', () => chartModal.close());
+
+let currentPortfolioEntriesForChart = [];
 
 const panel = initSidePanel({
   labelEl: document.getElementById('panel-region-label'),
@@ -26,6 +37,7 @@ const panel = initSidePanel({
   compareEl: document.getElementById('panel-compare'),
   portfolioLabelEl: document.getElementById('panel-portfolio-region-label'),
   portfolioEl: document.getElementById('panel-portfolio'),
+  onOpenChart: item => chartModal.open(item, currentPortfolioEntriesForChart),
 });
 
 let db = {};
@@ -43,12 +55,14 @@ function renderPanelForCurrentSelection() {
   if (!activeWeekId) return;
   const region = REGIONS.find(r => r.id === activeRegionId);
   const portfolioRegion = getPortfolioRegion(db, activeRegionId);
+  const portfolioEntries = getPortfolioEntriesForRegion(db, activeRegionId);
+  currentPortfolioEntriesForChart = portfolioEntries;
   panel.showRegion(region.label, {
     marketItems: getMarketItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
     newsItems: getNewsItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
     companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
     portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
-    portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
+    portfolioEntries,
   });
 }
 

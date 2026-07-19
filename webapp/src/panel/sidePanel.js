@@ -44,7 +44,7 @@ function renderNews(container, items) {
   }
 }
 
-export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl }) {
+export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart }) {
   let selectedCompanyIds = [];
   let currentCompanyItems = [];
   let currentPortfolioEntries = [];
@@ -52,7 +52,7 @@ export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compare
   let sortDirection = 'asc';
 
   function renderCompanySection() {
-    renderCompanies(companiesEl, currentCompanyItems, selectedCompanyIds, handleToggleCompare);
+    renderCompanies(companiesEl, currentCompanyItems, selectedCompanyIds, { onToggle: handleToggleCompare, onOpenChart });
     renderComparison(compareEl, currentCompanyItems, selectedCompanyIds);
   }
 
