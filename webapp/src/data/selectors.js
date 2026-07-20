@@ -31,11 +31,19 @@ export function getCompanyItemsForWeekAndRegion(db, weekId, regionId) {
     .filter(item => normalizeRegionLabel(item.region) === regionId);
 }
 
+export function getIaFintechItemsForWeek(db, weekId) {
+  const prefix = `mkg:content:ia-fintech:${weekId}:`;
+  return Object.keys(db)
+    .filter(key => key.startsWith(prefix))
+    .map(key => db[key]);
+}
+
 export function getWeekContentKeys(db, weekId) {
   const prefixes = [
     `mkg:market:${weekId}:`,
     `mkg:content:news:${weekId}:`,
     `mkg:content:entreprises:${weekId}:`,
+    `mkg:content:ia-fintech:${weekId}:`,
   ];
   const keys = Object.keys(db).filter(key => prefixes.some(prefix => key.startsWith(prefix)));
   keys.push(`mkg:week:${weekId}`);
