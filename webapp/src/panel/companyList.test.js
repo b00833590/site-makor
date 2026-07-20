@@ -151,6 +151,60 @@ describe('editable company fields', () => {
   });
 });
 
+describe('editable company bullets', () => {
+  const COMPANY = { id: 'c1', name: 'Reliance Industries', bullets: ['Expansion retail', 'Croissance Jio'] };
+  const EDIT_OPTS = { onToggle: () => {}, onOpenChart: () => {}, isEditing: true, onEditItem: () => {}, onAddItem: () => {}, onDeleteItem: () => {}, onBulletAdd: () => {}, onBulletEdit: () => {}, onBulletDelete: () => {} };
+
+  it('renders plain bullet text (no textarea) when isEditing is false', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { onToggle: () => {}, onOpenChart: () => {} });
+    expect(container.querySelector('textarea')).toBeNull();
+    expect(container.querySelectorAll('.panel-company-bullets li')[0].textContent).toBe('Expansion retail');
+  });
+
+  it('renders each bullet as a textarea plus a delete button in edit mode', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], EDIT_OPTS);
+    const textareas = container.querySelectorAll('.panel-company-bullet-input');
+    expect(textareas).toHaveLength(2);
+    expect(textareas[0].value).toBe('Expansion retail');
+    expect(container.querySelectorAll('.panel-company-bullet-delete')).toHaveLength(2);
+  });
+
+  it('calls onBulletEdit with the item, index, and new text when a bullet textarea changes', () => {
+    const onBulletEdit = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onBulletEdit });
+    const textarea = container.querySelectorAll('.panel-company-bullet-input')[1];
+    textarea.value = 'Forte croissance Jio 5G';
+    textarea.dispatchEvent(new Event('change'));
+    expect(onBulletEdit).toHaveBeenCalledWith(COMPANY, 1, 'Forte croissance Jio 5G');
+  });
+
+  it('calls onBulletDelete with the item and index when a bullet delete button is clicked', () => {
+    const onBulletDelete = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onBulletDelete });
+    container.querySelectorAll('.panel-company-bullet-delete')[0].click();
+    expect(onBulletDelete).toHaveBeenCalledWith(COMPANY, 0);
+  });
+
+  it('renders an add-bullet button in edit mode that calls onBulletAdd with the item', () => {
+    const onBulletAdd = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onBulletAdd });
+    container.querySelector('.panel-company-bullet-add').click();
+    expect(onBulletAdd).toHaveBeenCalledWith(COMPANY);
+  });
+
+  it('renders no bullet inputs but still an add button in edit mode when bullets is empty', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [{ ...COMPANY, bullets: [] }], [], EDIT_OPTS);
+    expect(container.querySelectorAll('.panel-company-bullet-input')).toHaveLength(0);
+    expect(container.querySelector('.panel-company-bullet-add')).not.toBeNull();
+  });
+});
+
 describe('renderComparison', () => {
   it('renders nothing when fewer than 2 companies are selected', () => {
     const container = document.createElement('div');

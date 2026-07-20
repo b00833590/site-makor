@@ -32,15 +32,43 @@ function buildStatsGrid(item, isEditing, onEditItem) {
   return stats;
 }
 
-// buildBulletsList is extended in Task 3 — keep its current read-only body for this task.
-function buildBulletsList(item, isEditing, callbacks) {
+function buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBulletDelete }) {
   const bullets = document.createElement('ul');
   bullets.className = 'panel-company-bullets';
-  for (const bullet of item.bullets || []) {
+
+  (item.bullets || []).forEach((bullet, index) => {
     const li = document.createElement('li');
-    li.textContent = bullet;
+    if (isEditing) {
+      const textarea = document.createElement('textarea');
+      textarea.className = 'panel-company-bullet-input';
+      textarea.value = bullet;
+      textarea.addEventListener('change', () => onBulletEdit(item, index, textarea.value));
+
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'panel-company-bullet-delete';
+      delBtn.setAttribute('aria-label', `Supprimer le point clé ${index + 1}`);
+      delBtn.textContent = '✕';
+      delBtn.addEventListener('click', () => onBulletDelete(item, index));
+
+      li.append(textarea, delBtn);
+    } else {
+      li.textContent = bullet;
+    }
     bullets.appendChild(li);
+  });
+
+  if (isEditing) {
+    const addLi = document.createElement('li');
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'panel-company-bullet-add';
+    addBtn.textContent = '+ Point clé';
+    addBtn.addEventListener('click', () => onBulletAdd(item));
+    addLi.appendChild(addBtn);
+    bullets.appendChild(addLi);
   }
+
   return bullets;
 }
 
