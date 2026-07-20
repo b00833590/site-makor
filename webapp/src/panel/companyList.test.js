@@ -85,6 +85,72 @@ describe('renderCompanies', () => {
   });
 });
 
+describe('editable company fields', () => {
+  const COMPANY = {
+    id: 'c1', name: 'Reliance Industries', yahooSymbol: 'RELIANCE.NS', flag: '🇮🇳', country: 'Inde',
+    marketCap: '210 Md$', salesGrowth: '12%', evEbitda: '14x', coursActuel: '1 450', targetPrice: '1 600',
+    bullets: [],
+  };
+  const EDIT_OPTS = { onToggle: () => {}, onOpenChart: () => {}, isEditing: true, onEditItem: () => {}, onAddItem: () => {}, onDeleteItem: () => {}, onBulletAdd: () => {}, onBulletEdit: () => {}, onBulletDelete: () => {} };
+
+  it('renders plain text (no inputs) when isEditing is false or omitted', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { onToggle: () => {}, onOpenChart: () => {} });
+    expect(container.querySelector('input')).toBeNull();
+    expect(container.querySelector('.panel-company-name').textContent).toBe('Reliance Industries');
+  });
+
+  it('renders name, symbol, flag, country, market cap, and the 4 stat values as inputs when isEditing is true', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], EDIT_OPTS);
+    const inputs = container.querySelectorAll('input');
+    expect(inputs).toHaveLength(9); // name + symbol + flag + country + marketCap + 4 stat values
+  });
+
+  it('calls onEditItem with a name patch when the name input changes', () => {
+    const onEditItem = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onEditItem });
+    const nameInput = container.querySelector('.panel-company-name-input');
+    nameInput.value = 'Reliance Ind.';
+    nameInput.dispatchEvent(new Event('change'));
+    expect(onEditItem).toHaveBeenCalledWith(COMPANY, { name: 'Reliance Ind.' });
+  });
+
+  it('calls onEditItem with the correct field patch when a stat value input changes', () => {
+    const onEditItem = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onEditItem });
+    const statInputs = container.querySelectorAll('.panel-company-stat-input');
+    statInputs[0].value = '15%';
+    statInputs[0].dispatchEvent(new Event('change'));
+    expect(onEditItem).toHaveBeenCalledWith(COMPANY, { salesGrowth: '15%' });
+  });
+
+  it('renders a delete button per card in edit mode that calls onDeleteItem with the item', () => {
+    const onDeleteItem = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onDeleteItem });
+    container.querySelector('.panel-company-delete').click();
+    expect(onDeleteItem).toHaveBeenCalledWith(COMPANY);
+  });
+
+  it('does not render delete/add buttons when isEditing is false', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { onToggle: () => {}, onOpenChart: () => {} });
+    expect(container.querySelector('.panel-company-delete')).toBeNull();
+    expect(container.querySelector('.panel-company-add')).toBeNull();
+  });
+
+  it('renders an add-company button in edit mode that calls onAddItem', () => {
+    const onAddItem = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onAddItem });
+    container.querySelector('.panel-company-add').click();
+    expect(onAddItem).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('renderComparison', () => {
   it('renders nothing when fewer than 2 companies are selected', () => {
     const container = document.createElement('div');
