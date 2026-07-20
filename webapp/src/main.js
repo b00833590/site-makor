@@ -57,11 +57,14 @@ function marketItemKey(item) {
 
 function handleIndexEdit(item, patch) {
   const key = marketItemKey(item);
-  const updated = { ...db[key], ...patch };
+  const previous = db[key];
+  const updated = { ...previous, ...patch };
   db[key] = updated;
   renderPanelForCurrentSelection();
   client.writeDoc(key, updated).catch(() => {
-    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — vérifie ta connexion');
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
   });
 }
 
@@ -79,16 +82,21 @@ function handleIndexAdd() {
   db[key] = newItem;
   renderPanelForCurrentSelection();
   client.writeDoc(key, newItem).catch(() => {
-    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — vérifie ta connexion');
+    delete db[key];
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — le nouvel indice a été retiré');
   });
 }
 
 function handleIndexDelete(item) {
   const key = marketItemKey(item);
+  const previous = db[key];
   delete db[key];
   renderPanelForCurrentSelection();
   client.deleteDocByKey(key).catch(() => {
-    showToast(document.getElementById('admin-toast'), '⚠️ Suppression en ligne échouée — vérifie ta connexion');
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — l'indice a été restauré");
   });
 }
 
