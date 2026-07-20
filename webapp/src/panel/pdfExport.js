@@ -1,7 +1,8 @@
 import html2pdf from 'html2pdf.js';
 
 function sanitizeForFilename(value) {
-  return (value || '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const withoutAccents = (value || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return withoutAccents.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 }
 
 export function buildExportFilename(regionLabel, weekLabel) {

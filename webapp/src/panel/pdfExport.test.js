@@ -15,8 +15,12 @@ describe('buildExportFilename', () => {
     expect(buildExportFilename('A---B', 'C   D')).toBe('Makor_A_B_C_D.pdf');
   });
 
-  it('trims leading/trailing underscores produced by non-alphanumeric-only labels', () => {
-    expect(buildExportFilename('É', 'Test')).toBe('Makor__Test.pdf');
+  it('strips accents while preserving the base letter, rather than dropping it as a separator', () => {
+    expect(buildExportFilename('É', 'Test')).toBe('Makor_E_Test.pdf');
+  });
+
+  it('strips accents from real region/week labels without mangling them', () => {
+    expect(buildExportFilename('Amérique du Nord', 'Semaine du 1er DÉCEMBRE')).toBe('Makor_Amerique_du_Nord_Semaine_du_1er_DECEMBRE.pdf');
   });
 
   it('falls back to empty segments when labels are missing, still producing a valid filename', () => {
@@ -39,5 +43,15 @@ describe('exportElementAsPDF', () => {
     expect(set).toHaveBeenCalledWith(expect.objectContaining({ filename: 'test.pdf' }));
     expect(from).toHaveBeenCalledWith(element);
     expect(save).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects when the underlying html2pdf save() call rejects', async () => {
+    const save = vi.fn().mockRejectedValue(new Error('canvas render failed'));
+    const from = vi.fn(() => ({ save }));
+    const set = vi.fn(() => ({ from }));
+    const html2pdfFn = vi.fn(() => ({ set }));
+    const element = document.createElement('div');
+
+    await expect(exportElementAsPDF(element, 'test.pdf', html2pdfFn)).rejects.toThrow('canvas render failed');
   });
 });
