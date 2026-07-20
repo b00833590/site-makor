@@ -357,4 +357,100 @@ describe('initSidePanel', () => {
       expect(inputAfter).toBe(inputBefore); // same DOM node = table was not re-rendered
     });
   });
+
+  describe('editable news via side panel', () => {
+    const NEWS_ITEM = { id: 'n1', title: 'Titre', description: 'Description.' };
+
+    it('renders plain text (no inputs) when isEditing is false or omitted', () => {
+      panel.showRegion('Asie', { marketItems: [], newsItems: [NEWS_ITEM] });
+      expect(newsEl.querySelector('input')).toBeNull();
+      expect(newsEl.querySelector('textarea')).toBeNull();
+      expect(newsEl.querySelector('h3').textContent).toBe('Titre');
+    });
+
+    it('renders title as a text input and description as a textarea when isEditing is true', () => {
+      panel.showRegion('Asie', { marketItems: [], newsItems: [NEWS_ITEM], isEditing: true });
+      expect(newsEl.querySelector('.panel-news-title-input')).not.toBeNull();
+      expect(newsEl.querySelector('.panel-news-title-input').value).toBe('Titre');
+      const textarea = newsEl.querySelector('.panel-news-description-input');
+      expect(textarea.tagName).toBe('TEXTAREA');
+      expect(textarea.value).toBe('Description.');
+    });
+
+    it('calls onNewsEdit with a title patch when the title input changes', () => {
+      const onNewsEdit = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
+        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
+        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
+        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
+        onNewsEdit, onNewsAdd: () => {}, onNewsDelete: () => {},
+      });
+      panel.showRegion('Asie', { marketItems: [], newsItems: [NEWS_ITEM], isEditing: true });
+
+      const titleInput = newsEl.querySelector('.panel-news-title-input');
+      titleInput.value = 'Nouveau titre';
+      titleInput.dispatchEvent(new Event('change'));
+
+      expect(onNewsEdit).toHaveBeenCalledWith(NEWS_ITEM, { title: 'Nouveau titre' });
+    });
+
+    it('calls onNewsEdit with a description patch when the description textarea changes', () => {
+      const onNewsEdit = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
+        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
+        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
+        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
+        onNewsEdit, onNewsAdd: () => {}, onNewsDelete: () => {},
+      });
+      panel.showRegion('Asie', { marketItems: [], newsItems: [NEWS_ITEM], isEditing: true });
+
+      const textarea = newsEl.querySelector('.panel-news-description-input');
+      textarea.value = 'Nouvelle description.';
+      textarea.dispatchEvent(new Event('change'));
+
+      expect(onNewsEdit).toHaveBeenCalledWith(NEWS_ITEM, { description: 'Nouvelle description.' });
+    });
+
+    it('renders a delete button per brief in edit mode that calls onNewsDelete with the item', () => {
+      const onNewsDelete = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
+        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
+        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
+        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
+        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete,
+      });
+      panel.showRegion('Asie', { marketItems: [], newsItems: [NEWS_ITEM], isEditing: true });
+
+      newsEl.querySelector('.panel-news-delete').click();
+      expect(onNewsDelete).toHaveBeenCalledWith(NEWS_ITEM);
+    });
+
+    it('does not render delete/add buttons when isEditing is false', () => {
+      panel.showRegion('Asie', { marketItems: [], newsItems: [NEWS_ITEM] });
+      expect(newsEl.querySelector('.panel-news-delete')).toBeNull();
+      expect(newsEl.querySelector('.panel-news-add')).toBeNull();
+    });
+
+    it('renders an add-brief button in edit mode that calls onNewsAdd', () => {
+      const onNewsAdd = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
+        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
+        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
+        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
+        onNewsEdit: () => {}, onNewsAdd, onNewsDelete: () => {},
+      });
+      panel.showRegion('Asie', { marketItems: [], newsItems: [NEWS_ITEM], isEditing: true });
+
+      newsEl.querySelector('.panel-news-add').click();
+      expect(onNewsAdd).toHaveBeenCalledTimes(1);
+    });
+  });
 });
