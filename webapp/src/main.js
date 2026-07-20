@@ -100,6 +100,73 @@ function handleIndexDelete(item) {
   });
 }
 
+function companyItemKey(item) {
+  return `mkg:content:entreprises:${activeWeekId}:${item.id}`;
+}
+
+function handleCompanyEdit(item, patch) {
+  const key = companyItemKey(item);
+  const previous = db[key];
+  const updated = { ...previous, ...patch };
+  db[key] = updated;
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, updated).catch(() => {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
+  });
+}
+
+function handleCompanyAdd() {
+  const id = generateId();
+  const key = `mkg:content:entreprises:${activeWeekId}:${id}`;
+  const newItem = {
+    id,
+    region: GROUP_LABEL_BY_REGION[activeRegionId] || '',
+    name: 'Nouvelle entreprise',
+    yahooSymbol: '',
+    flag: '',
+    country: '',
+    marketCap: '',
+    salesGrowth: '',
+    evEbitda: '',
+    coursActuel: '',
+    targetPrice: '',
+    bullets: [],
+  };
+  db[key] = newItem;
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, newItem).catch(() => {
+    delete db[key];
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — la nouvelle entreprise a été retirée');
+  });
+}
+
+function handleCompanyDelete(item) {
+  const key = companyItemKey(item);
+  const previous = db[key];
+  delete db[key];
+  renderPanelForCurrentSelection();
+  client.deleteDocByKey(key).catch(() => {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — l'entreprise a été restaurée");
+  });
+}
+
+function handleCompanyBulletAdd(item) {
+  handleCompanyEdit(item, { bullets: [...(item.bullets || []), 'Nouveau point clé à compléter'] });
+}
+
+function handleCompanyBulletEdit(item, index, text) {
+  handleCompanyEdit(item, { bullets: (item.bullets || []).map((bullet, i) => (i === index ? text : bullet)) });
+}
+
+function handleCompanyBulletDelete(item, index) {
+  handleCompanyEdit(item, { bullets: (item.bullets || []).filter((_, i) => i !== index) });
+}
+
 const panel = initSidePanel({
   labelEl: document.getElementById('panel-region-label'),
   indicesEl: document.getElementById('panel-indices'),
@@ -112,6 +179,12 @@ const panel = initSidePanel({
   onIndexEdit: handleIndexEdit,
   onIndexAdd: handleIndexAdd,
   onIndexDelete: handleIndexDelete,
+  onCompanyEdit: handleCompanyEdit,
+  onCompanyAdd: handleCompanyAdd,
+  onCompanyDelete: handleCompanyDelete,
+  onCompanyBulletAdd: handleCompanyBulletAdd,
+  onCompanyBulletEdit: handleCompanyBulletEdit,
+  onCompanyBulletDelete: handleCompanyBulletDelete,
 });
 
 function updateIndicator(regionId) {
