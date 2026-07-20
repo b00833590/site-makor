@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { initSidePanel } from './sidePanel.js';
 
 describe('initSidePanel', () => {
@@ -13,7 +13,7 @@ describe('initSidePanel', () => {
     compareEl = document.createElement('div');
     portfolioLabelEl = document.createElement('div');
     portfolioEl = document.createElement('div');
-    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart: () => {} });
+    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {} });
   });
 
   it('sets the region label', () => {
@@ -205,5 +205,71 @@ describe('initSidePanel', () => {
 
     expect(() => panel.updateLiveQuotes({ 'stale-id': { depuis: 9.9, ytd: 8.8 } })).not.toThrow();
     expect(portfolioEl.querySelector('tbody tr').textContent).toContain('1%');
+  });
+
+  describe('editable market indices', () => {
+    const ITEM = { id: 'idx1', flag: '🇫🇷', name: 'CAC 40', value: '7 500', weekChange: 1.2 };
+
+    it('renders plain text (no inputs) when isEditing is false or omitted', () => {
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [] });
+      expect(indicesEl.querySelector('input')).toBeNull();
+      expect(indicesEl.querySelector('.panel-index-value').textContent).toBe('7 500');
+    });
+
+    it('renders value and weekChange as inputs when isEditing is true', () => {
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+      const inputs = indicesEl.querySelectorAll('input');
+      expect(inputs).toHaveLength(2);
+      expect(inputs[0].value).toBe('7 500');
+      expect(Number(inputs[1].value)).toBe(1.2);
+    });
+
+    it('calls onIndexEdit with the item and a value patch when the value input changes', () => {
+      const onIndexEdit = vi.fn();
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+
+      const valueInput = indicesEl.querySelectorAll('input')[0];
+      valueInput.value = '7 600';
+      valueInput.dispatchEvent(new Event('change'));
+
+      expect(onIndexEdit).toHaveBeenCalledWith(ITEM, { value: '7 600' });
+    });
+
+    it('calls onIndexEdit with a numeric weekChange patch when the change input changes', () => {
+      const onIndexEdit = vi.fn();
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+
+      const changeInput = indicesEl.querySelectorAll('input')[1];
+      changeInput.value = '2.5';
+      changeInput.dispatchEvent(new Event('change'));
+
+      expect(onIndexEdit).toHaveBeenCalledWith(ITEM, { weekChange: 2.5 });
+    });
+
+    it('renders a delete button per row in edit mode that calls onIndexDelete with the item', () => {
+      const onIndexDelete = vi.fn();
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete });
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+
+      indicesEl.querySelector('.panel-index-delete').click();
+      expect(onIndexDelete).toHaveBeenCalledWith(ITEM);
+    });
+
+    it('does not render a delete button or add button when isEditing is false', () => {
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [] });
+      expect(indicesEl.querySelector('.panel-index-delete')).toBeNull();
+      expect(indicesEl.querySelector('.panel-index-add')).toBeNull();
+    });
+
+    it('renders an add-index button in edit mode that calls onIndexAdd', () => {
+      const onIndexAdd = vi.fn();
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd, onIndexDelete: () => {} });
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+
+      indicesEl.querySelector('.panel-index-add').click();
+      expect(onIndexAdd).toHaveBeenCalledTimes(1);
+    });
   });
 });
