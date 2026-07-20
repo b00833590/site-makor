@@ -15,6 +15,7 @@ import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion,
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
+import { buildExportFilename, exportElementAsPDF } from './panel/pdfExport.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
 import { renderWeekAdmin } from './timeline/weekAdmin.js';
 import { startPortfolioLiveRefresh } from './panel/portfolioLiveRefresh.js';
@@ -458,6 +459,28 @@ editToggleBtn.addEventListener('click', () => {
     renderPanelForCurrentSelection();
   } else {
     passwordModal.open();
+  }
+});
+
+const exportPdfBtn = document.getElementById('export-pdf-btn');
+
+exportPdfBtn.addEventListener('click', async () => {
+  const sidePanelEl = document.querySelector('.side-panel');
+  const region = REGIONS.find(r => r.id === activeRegionId);
+  const activeWeek = getWeeks(db).find(w => w.id === activeWeekId);
+  const filename = buildExportFilename(region ? region.label : '', activeWeek ? activeWeek.label : '');
+
+  exportPdfBtn.disabled = true;
+  exportPdfBtn.textContent = '⏳ Génération...';
+  sidePanelEl.classList.add('pdf-export');
+  try {
+    await exportElementAsPDF(sidePanelEl, filename);
+  } catch (error) {
+    console.error('PDF export failed', error);
+  } finally {
+    sidePanelEl.classList.remove('pdf-export');
+    exportPdfBtn.disabled = false;
+    exportPdfBtn.textContent = '📄 Exporter en PDF';
   }
 });
 
