@@ -4,6 +4,13 @@ import { sortPortfolioEntries, nextSort } from './portfolioSort.js';
 import { renderPortfolioTable } from './portfolioTable.js';
 import { buildEditableInput } from '../admin/editableInput.js';
 
+// Only http(s) links are ever rendered as a clickable anchor — admin-entered
+// text is otherwise trusted, but an editor could paste a javascript: URI
+// into this field, and unlike every other field here it becomes a real href.
+function isSafeHttpUrl(value) {
+  return typeof value === 'string' && /^https?:\/\//i.test(value);
+}
+
 function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, onAddItem }) {
   container.replaceChildren();
   for (const item of items) {
@@ -158,7 +165,7 @@ function renderIaFintech(container, items, isEditing, { onEditItem, onAddItem, o
     if (item.link || isEditing) {
       if (isEditing) {
         card.appendChild(buildEditableInput(item.link, 'text', 'panel-iafintech-link-input', v => onEditItem(item, { link: v })));
-      } else if (item.link) {
+      } else if (isSafeHttpUrl(item.link)) {
         const link = document.createElement('a');
         link.className = 'panel-iafintech-link';
         link.href = item.link;

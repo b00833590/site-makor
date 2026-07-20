@@ -474,6 +474,14 @@ describe('initSidePanel', () => {
       expect(link.getAttribute('href')).toBe('https://example.com/source');
     });
 
+    it('never renders a javascript: (or other non-http) link as a clickable anchor', () => {
+      panel.showRegion('Asie', {
+        marketItems: [], newsItems: [],
+        iaFintechItems: [{ id: 'ia4', title: 'T', description: 'D', link: 'javascript:alert(document.cookie)' }],
+      });
+      expect(iaFintechEl.querySelector('.panel-iafintech-link')).toBeNull();
+    });
+
     it('omits the tag pill and stat line when absent and not editing', () => {
       panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [{ id: 'ia2', title: 'T', description: 'D' }] });
       expect(iaFintechEl.querySelector('.panel-iafintech-tag')).toBeNull();
