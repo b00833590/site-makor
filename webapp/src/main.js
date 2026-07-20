@@ -325,16 +325,21 @@ function handleWeekDelete(week) {
   for (const key of keys) delete db[key];
 
   const wasActive = activeWeekId === week.id;
+  let fallbackWeekId = activeWeekId;
   if (wasActive) {
     const remainingWeeks = getWeeks(db);
     activeWeekId = remainingWeeks.length ? remainingWeeks[remainingWeeks.length - 1].id : null;
+    fallbackWeekId = activeWeekId;
   }
   if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
   renderPanelForCurrentSelection();
 
   client.deleteDocsBatch(keys).catch(() => {
     for (const [key, value] of previousEntries) db[key] = value;
-    if (wasActive) activeWeekId = week.id;
+    // Only snap navigation back to the deleted week if the user hasn't since
+    // moved on from the fallback week this call switched to (e.g. manually
+    // selecting another week) — same reasoning as handleWeekAdd's guard.
+    if (wasActive && activeWeekId === fallbackWeekId) activeWeekId = week.id;
     if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
     renderPanelForCurrentSelection();
     showToast(document.getElementById('admin-toast'), '⚠️ Suppression en ligne échouée — la semaine a été restaurée');
