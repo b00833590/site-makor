@@ -73,15 +73,30 @@ function renderNews(container, items) {
   }
 }
 
-export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete }) {
+export function initSidePanel({
+  labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
+  onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete,
+  onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete,
+}) {
   let selectedCompanyIds = [];
   let currentCompanyItems = [];
   let currentPortfolioEntries = [];
+  let currentIsEditing = false;
   let sortField = 'date';
   let sortDirection = 'asc';
 
   function renderCompanySection() {
-    renderCompanies(companiesEl, currentCompanyItems, selectedCompanyIds, { onToggle: handleToggleCompare, onOpenChart });
+    renderCompanies(companiesEl, currentCompanyItems, selectedCompanyIds, {
+      onToggle: handleToggleCompare,
+      onOpenChart,
+      isEditing: currentIsEditing,
+      onEditItem: onCompanyEdit,
+      onAddItem: onCompanyAdd,
+      onDeleteItem: onCompanyDelete,
+      onBulletAdd: onCompanyBulletAdd,
+      onBulletEdit: onCompanyBulletEdit,
+      onBulletDelete: onCompanyBulletDelete,
+    });
     renderComparison(compareEl, currentCompanyItems, selectedCompanyIds);
   }
 
@@ -107,6 +122,7 @@ export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compare
     renderIndices(indicesEl, marketItems, isEditing, { onEditItem: onIndexEdit, onDeleteItem: onIndexDelete, onAddItem: onIndexAdd });
     renderNews(newsEl, newsItems);
     currentCompanyItems = companyItems;
+    currentIsEditing = isEditing;
     selectedCompanyIds = [];
     renderCompanySection();
     portfolioLabelEl.textContent = portfolioRegionLabel;

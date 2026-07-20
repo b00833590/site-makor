@@ -272,4 +272,35 @@ describe('initSidePanel', () => {
       expect(onIndexAdd).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('editable companies via side panel', () => {
+    const COMPANY = { id: 'c1', name: 'Toyota', bullets: [] };
+
+    it('renders company fields as inputs when isEditing is true', () => {
+      panel.showRegion('Asie', { marketItems: [], newsItems: [], isEditing: true, companyItems: [COMPANY] });
+      expect(companiesEl.querySelector('input')).not.toBeNull();
+    });
+
+    it('does not render company inputs when isEditing is false', () => {
+      panel.showRegion('Asie', { marketItems: [], newsItems: [], companyItems: [COMPANY] });
+      expect(companiesEl.querySelector('input')).toBeNull();
+    });
+
+    it('calls onCompanyEdit when a company field is edited through the panel', () => {
+      const onCompanyEdit = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
+        onCompanyEdit, onCompanyAdd: () => {}, onCompanyDelete: () => {},
+        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
+      });
+      panel.showRegion('Asie', { marketItems: [], newsItems: [], isEditing: true, companyItems: [COMPANY] });
+
+      const nameInput = companiesEl.querySelector('.panel-company-name-input');
+      nameInput.value = 'Toyota Motor';
+      nameInput.dispatchEvent(new Event('change'));
+
+      expect(onCompanyEdit).toHaveBeenCalledWith(COMPANY, { name: 'Toyota Motor' });
+    });
+  });
 });
