@@ -40,8 +40,22 @@ describe('renderWeekAdmin', () => {
 
   it('renders the add-week button (but no label input, no crash) when isEditing is true and activeWeek is null', () => {
     const container = document.createElement('div');
-    expect(() => renderWeekAdmin(container, { activeWeek: null, isEditing: true, onLabelEdit: () => {}, onAddWeek: () => {} })).not.toThrow();
+    expect(() => renderWeekAdmin(container, { activeWeek: null, isEditing: true, onLabelEdit: () => {}, onAddWeek: () => {}, onDeleteWeek: () => {} })).not.toThrow();
     expect(container.querySelector('.week-admin-label-input')).toBeNull();
     expect(container.querySelector('.week-admin-add')).not.toBeNull();
+  });
+
+  it('renders a delete-week button in edit mode that calls onDeleteWeek with the active week', () => {
+    const onDeleteWeek = vi.fn();
+    const container = document.createElement('div');
+    renderWeekAdmin(container, { activeWeek: WEEK, isEditing: true, onLabelEdit: () => {}, onAddWeek: () => {}, onDeleteWeek });
+    container.querySelector('.week-admin-delete').click();
+    expect(onDeleteWeek).toHaveBeenCalledWith(WEEK);
+  });
+
+  it('does not render a delete-week button when there is no active week', () => {
+    const container = document.createElement('div');
+    renderWeekAdmin(container, { activeWeek: null, isEditing: true, onLabelEdit: () => {}, onAddWeek: () => {}, onDeleteWeek: () => {} });
+    expect(container.querySelector('.week-admin-delete')).toBeNull();
   });
 });

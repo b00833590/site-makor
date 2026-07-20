@@ -34,3 +34,15 @@
 .week-admin-add:hover {
   background: rgba(201, 151, 31, 0.2);
 }
+
+.week-admin-delete {
+  width: 180px;
+  box-sizing: border-box;
+  background: transparent;
+  border: 1px solid rgba(224, 118, 106, 0.4);
+  border-radius: 4px;
+  color: #e0736a;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 6px 8px;
+}
