@@ -11,7 +11,7 @@ import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion } from './data/selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getWeekContentKeys } from './data/selectors.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
@@ -313,6 +313,34 @@ function handleWeekAdd() {
   });
 }
 
+function handleWeekDelete(week) {
+  const keys = getWeekContentKeys(db, week.id);
+  const contentCount = keys.length - 1; // excludes the week document itself
+  const confirmed = window.confirm(
+    `Supprimer définitivement "${week.label}" et ${contentCount} élément(s) de contenu associé (indices, news, entreprises) ? Cette action ne peut pas être annulée facilement.`
+  );
+  if (!confirmed) return;
+
+  const previousEntries = keys.map(key => [key, db[key]]);
+  for (const key of keys) delete db[key];
+
+  const wasActive = activeWeekId === week.id;
+  if (wasActive) {
+    const remainingWeeks = getWeeks(db);
+    activeWeekId = remainingWeeks.length ? remainingWeeks[remainingWeeks.length - 1].id : null;
+  }
+  if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+  renderPanelForCurrentSelection();
+
+  client.deleteDocsBatch(keys).catch(() => {
+    for (const [key, value] of previousEntries) db[key] = value;
+    if (wasActive) activeWeekId = week.id;
+    if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Suppression en ligne échouée — la semaine a été restaurée');
+  });
+}
+
 const panel = initSidePanel({
   labelEl: document.getElementById('panel-region-label'),
   indicesEl: document.getElementById('panel-indices'),
@@ -366,6 +394,7 @@ function renderPanelForCurrentSelection() {
     isEditing,
     onLabelEdit: handleWeekLabelEdit,
     onAddWeek: handleWeekAdd,
+    onDeleteWeek: handleWeekDelete,
   });
 
   if (liveRefreshHandle) liveRefreshHandle.stop();
