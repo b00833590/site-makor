@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion } from './selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getWeekContentKeys } from './selectors.js';
 
 const DB = {
   'mkg:week:w2': { id: 'w2', label: 'Semaine 2', order: 1 },
@@ -94,5 +94,43 @@ describe('getCompanyItemsForWeekAndRegion', () => {
 
   it('returns an empty array when nothing matches', () => {
     expect(getCompanyItemsForWeekAndRegion(DB, 'w1', 'north-america')).toEqual([]);
+  });
+});
+
+describe('getWeekContentKeys', () => {
+  const DB = {
+    'mkg:week:w1': { id: 'w1', label: 'Semaine 1', order: 0 },
+    'mkg:market:w1:m1': { id: 'm1' },
+    'mkg:market:w1:m2': { id: 'm2' },
+    'mkg:content:news:w1:n1': { id: 'n1' },
+    'mkg:content:entreprises:w1:c1': { id: 'c1' },
+    'mkg:market:w2:m3': { id: 'm3' },
+    'mkg:portfolio:p1': { id: 'p1' },
+  };
+
+  it('returns every market/news/entreprises key for the given week, plus the week document itself', () => {
+    const keys = getWeekContentKeys(DB, 'w1');
+    expect(keys.sort()).toEqual([
+      'mkg:content:entreprises:w1:c1',
+      'mkg:content:news:w1:n1',
+      'mkg:market:w1:m1',
+      'mkg:market:w1:m2',
+      'mkg:week:w1',
+    ].sort());
+  });
+
+  it("does not include another week's content", () => {
+    const keys = getWeekContentKeys(DB, 'w1');
+    expect(keys).not.toContain('mkg:market:w2:m3');
+  });
+
+  it('never includes portfolio entries, which are not week-scoped', () => {
+    const keys = getWeekContentKeys(DB, 'w1');
+    expect(keys).not.toContain('mkg:portfolio:p1');
+  });
+
+  it('returns just the week document key when the week has no other content', () => {
+    const keys = getWeekContentKeys({ 'mkg:week:w9': { id: 'w9', label: 'Vide', order: 9 } }, 'w9');
+    expect(keys).toEqual(['mkg:week:w9']);
   });
 });
