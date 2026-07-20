@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 
 const DEFAULT_CONFIG = {
   apiKey: 'AIzaSyDSq-wkq28uEsU3CO5WT6aW0CQgU1SW7bk',
@@ -56,7 +56,18 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     await writeWithRetry(() => deleteDoc(doc(db, MAIN_COLLECTION, key)));
   }
 
-  return { loadAllOnce, writeDoc, deleteDocByKey };
+  async function deleteDocsBatch(keys) {
+    if (keys.length === 0) return;
+    await writeWithRetry(async () => {
+      const batch = writeBatch(db);
+      for (const key of keys) {
+        batch.delete(doc(db, MAIN_COLLECTION, key));
+      }
+      await batch.commit();
+    });
+  }
+
+  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch };
 }
 
 export async function loadAllWithRetry(loadOnceFn, delayMs = EMPTY_RETRY_DELAY_MS) {
