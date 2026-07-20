@@ -3,7 +3,19 @@ import { toggleCompanySelection } from './compareSelection.js';
 import { sortPortfolioEntries, nextSort } from './portfolioSort.js';
 import { renderPortfolioTable } from './portfolioTable.js';
 
-function renderIndices(container, items) {
+function buildEditableInput(value, type, className, onCommit) {
+  const input = document.createElement('input');
+  input.type = type;
+  if (type === 'number') input.step = 'any';
+  input.className = className;
+  input.value = value ?? '';
+  input.addEventListener('change', () => {
+    onCommit(type === 'number' ? Number(input.value) : input.value);
+  });
+  return input;
+}
+
+function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, onAddItem }) {
   container.replaceChildren();
   for (const item of items) {
     const row = document.createElement('div');
@@ -15,15 +27,43 @@ function renderIndices(container, items) {
 
     const value = document.createElement('span');
     value.className = 'panel-index-value';
-    value.textContent = item.value ?? '';
+    if (isEditing) {
+      value.appendChild(buildEditableInput(item.value, 'text', 'panel-index-value-input', v => onEditItem(item, { value: v })));
+    } else {
+      value.textContent = item.value ?? '';
+    }
 
     const change = document.createElement('span');
     const isNegative = Number(item.weekChange) < 0;
     change.className = `panel-index-change ${isNegative ? 'negative' : 'positive'}`;
-    change.textContent = `${item.weekChange}%`;
+    if (isEditing) {
+      change.appendChild(buildEditableInput(item.weekChange, 'number', 'panel-index-change-input', v => onEditItem(item, { weekChange: v })));
+    } else {
+      change.textContent = `${item.weekChange}%`;
+    }
 
     row.append(name, value, change);
+
+    if (isEditing) {
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'panel-index-delete';
+      delBtn.setAttribute('aria-label', `Supprimer ${item.name}`);
+      delBtn.textContent = '✕';
+      delBtn.addEventListener('click', () => onDeleteItem(item));
+      row.appendChild(delBtn);
+    }
+
     container.appendChild(row);
+  }
+
+  if (isEditing) {
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'panel-index-add';
+    addBtn.textContent = '+ Ajouter un indice';
+    addBtn.addEventListener('click', () => onAddItem());
+    container.appendChild(addBtn);
   }
 }
 
@@ -44,7 +84,7 @@ function renderNews(container, items) {
   }
 }
 
-export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart }) {
+export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete }) {
   let selectedCompanyIds = [];
   let currentCompanyItems = [];
   let currentPortfolioEntries = [];
@@ -73,9 +113,9 @@ export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compare
     renderPortfolioSection();
   }
 
-  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [] }) {
+  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [], isEditing = false }) {
     labelEl.textContent = regionLabel;
-    renderIndices(indicesEl, marketItems);
+    renderIndices(indicesEl, marketItems, isEditing, { onEditItem: onIndexEdit, onDeleteItem: onIndexDelete, onAddItem: onIndexAdd });
     renderNews(newsEl, newsItems);
     currentCompanyItems = companyItems;
     selectedCompanyIds = [];

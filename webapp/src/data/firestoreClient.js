@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 
 const DEFAULT_CONFIG = {
   apiKey: 'AIzaSyDSq-wkq28uEsU3CO5WT6aW0CQgU1SW7bk',
@@ -13,6 +13,20 @@ const DEFAULT_CONFIG = {
 
 const MAIN_COLLECTION = 'mkg_data';
 const EMPTY_RETRY_DELAY_MS = 1200;
+const WRITE_RETRY_COUNT = 2;
+const WRITE_RETRY_DELAY_MS = 900;
+
+export async function writeWithRetry(writeFn, retries = WRITE_RETRY_COUNT, delayMs = WRITE_RETRY_DELAY_MS) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      await writeFn();
+      return;
+    } catch (error) {
+      if (attempt === retries) throw error;
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+}
 
 export function createFirestoreClient(config = DEFAULT_CONFIG) {
   const app = initializeApp(config);
@@ -31,7 +45,18 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     return out;
   }
 
-  return { loadAllOnce };
+  async function writeDoc(key, value) {
+    await writeWithRetry(() => setDoc(doc(db, MAIN_COLLECTION, key), {
+      value: JSON.stringify(value),
+      updatedAt: serverTimestamp(),
+    }));
+  }
+
+  async function deleteDocByKey(key) {
+    await writeWithRetry(() => deleteDoc(doc(db, MAIN_COLLECTION, key)));
+  }
+
+  return { loadAllOnce, writeDoc, deleteDocByKey };
 }
 
 export async function loadAllWithRetry(loadOnceFn, delayMs = EMPTY_RETRY_DELAY_MS) {
