@@ -4,6 +4,7 @@ import './panel/companyList.css';
 import './panel/portfolioTable.css';
 import './panel/chartModal.css';
 import './timeline/weekTimeline.css';
+import './timeline/weekAdmin.css';
 import './admin/passwordModal.css';
 import './admin/toast.css';
 import { REGIONS } from './globe/regions.js';
@@ -15,6 +16,7 @@ import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_G
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
+import { renderWeekAdmin } from './timeline/weekAdmin.js';
 import { startPortfolioLiveRefresh } from './panel/portfolioLiveRefresh.js';
 import { initPasswordModal } from './admin/passwordModal.js';
 import { showToast } from './admin/toast.js';
@@ -50,6 +52,7 @@ let activeWeekId = null;
 let activeRegionId = 'asia';
 let liveRefreshHandle = null;
 let isEditing = false;
+let weekTimelineHandle = null;
 
 function marketItemKey(item) {
   return `mkg:market:${activeWeekId}:${item.id}`;
@@ -265,6 +268,51 @@ function handleNewsDelete(item) {
   });
 }
 
+function weekItemKey(week) {
+  return `mkg:week:${week.id}`;
+}
+
+function handleWeekLabelEdit(week, patch) {
+  const key = weekItemKey(week);
+  const previous = db[key];
+  const updated = { ...previous, ...patch };
+  db[key] = updated;
+  if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, updated).catch(() => {
+    db[key] = previous;
+    if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
+  });
+}
+
+function handleWeekAdd() {
+  const id = generateId();
+  const key = `mkg:week:${id}`;
+  const existingWeeks = getWeeks(db);
+  const maxOrder = existingWeeks.reduce((max, w) => Math.max(max, w.order), -1);
+  const newWeek = { id, label: 'Nouvelle semaine', order: maxOrder + 1 };
+  const previousActiveWeekId = activeWeekId;
+
+  db[key] = newWeek;
+  activeWeekId = id;
+  if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+  renderPanelForCurrentSelection();
+
+  client.writeDoc(key, newWeek).catch(() => {
+    delete db[key];
+    // Only snap navigation back if the user hasn't since moved on (e.g. a
+    // second "+ Nouvelle semaine" click, or manually selecting another week)
+    // — otherwise this would silently discard a later, successfully-saved
+    // week switch just because an earlier, unrelated write failed.
+    if (activeWeekId === id) activeWeekId = previousActiveWeekId;
+    if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — la nouvelle semaine a été retirée');
+  });
+}
+
 const panel = initSidePanel({
   labelEl: document.getElementById('panel-region-label'),
   indicesEl: document.getElementById('panel-indices'),
@@ -311,6 +359,13 @@ function renderPanelForCurrentSelection() {
     portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
     portfolioEntries,
     isEditing,
+  });
+
+  renderWeekAdmin(document.getElementById('week-admin'), {
+    activeWeek: getWeeks(db).find(w => w.id === activeWeekId) || null,
+    isEditing,
+    onLabelEdit: handleWeekLabelEdit,
+    onAddWeek: handleWeekAdd,
   });
 
   if (liveRefreshHandle) liveRefreshHandle.stop();
@@ -370,7 +425,7 @@ async function bootstrap() {
     const weeks = getWeeks(db);
     activeWeekId = weeks.length ? weeks[weeks.length - 1].id : null;
 
-    initWeekTimeline({
+    weekTimelineHandle = initWeekTimeline({
       container: timelineEl,
       weeks,
       activeWeekId,
