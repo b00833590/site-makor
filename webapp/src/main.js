@@ -11,7 +11,7 @@ import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
 import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion } from './data/selectors.js';
-import { getPortfolioEntriesForRegion, getPortfolioRegion } from './data/portfolioSelectors.js';
+import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
@@ -167,6 +167,57 @@ function handleCompanyBulletDelete(item, index) {
   handleCompanyEdit(item, { bullets: (item.bullets || []).filter((_, i) => i !== index) });
 }
 
+function portfolioItemKey(item) {
+  return `mkg:portfolio:${item.id}`;
+}
+
+function handlePortfolioEdit(item, patch) {
+  const key = portfolioItemKey(item);
+  const previous = db[key];
+  const updated = { ...previous, ...patch };
+  db[key] = updated;
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, updated).catch(() => {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
+  });
+}
+
+function handlePortfolioAdd() {
+  const id = generateId();
+  const key = `mkg:portfolio:${id}`;
+  const newItem = {
+    id,
+    date: '',
+    entreprise: 'Nouvelle position',
+    stagiaire: '',
+    symbol: '',
+    regionId: PORTFOLIO_REGION_BY_GLOBE_REGION[activeRegionId] || '',
+    depuis: 0,
+    ytd: 0,
+  };
+  db[key] = newItem;
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, newItem).catch(() => {
+    delete db[key];
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — la nouvelle ligne a été retirée');
+  });
+}
+
+function handlePortfolioDelete(item) {
+  const key = portfolioItemKey(item);
+  const previous = db[key];
+  delete db[key];
+  renderPanelForCurrentSelection();
+  client.deleteDocByKey(key).catch(() => {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — la ligne a été restaurée");
+  });
+}
+
 const panel = initSidePanel({
   labelEl: document.getElementById('panel-region-label'),
   indicesEl: document.getElementById('panel-indices'),
@@ -185,6 +236,9 @@ const panel = initSidePanel({
   onCompanyBulletAdd: handleCompanyBulletAdd,
   onCompanyBulletEdit: handleCompanyBulletEdit,
   onCompanyBulletDelete: handleCompanyBulletDelete,
+  onPortfolioEdit: handlePortfolioEdit,
+  onPortfolioAdd: handlePortfolioAdd,
+  onPortfolioDelete: handlePortfolioDelete,
 });
 
 function updateIndicator(regionId) {
