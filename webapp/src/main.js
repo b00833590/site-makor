@@ -302,7 +302,11 @@ function handleWeekAdd() {
 
   client.writeDoc(key, newWeek).catch(() => {
     delete db[key];
-    activeWeekId = previousActiveWeekId;
+    // Only snap navigation back if the user hasn't since moved on (e.g. a
+    // second "+ Nouvelle semaine" click, or manually selecting another week)
+    // — otherwise this would silently discard a later, successfully-saved
+    // week switch just because an earlier, unrelated write failed.
+    if (activeWeekId === id) activeWeekId = previousActiveWeekId;
     if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
     renderPanelForCurrentSelection();
     showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — la nouvelle semaine a été retirée');
