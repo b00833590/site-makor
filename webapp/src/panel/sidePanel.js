@@ -56,20 +56,52 @@ function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, 
   }
 }
 
-function renderNews(container, items) {
+function renderNews(container, items, isEditing, { onEditItem, onAddItem, onDeleteItem }) {
   container.replaceChildren();
   for (const item of items) {
     const block = document.createElement('div');
     block.className = 'panel-news-block';
 
     const title = document.createElement('h3');
-    title.textContent = item.title;
+    if (isEditing) {
+      title.appendChild(buildEditableInput(item.title, 'text', 'panel-news-title-input', v => onEditItem(item, { title: v })));
+    } else {
+      title.textContent = item.title;
+    }
 
     const description = document.createElement('p');
-    description.textContent = item.description;
+    if (isEditing) {
+      const textarea = document.createElement('textarea');
+      textarea.className = 'panel-news-description-input';
+      textarea.value = item.description ?? '';
+      textarea.addEventListener('change', () => onEditItem(item, { description: textarea.value }));
+      description.appendChild(textarea);
+    } else {
+      description.textContent = item.description;
+    }
 
     block.append(title, description);
+
+    if (isEditing) {
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'panel-news-delete';
+      delBtn.setAttribute('aria-label', `Supprimer ${item.title}`);
+      delBtn.textContent = '✕ Supprimer';
+      delBtn.addEventListener('click', () => onDeleteItem(item));
+      block.appendChild(delBtn);
+    }
+
     container.appendChild(block);
+  }
+
+  if (isEditing) {
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'panel-news-add';
+    addBtn.textContent = '+ Ajouter une brève';
+    addBtn.addEventListener('click', () => onAddItem());
+    container.appendChild(addBtn);
   }
 }
 
@@ -78,6 +110,7 @@ export function initSidePanel({
   onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete,
   onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete,
   onPortfolioEdit, onPortfolioAdd, onPortfolioDelete,
+  onNewsEdit, onNewsAdd, onNewsDelete,
 }) {
   let selectedCompanyIds = [];
   let currentCompanyItems = [];
@@ -127,7 +160,7 @@ export function initSidePanel({
   function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [], isEditing = false }) {
     labelEl.textContent = regionLabel;
     renderIndices(indicesEl, marketItems, isEditing, { onEditItem: onIndexEdit, onDeleteItem: onIndexDelete, onAddItem: onIndexAdd });
-    renderNews(newsEl, newsItems);
+    renderNews(newsEl, newsItems, isEditing, { onEditItem: onNewsEdit, onAddItem: onNewsAdd, onDeleteItem: onNewsDelete });
     currentCompanyItems = companyItems;
     currentIsEditing = isEditing;
     selectedCompanyIds = [];
