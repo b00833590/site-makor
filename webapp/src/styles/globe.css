@@ -84,3 +84,50 @@ html, body {
 .edit-toggle-btn.active {
   background: rgba(201, 151, 31, 0.25);
 }
+
+.export-pdf-btn {
+  position: fixed;
+  top: 16px;
+  right: 160px;
+  z-index: 15;
+  background: rgba(15, 23, 48, 0.9);
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 6px;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 8px 14px;
+}
+
+.export-pdf-btn:hover {
+  background: rgba(201, 151, 31, 0.2);
+}
+
+/* Applied temporarily to .side-panel during PDF generation only. */
+.side-panel.pdf-export {
+  background: #ffffff;
+  color: #111111;
+}
+
+.side-panel.pdf-export .panel-region-label,
+.side-panel.pdf-export .panel-section-label,
+.side-panel.pdf-export .panel-index-name,
+.side-panel.pdf-export .panel-company-name,
+.side-panel.pdf-export .panel-news-block h3 {
+  color: #0f1730;
+}
+
+.side-panel.pdf-export .panel-index-delete,
+.side-panel.pdf-export .panel-index-add,
+.side-panel.pdf-export .panel-company-delete,
+.side-panel.pdf-export .panel-company-add,
+.side-panel.pdf-export .panel-company-bullet-delete,
+.side-panel.pdf-export .panel-company-bullet-add,
+.side-panel.pdf-export .portfolio-delete,
+.side-panel.pdf-export .portfolio-add,
+.side-panel.pdf-export .panel-news-delete,
+.side-panel.pdf-export .panel-news-add,
+.side-panel.pdf-export .panel-compare-toggle,
+.side-panel.pdf-export .panel-chart-toggle {
+  display: none !important;
+}
