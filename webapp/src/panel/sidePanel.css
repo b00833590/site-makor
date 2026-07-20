@@ -165,3 +165,112 @@
 .panel-news-add:hover {
   background: rgba(201, 151, 31, 0.15);
 }
+
+.panel-iafintech-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.panel-iafintech-card h3 {
+  margin: 6px 0 4px;
+  font-size: 13px;
+}
+
+.panel-iafintech-card p {
+  margin: 0;
+  font-size: 12px;
+  color: #b7bdd6;
+}
+
+.panel-iafintech-tag {
+  display: inline-block;
+  background: rgba(201, 151, 31, 0.2);
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 10px;
+  color: var(--gold-light, #e0b53d);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+}
+
+.panel-iafintech-stat {
+  margin-top: 6px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.panel-iafintech-link {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--gold-light, #e0b53d);
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.panel-iafintech-link:hover {
+  text-decoration: underline;
+}
+
+.panel-iafintech-tag-input,
+.panel-iafintech-title-input,
+.panel-iafintech-stat-label-input,
+.panel-iafintech-stat-value-input,
+.panel-iafintech-link-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0f1730;
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 4px;
+  margin-top: 2px;
+}
+
+.panel-iafintech-description-input {
+  width: 100%;
+  min-height: 60px;
+  box-sizing: border-box;
+  background: #0f1730;
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 6px;
+  margin-top: 4px;
+  resize: vertical;
+}
+
+.panel-iafintech-delete {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid rgba(224, 118, 106, 0.4);
+  border-radius: 4px;
+  color: #e0736a;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px;
+}
+
+.panel-iafintech-add {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background: transparent;
+  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 6px;
+}
+
+.panel-iafintech-add:hover {
+  background: rgba(201, 151, 31, 0.15);
+}
