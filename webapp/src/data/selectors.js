@@ -30,3 +30,14 @@ export function getCompanyItemsForWeekAndRegion(db, weekId, regionId) {
     .map(key => db[key])
     .filter(item => normalizeRegionLabel(item.region) === regionId);
 }
+
+export function getWeekContentKeys(db, weekId) {
+  const prefixes = [
+    `mkg:market:${weekId}:`,
+    `mkg:content:news:${weekId}:`,
+    `mkg:content:entreprises:${weekId}:`,
+  ];
+  const keys = Object.keys(db).filter(key => prefixes.some(prefix => key.startsWith(prefix)));
+  keys.push(`mkg:week:${weekId}`);
+  return keys;
+}

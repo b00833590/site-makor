@@ -11,7 +11,7 @@ import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion } from './data/selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getWeekContentKeys } from './data/selectors.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
@@ -313,6 +313,39 @@ function handleWeekAdd() {
   });
 }
 
+function handleWeekDelete(week) {
+  const keys = getWeekContentKeys(db, week.id);
+  const contentCount = keys.length - 1; // excludes the week document itself
+  const confirmed = window.confirm(
+    `Supprimer définitivement "${week.label}" et ${contentCount} élément(s) de contenu associé (indices, news, entreprises) ? Cette action ne peut pas être annulée facilement.`
+  );
+  if (!confirmed) return;
+
+  const previousEntries = keys.map(key => [key, db[key]]);
+  for (const key of keys) delete db[key];
+
+  const wasActive = activeWeekId === week.id;
+  let fallbackWeekId = activeWeekId;
+  if (wasActive) {
+    const remainingWeeks = getWeeks(db);
+    activeWeekId = remainingWeeks.length ? remainingWeeks[remainingWeeks.length - 1].id : null;
+    fallbackWeekId = activeWeekId;
+  }
+  if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+  renderPanelForCurrentSelection();
+
+  client.deleteDocsBatch(keys).catch(() => {
+    for (const [key, value] of previousEntries) db[key] = value;
+    // Only snap navigation back to the deleted week if the user hasn't since
+    // moved on from the fallback week this call switched to (e.g. manually
+    // selecting another week) — same reasoning as handleWeekAdd's guard.
+    if (wasActive && activeWeekId === fallbackWeekId) activeWeekId = week.id;
+    if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Suppression en ligne échouée — la semaine a été restaurée');
+  });
+}
+
 const panel = initSidePanel({
   labelEl: document.getElementById('panel-region-label'),
   indicesEl: document.getElementById('panel-indices'),
@@ -347,6 +380,23 @@ function updateIndicator(regionId) {
 }
 
 function renderPanelForCurrentSelection() {
+  // Rendered unconditionally, before the activeWeekId guard below: unlike
+  // the region panel, this has always been able to represent "no active
+  // week" (renderWeekAdmin(null) just shows the add-week button, no crash).
+  // Deleting the last remaining week is the one path that can drive
+  // activeWeekId to null *during* an editing session — if this call were
+  // gated behind the same early return as the rest of the function, the
+  // week-admin container would keep showing a stale rename input/delete
+  // button still wired to the just-deleted week, and using them could
+  // resurrect a malformed ghost week document in Firestore.
+  renderWeekAdmin(document.getElementById('week-admin'), {
+    activeWeek: activeWeekId ? getWeeks(db).find(w => w.id === activeWeekId) || null : null,
+    isEditing,
+    onLabelEdit: handleWeekLabelEdit,
+    onAddWeek: handleWeekAdd,
+    onDeleteWeek: handleWeekDelete,
+  });
+
   if (!activeWeekId) return;
   const region = REGIONS.find(r => r.id === activeRegionId);
   const portfolioRegion = getPortfolioRegion(db, activeRegionId);
@@ -359,13 +409,6 @@ function renderPanelForCurrentSelection() {
     portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
     portfolioEntries,
     isEditing,
-  });
-
-  renderWeekAdmin(document.getElementById('week-admin'), {
-    activeWeek: getWeeks(db).find(w => w.id === activeWeekId) || null,
-    isEditing,
-    onLabelEdit: handleWeekLabelEdit,
-    onAddWeek: handleWeekAdd,
   });
 
   if (liveRefreshHandle) liveRefreshHandle.stop();
