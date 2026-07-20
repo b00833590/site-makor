@@ -100,3 +100,97 @@
   text-align: left;
   color: #fff;
 }
+
+.panel-company-name-input,
+.panel-company-sub-input,
+.panel-company-cap-input,
+.panel-company-stat-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0f1730;
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 4px;
+  margin-top: 2px;
+}
+
+.panel-company-sub-input {
+  width: 30%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.panel-company-flag-input {
+  width: 15%;
+}
+
+.panel-company-delete {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid rgba(224, 118, 106, 0.4);
+  border-radius: 4px;
+  color: #e0736a;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px;
+}
+
+.panel-company-add {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background: transparent;
+  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 6px;
+}
+
+.panel-company-add:hover {
+  background: rgba(201, 151, 31, 0.15);
+}
+
+.panel-company-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.panel-company-bullet-input {
+  flex: 1;
+  min-height: 40px;
+  box-sizing: border-box;
+  background: #0f1730;
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px;
+  resize: vertical;
+}
+
+.panel-company-bullet-delete {
+  background: transparent;
+  border: none;
+  color: #e0736a;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.panel-company-bullet-add {
+  background: transparent;
+  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+}

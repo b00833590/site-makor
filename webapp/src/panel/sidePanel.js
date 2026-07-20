@@ -2,18 +2,7 @@ import { renderCompanies, renderComparison } from './companyList.js';
 import { toggleCompanySelection } from './compareSelection.js';
 import { sortPortfolioEntries, nextSort } from './portfolioSort.js';
 import { renderPortfolioTable } from './portfolioTable.js';
-
-function buildEditableInput(value, type, className, onCommit) {
-  const input = document.createElement('input');
-  input.type = type;
-  if (type === 'number') input.step = 'any';
-  input.className = className;
-  input.value = value ?? '';
-  input.addEventListener('change', () => {
-    onCommit(type === 'number' ? Number(input.value) : input.value);
-  });
-  return input;
-}
+import { buildEditableInput } from '../admin/editableInput.js';
 
 function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, onAddItem }) {
   container.replaceChildren();
@@ -84,15 +73,30 @@ function renderNews(container, items) {
   }
 }
 
-export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete }) {
+export function initSidePanel({
+  labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
+  onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete,
+  onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete,
+}) {
   let selectedCompanyIds = [];
   let currentCompanyItems = [];
   let currentPortfolioEntries = [];
+  let currentIsEditing = false;
   let sortField = 'date';
   let sortDirection = 'asc';
 
   function renderCompanySection() {
-    renderCompanies(companiesEl, currentCompanyItems, selectedCompanyIds, { onToggle: handleToggleCompare, onOpenChart });
+    renderCompanies(companiesEl, currentCompanyItems, selectedCompanyIds, {
+      onToggle: handleToggleCompare,
+      onOpenChart,
+      isEditing: currentIsEditing,
+      onEditItem: onCompanyEdit,
+      onAddItem: onCompanyAdd,
+      onDeleteItem: onCompanyDelete,
+      onBulletAdd: onCompanyBulletAdd,
+      onBulletEdit: onCompanyBulletEdit,
+      onBulletDelete: onCompanyBulletDelete,
+    });
     renderComparison(compareEl, currentCompanyItems, selectedCompanyIds);
   }
 
@@ -118,6 +122,7 @@ export function initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compare
     renderIndices(indicesEl, marketItems, isEditing, { onEditItem: onIndexEdit, onDeleteItem: onIndexDelete, onAddItem: onIndexAdd });
     renderNews(newsEl, newsItems);
     currentCompanyItems = companyItems;
+    currentIsEditing = isEditing;
     selectedCompanyIds = [];
     renderCompanySection();
     portfolioLabelEl.textContent = portfolioRegionLabel;
