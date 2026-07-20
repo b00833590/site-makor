@@ -375,6 +375,23 @@ function updateIndicator(regionId) {
 }
 
 function renderPanelForCurrentSelection() {
+  // Rendered unconditionally, before the activeWeekId guard below: unlike
+  // the region panel, this has always been able to represent "no active
+  // week" (renderWeekAdmin(null) just shows the add-week button, no crash).
+  // Deleting the last remaining week is the one path that can drive
+  // activeWeekId to null *during* an editing session — if this call were
+  // gated behind the same early return as the rest of the function, the
+  // week-admin container would keep showing a stale rename input/delete
+  // button still wired to the just-deleted week, and using them could
+  // resurrect a malformed ghost week document in Firestore.
+  renderWeekAdmin(document.getElementById('week-admin'), {
+    activeWeek: activeWeekId ? getWeeks(db).find(w => w.id === activeWeekId) || null : null,
+    isEditing,
+    onLabelEdit: handleWeekLabelEdit,
+    onAddWeek: handleWeekAdd,
+    onDeleteWeek: handleWeekDelete,
+  });
+
   if (!activeWeekId) return;
   const region = REGIONS.find(r => r.id === activeRegionId);
   const portfolioRegion = getPortfolioRegion(db, activeRegionId);
@@ -387,14 +404,6 @@ function renderPanelForCurrentSelection() {
     portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
     portfolioEntries,
     isEditing,
-  });
-
-  renderWeekAdmin(document.getElementById('week-admin'), {
-    activeWeek: getWeeks(db).find(w => w.id === activeWeekId) || null,
-    isEditing,
-    onLabelEdit: handleWeekLabelEdit,
-    onAddWeek: handleWeekAdd,
-    onDeleteWeek: handleWeekDelete,
   });
 
   if (liveRefreshHandle) liveRefreshHandle.stop();
