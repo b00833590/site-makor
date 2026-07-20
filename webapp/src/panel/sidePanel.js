@@ -77,6 +77,7 @@ export function initSidePanel({
   labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
   onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete,
   onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete,
+  onPortfolioEdit, onPortfolioAdd, onPortfolioDelete,
 }) {
   let selectedCompanyIds = [];
   let currentCompanyItems = [];
@@ -107,7 +108,13 @@ export function initSidePanel({
 
   function renderPortfolioSection() {
     const sorted = sortPortfolioEntries(currentPortfolioEntries, sortField, sortDirection);
-    renderPortfolioTable(portfolioEl, sorted, { sortField, sortDirection, onSort: handleSort });
+    renderPortfolioTable(portfolioEl, sorted, {
+      sortField, sortDirection, onSort: handleSort,
+      isEditing: currentIsEditing,
+      onEditItem: onPortfolioEdit,
+      onAddItem: onPortfolioAdd,
+      onDeleteItem: onPortfolioDelete,
+    });
   }
 
   function handleSort(clickedField) {
@@ -134,7 +141,7 @@ export function initSidePanel({
     currentPortfolioEntries = currentPortfolioEntries.map(entry =>
       overrides[entry.id] ? { ...entry, ...overrides[entry.id] } : entry
     );
-    renderPortfolioSection();
+    if (!currentIsEditing) renderPortfolioSection();
   }
 
   return { showRegion, updateLiveQuotes };

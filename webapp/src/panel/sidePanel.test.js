@@ -303,4 +303,58 @@ describe('initSidePanel', () => {
       expect(onCompanyEdit).toHaveBeenCalledWith(COMPANY, { name: 'Toyota Motor' });
     });
   });
+
+  describe('editable portfolio via side panel', () => {
+    const ENTRY = { id: 'p1', date: '20/06', entreprise: 'A', stagiaire: 'X', symbol: 'A', depuis: 1, ytd: 1 };
+
+    it('renders portfolio row fields as inputs when isEditing is true', () => {
+      panel.showRegion('Asie', {
+        marketItems: [], newsItems: [], companyItems: [],
+        portfolioRegionLabel: 'Asie', isEditing: true, portfolioEntries: [ENTRY],
+      });
+      expect(portfolioEl.querySelector('input')).not.toBeNull();
+    });
+
+    it('does not render portfolio inputs when isEditing is false', () => {
+      panel.showRegion('Asie', {
+        marketItems: [], newsItems: [], companyItems: [],
+        portfolioRegionLabel: 'Asie', portfolioEntries: [ENTRY],
+      });
+      expect(portfolioEl.querySelector('input')).toBeNull();
+    });
+
+    it('calls onPortfolioEdit when a portfolio field is edited through the panel', () => {
+      const onPortfolioEdit = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
+        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
+        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
+        onPortfolioEdit, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
+      });
+      panel.showRegion('Asie', {
+        marketItems: [], newsItems: [], companyItems: [],
+        portfolioRegionLabel: 'Asie', isEditing: true, portfolioEntries: [ENTRY],
+      });
+
+      const dateInput = portfolioEl.querySelectorAll('tbody tr input')[0];
+      dateInput.value = '25/06';
+      dateInput.dispatchEvent(new Event('change'));
+
+      expect(onPortfolioEdit).toHaveBeenCalledWith(ENTRY, { date: '25/06' });
+    });
+
+    it('does not re-render the portfolio table (preserving in-progress edits) when live quotes arrive while isEditing is true', () => {
+      panel.showRegion('Asie', {
+        marketItems: [], newsItems: [], companyItems: [],
+        portfolioRegionLabel: 'Asie', isEditing: true, portfolioEntries: [ENTRY],
+      });
+      const inputBefore = portfolioEl.querySelector('tbody tr input');
+
+      panel.updateLiveQuotes({ p1: { depuis: 9.9, ytd: 8.8 } });
+
+      const inputAfter = portfolioEl.querySelector('tbody tr input');
+      expect(inputAfter).toBe(inputBefore); // same DOM node = table was not re-rendered
+    });
+  });
 });
