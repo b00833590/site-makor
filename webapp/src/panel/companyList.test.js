@@ -117,14 +117,46 @@ describe('editable company fields', () => {
     expect(onEditItem).toHaveBeenCalledWith(COMPANY, { name: 'Reliance Ind.' });
   });
 
-  it('calls onEditItem with the correct field patch when a stat value input changes', () => {
+  it('calls onEditItem with the correct field patch for each of the 4 stat value inputs', () => {
     const onEditItem = vi.fn();
     const container = document.createElement('div');
     renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onEditItem });
     const statInputs = container.querySelectorAll('.panel-company-stat-input');
-    statInputs[0].value = '15%';
-    statInputs[0].dispatchEvent(new Event('change'));
-    expect(onEditItem).toHaveBeenCalledWith(COMPANY, { salesGrowth: '15%' });
+    const expectedFields = ['salesGrowth', 'evEbitda', 'coursActuel', 'targetPrice'];
+    statInputs.forEach((input, i) => {
+      input.value = `new-${i}`;
+      input.dispatchEvent(new Event('change'));
+      expect(onEditItem).toHaveBeenNthCalledWith(i + 1, COMPANY, { [expectedFields[i]]: `new-${i}` });
+    });
+  });
+
+  it('calls onEditItem with the correct field patch for the symbol, flag, and country inputs', () => {
+    const onEditItem = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onEditItem });
+    const [symbolInput, flagInput, countryInput] = container.querySelectorAll('.panel-company-sub-input');
+
+    symbolInput.value = 'RELI.NS';
+    symbolInput.dispatchEvent(new Event('change'));
+    expect(onEditItem).toHaveBeenNthCalledWith(1, COMPANY, { yahooSymbol: 'RELI.NS' });
+
+    flagInput.value = '🇺🇸';
+    flagInput.dispatchEvent(new Event('change'));
+    expect(onEditItem).toHaveBeenNthCalledWith(2, COMPANY, { flag: '🇺🇸' });
+
+    countryInput.value = 'USA';
+    countryInput.dispatchEvent(new Event('change'));
+    expect(onEditItem).toHaveBeenNthCalledWith(3, COMPANY, { country: 'USA' });
+  });
+
+  it('calls onEditItem with a marketCap patch when the market cap input changes', () => {
+    const onEditItem = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onEditItem });
+    const capInput = container.querySelector('.panel-company-cap-input');
+    capInput.value = '220 Md$';
+    capInput.dispatchEvent(new Event('change'));
+    expect(onEditItem).toHaveBeenCalledWith(COMPANY, { marketCap: '220 Md$' });
   });
 
   it('renders a delete button per card in edit mode that calls onDeleteItem with the item', () => {
