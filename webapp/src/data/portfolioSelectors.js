@@ -1,4 +1,4 @@
-const PORTFOLIO_REGION_BY_GLOBE_REGION = {
+export const PORTFOLIO_REGION_BY_GLOBE_REGION = {
   asia: 'asie',
   'brics-uk': 'brics-uk',
   europe: 'europe',

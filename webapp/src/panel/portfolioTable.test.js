@@ -94,3 +94,64 @@ describe('renderPortfolioTable', () => {
     expect(container.querySelector('img')).toBeNull();
   });
 });
+
+describe('editable portfolio table', () => {
+  const EDIT_OPTS = { sortField: 'date', sortDirection: 'asc', onSort: () => {}, isEditing: true, onEditItem: () => {}, onAddItem: () => {}, onDeleteItem: () => {} };
+
+  it('renders plain text (no inputs) when isEditing is false or omitted', () => {
+    const container = document.createElement('div');
+    renderPortfolioTable(container, ENTRIES, { sortField: 'date', sortDirection: 'asc', onSort: () => {} });
+    expect(container.querySelector('input')).toBeNull();
+  });
+
+  it('renders all 6 columns as inputs, with DEPUIS/YTD as number inputs and the rest as text, when isEditing is true', () => {
+    const container = document.createElement('div');
+    renderPortfolioTable(container, [ENTRIES[0]], EDIT_OPTS);
+    const inputs = [...container.querySelectorAll('tbody tr input')];
+    expect(inputs).toHaveLength(6);
+    expect(inputs.map(i => i.type)).toEqual(['text', 'text', 'text', 'text', 'number', 'number']);
+  });
+
+  it('calls onEditItem with the correct field patch for every column when its input changes', () => {
+    const onEditItem = vi.fn();
+    const container = document.createElement('div');
+    renderPortfolioTable(container, [ENTRIES[0]], { ...EDIT_OPTS, onEditItem });
+    const inputs = [...container.querySelectorAll('tbody tr input')];
+    const cases = [
+      { value: '20/06', patch: { date: '20/06' } },
+      { value: 'Evergreen Marine Corp', patch: { entreprise: 'Evergreen Marine Corp' } },
+      { value: 'Marie', patch: { stagiaire: 'Marie' } },
+      { value: 'EMC.TW', patch: { symbol: 'EMC.TW' } },
+      { value: '9.9', patch: { depuis: 9.9 } },
+      { value: '8.8', patch: { ytd: 8.8 } },
+    ];
+    inputs.forEach((input, i) => {
+      input.value = cases[i].value;
+      input.dispatchEvent(new Event('change'));
+      expect(onEditItem).toHaveBeenNthCalledWith(i + 1, ENTRIES[0], cases[i].patch);
+    });
+  });
+
+  it('renders a delete button per row in edit mode that calls onDeleteItem with the entry', () => {
+    const onDeleteItem = vi.fn();
+    const container = document.createElement('div');
+    renderPortfolioTable(container, [ENTRIES[0]], { ...EDIT_OPTS, onDeleteItem });
+    container.querySelector('.portfolio-delete').click();
+    expect(onDeleteItem).toHaveBeenCalledWith(ENTRIES[0]);
+  });
+
+  it('does not render delete/add buttons when isEditing is false', () => {
+    const container = document.createElement('div');
+    renderPortfolioTable(container, ENTRIES, { sortField: 'date', sortDirection: 'asc', onSort: () => {} });
+    expect(container.querySelector('.portfolio-delete')).toBeNull();
+    expect(container.querySelector('.portfolio-add')).toBeNull();
+  });
+
+  it('renders an add-entry button in edit mode that calls onAddItem', () => {
+    const onAddItem = vi.fn();
+    const container = document.createElement('div');
+    renderPortfolioTable(container, ENTRIES, { ...EDIT_OPTS, onAddItem });
+    container.querySelector('.portfolio-add').click();
+    expect(onAddItem).toHaveBeenCalledTimes(1);
+  });
+});
