@@ -1,15 +1,17 @@
+import { buildEditableInput } from '../admin/editableInput.js';
+
 const COLUMNS = [
-  { field: 'date', label: 'DATE' },
-  { field: 'entreprise', label: 'ENTREPRISE' },
-  { field: 'stagiaire', label: 'STAGIAIRE' },
-  { field: 'symbol', label: 'SYMBOLE' },
-  { field: 'depuis', label: 'DEPUIS' },
-  { field: 'ytd', label: 'YTD' },
+  { field: 'date', label: 'DATE', type: 'text' },
+  { field: 'entreprise', label: 'ENTREPRISE', type: 'text' },
+  { field: 'stagiaire', label: 'STAGIAIRE', type: 'text' },
+  { field: 'symbol', label: 'SYMBOLE', type: 'text' },
+  { field: 'depuis', label: 'DEPUIS', type: 'number' },
+  { field: 'ytd', label: 'YTD', type: 'number' },
 ];
 const PERCENT_FIELDS = new Set(['depuis', 'ytd']);
 const SORTABLE_FIELDS = new Set(['date', 'depuis', 'ytd']);
 
-export function renderPortfolioTable(container, entries, { sortField, sortDirection, onSort }) {
+export function renderPortfolioTable(container, entries, { sortField, sortDirection, onSort, isEditing = false, onEditItem, onAddItem, onDeleteItem }) {
   container.replaceChildren();
 
   const table = document.createElement('table');
@@ -29,6 +31,7 @@ export function renderPortfolioTable(container, entries, { sortField, sortDirect
     }
     headRow.appendChild(th);
   }
+  if (isEditing) headRow.appendChild(document.createElement('th'));
   thead.appendChild(headRow);
 
   const tbody = document.createElement('tbody');
@@ -37,16 +40,38 @@ export function renderPortfolioTable(container, entries, { sortField, sortDirect
     for (const col of COLUMNS) {
       const td = document.createElement('td');
       const raw = entry[col.field];
-      if (PERCENT_FIELDS.has(col.field)) {
+      if (isEditing) {
+        td.appendChild(buildEditableInput(raw, col.type, 'portfolio-cell-input', v => onEditItem(entry, { [col.field]: v })));
+      } else if (PERCENT_FIELDS.has(col.field)) {
         td.textContent = raw === undefined || raw === null || raw === '' ? '' : `${raw}%`;
       } else {
         td.textContent = raw ?? '';
       }
       row.appendChild(td);
     }
+    if (isEditing) {
+      const delTd = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'portfolio-delete';
+      delBtn.setAttribute('aria-label', `Supprimer ${entry.entreprise || 'la ligne'}`);
+      delBtn.textContent = '✕';
+      delBtn.addEventListener('click', () => onDeleteItem(entry));
+      delTd.appendChild(delBtn);
+      row.appendChild(delTd);
+    }
     tbody.appendChild(row);
   }
 
   table.append(thead, tbody);
   container.appendChild(table);
+
+  if (isEditing) {
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'portfolio-add';
+    addBtn.textContent = '+ Ajouter une ligne';
+    addBtn.addEventListener('click', () => onAddItem());
+    container.appendChild(addBtn);
+  }
 }
