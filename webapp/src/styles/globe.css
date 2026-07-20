@@ -103,8 +103,20 @@ html, body {
   background: rgba(201, 151, 31, 0.2);
 }
 
-/* Applied temporarily to .side-panel during PDF generation only. */
+/* Applied temporarily to .side-panel during PDF generation only. The panel
+   is normally position:fixed with a viewport-bound height and its own
+   internal scroll (see sidePanel.css) — html2canvas only captures what's
+   actually laid out, not content scrolled out of view, so exporting it as-is
+   silently produces a near-empty PDF. Taking it out of fixed positioning for
+   the duration of the capture lets it grow to its real, full content height. */
 .side-panel.pdf-export {
+  position: static;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  height: auto;
+  max-height: none;
+  overflow: visible;
   background: #ffffff;
   color: #111111;
 }
