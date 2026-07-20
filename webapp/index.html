@@ -9,6 +9,7 @@
   <div id="week-timeline" class="week-timeline"></div>
   <div id="globe-container"></div>
   <div id="region-indicator" class="region-indicator"></div>
+  <button id="edit-toggle-btn" class="edit-toggle-btn" type="button">✏️ Éditer</button>
   <button id="arrow-prev" class="arrow-btn arrow-prev" aria-label="Région précédente">‹</button>
   <button id="arrow-next" class="arrow-btn arrow-next" aria-label="Région suivante">›</button>
   <aside class="side-panel">
@@ -33,6 +34,18 @@
       <div id="chart-modal-body"></div>
     </div>
   </div>
+  <div id="password-modal" class="password-modal">
+    <div class="password-modal-content">
+      <h3>🔒 Mode édition</h3>
+      <input type="password" id="password-input" placeholder="Mot de passe" />
+      <div id="password-error" class="password-modal-error">Mot de passe incorrect.</div>
+      <div class="password-modal-actions">
+        <button id="password-cancel" type="button">Annuler</button>
+        <button id="password-ok" type="button">Déverrouiller</button>
+      </div>
+    </div>
+  </div>
+  <div id="admin-toast" class="admin-toast"></div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

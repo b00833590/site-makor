@@ -66,3 +66,21 @@ html, body {
 .arrow-next {
   right: calc(var(--panel-width, 340px) + 20px);
 }
+
+.edit-toggle-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 15;
+  background: rgba(15, 23, 48, 0.9);
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 6px;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 8px 14px;
+}
+
+.edit-toggle-btn.active {
+  background: rgba(201, 151, 31, 0.25);
+}
