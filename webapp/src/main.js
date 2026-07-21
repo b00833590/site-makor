@@ -15,7 +15,7 @@ import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion,
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
-import { buildExportFilename, exportElementAsPDF } from './panel/pdfExport.js';
+import { buildExportFilename, exportElementAsPDF, buildPortfolioExportFilename } from './panel/pdfExport.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
 import { renderWeekAdmin } from './timeline/weekAdmin.js';
 import { startPortfolioLiveRefresh } from './panel/portfolioLiveRefresh.js';
@@ -577,6 +577,29 @@ exportPdfBtn.addEventListener('click', async () => {
     sidePanelEl.classList.remove('pdf-export');
     exportPdfBtn.disabled = false;
     exportPdfBtn.textContent = '📄 Exporter en PDF';
+  }
+});
+
+const exportPortfolioPdfBtn = document.getElementById('export-portfolio-pdf-btn');
+
+exportPortfolioPdfBtn.addEventListener('click', async () => {
+  const sidePanelEl = document.querySelector('.side-panel');
+  const portfolioSectionEl = document.getElementById('panel-portfolio-section');
+  const portfolioRegion = getPortfolioRegion(db, activeRegionId);
+  const activeWeek = getWeeks(db).find(w => w.id === activeWeekId);
+  const filename = buildPortfolioExportFilename(portfolioRegion ? portfolioRegion.label : '', activeWeek ? activeWeek.label : '');
+
+  exportPortfolioPdfBtn.disabled = true;
+  exportPortfolioPdfBtn.textContent = '⏳';
+  sidePanelEl.classList.add('pdf-export');
+  try {
+    await exportElementAsPDF(portfolioSectionEl, filename);
+  } catch (error) {
+    console.error('Portfolio PDF export failed', error);
+  } finally {
+    sidePanelEl.classList.remove('pdf-export');
+    exportPortfolioPdfBtn.disabled = false;
+    exportPortfolioPdfBtn.textContent = '📄';
   }
 });
 
