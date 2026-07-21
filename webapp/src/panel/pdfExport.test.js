@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
-import { buildExportFilename, exportElementAsPDF } from './pdfExport.js';
+import { buildExportFilename, exportElementAsPDF, buildPortfolioExportFilename } from './pdfExport.js';
 
 describe('buildExportFilename', () => {
   it('builds a filename from the region and week labels', () => {
@@ -26,6 +26,21 @@ describe('buildExportFilename', () => {
   it('falls back to empty segments when labels are missing, still producing a valid filename', () => {
     expect(buildExportFilename('', '')).toBe('Makor__.pdf');
     expect(buildExportFilename(undefined, undefined)).toBe('Makor__.pdf');
+  });
+});
+
+describe('buildPortfolioExportFilename', () => {
+  it('builds a filename from the region and week labels, prefixed with Portefeuille', () => {
+    expect(buildPortfolioExportFilename('Europe', 'Semaine 13-17 JUILLET')).toBe('Makor_Portefeuille_Europe_Semaine_13_17_JUILLET.pdf');
+  });
+
+  it('strips accents from real region/week labels without mangling them', () => {
+    expect(buildPortfolioExportFilename('Amérique du Nord', 'Semaine du 1er DÉCEMBRE')).toBe('Makor_Portefeuille_Amerique_du_Nord_Semaine_du_1er_DECEMBRE.pdf');
+  });
+
+  it('falls back to empty segments when labels are missing, still producing a valid filename', () => {
+    expect(buildPortfolioExportFilename('', '')).toBe('Makor_Portefeuille__.pdf');
+    expect(buildPortfolioExportFilename(undefined, undefined)).toBe('Makor_Portefeuille__.pdf');
   });
 });
 

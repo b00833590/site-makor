@@ -9,6 +9,10 @@ export function buildExportFilename(regionLabel, weekLabel) {
   return `Makor_${sanitizeForFilename(regionLabel)}_${sanitizeForFilename(weekLabel)}.pdf`;
 }
 
+export function buildPortfolioExportFilename(regionLabel, weekLabel) {
+  return `Makor_Portefeuille_${sanitizeForFilename(regionLabel)}_${sanitizeForFilename(weekLabel)}.pdf`;
+}
+
 export async function exportElementAsPDF(element, filename, html2pdfFn = html2pdf) {
   await html2pdfFn()
     .set({
