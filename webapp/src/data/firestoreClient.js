@@ -67,7 +67,21 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     });
   }
 
-  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch };
+  async function writeDocsBatch(entries) {
+    if (entries.length === 0) return;
+    await writeWithRetry(async () => {
+      const batch = writeBatch(db);
+      for (const [key, value] of entries) {
+        batch.set(doc(db, MAIN_COLLECTION, key), {
+          value: JSON.stringify(value),
+          updatedAt: serverTimestamp(),
+        });
+      }
+      await batch.commit();
+    });
+  }
+
+  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch, writeDocsBatch };
 }
 
 export async function loadAllWithRetry(loadOnceFn, delayMs = EMPTY_RETRY_DELAY_MS) {

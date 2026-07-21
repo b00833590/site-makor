@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys } from './selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek } from './selectors.js';
 
 const DB = {
   'mkg:week:w2': { id: 'w2', label: 'Semaine 2', order: 1 },
@@ -113,6 +113,49 @@ describe('getIaFintechItemsForWeek', () => {
 
   it('returns an empty array when nothing matches', () => {
     expect(getIaFintechItemsForWeek(DB, 'w9')).toEqual([]);
+  });
+});
+
+describe('getAllMarketItemsForWeek', () => {
+  it('returns every market item for the week regardless of region', () => {
+    const items = getAllMarketItemsForWeek(DB, 'w1');
+    expect(items.map(i => i.name).sort()).toEqual(['CAC 40', 'EUR/USD', 'Nikkei 225']);
+  });
+
+  it('does not leak items from a different week', () => {
+    const items = getAllMarketItemsForWeek(DB, 'w1');
+    expect(items.some(i => i.name === 'Hang Seng')).toBe(false);
+  });
+
+  it('returns an empty array when nothing matches', () => {
+    expect(getAllMarketItemsForWeek(DB, 'w9')).toEqual([]);
+  });
+});
+
+describe('getAllNewsItemsForWeek', () => {
+  it('returns every news item for the week regardless of region', () => {
+    const items = getAllNewsItemsForWeek(DB, 'w1');
+    expect(items.map(i => i.id).sort()).toEqual(['n1', 'n2']);
+  });
+
+  it('returns an empty array when nothing matches', () => {
+    expect(getAllNewsItemsForWeek(DB, 'w9')).toEqual([]);
+  });
+});
+
+describe('getAllCompanyItemsForWeek', () => {
+  it('returns every company item for the week regardless of region', () => {
+    const items = getAllCompanyItemsForWeek(DB, 'w1');
+    expect(items.map(i => i.id).sort()).toEqual(['c1', 'c2']);
+  });
+
+  it('does not leak items from a different week', () => {
+    const items = getAllCompanyItemsForWeek(DB, 'w1');
+    expect(items.some(i => i.name === 'Toyota')).toBe(false);
+  });
+
+  it('returns an empty array when nothing matches', () => {
+    expect(getAllCompanyItemsForWeek(DB, 'w9')).toEqual([]);
   });
 });
 

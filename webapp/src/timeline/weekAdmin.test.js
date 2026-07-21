@@ -58,4 +58,18 @@ describe('renderWeekAdmin', () => {
     renderWeekAdmin(container, { activeWeek: null, isEditing: true, onLabelEdit: () => {}, onAddWeek: () => {}, onDeleteWeek: () => {} });
     expect(container.querySelector('.week-admin-delete')).toBeNull();
   });
+
+  it('renders a duplicate-week button in edit mode that calls onDuplicateWeek with the active week', () => {
+    const onDuplicateWeek = vi.fn();
+    const container = document.createElement('div');
+    renderWeekAdmin(container, { activeWeek: WEEK, isEditing: true, onLabelEdit: () => {}, onAddWeek: () => {}, onDeleteWeek: () => {}, onDuplicateWeek });
+    container.querySelector('.week-admin-duplicate').click();
+    expect(onDuplicateWeek).toHaveBeenCalledWith(WEEK);
+  });
+
+  it('does not render a duplicate-week button when there is no active week', () => {
+    const container = document.createElement('div');
+    renderWeekAdmin(container, { activeWeek: null, isEditing: true, onLabelEdit: () => {}, onAddWeek: () => {}, onDeleteWeek: () => {}, onDuplicateWeek: () => {} });
+    expect(container.querySelector('.week-admin-duplicate')).toBeNull();
+  });
 });

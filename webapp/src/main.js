@@ -11,7 +11,7 @@ import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys } from './data/selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek } from './data/selectors.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
@@ -397,6 +397,46 @@ function handleWeekDelete(week) {
   });
 }
 
+function duplicateContentEntries(items, keyPrefix, newWeekId) {
+  return items.map(item => {
+    const newId = generateId();
+    return [`${keyPrefix}${newWeekId}:${newId}`, { ...item, id: newId }];
+  });
+}
+
+function handleWeekDuplicate(sourceWeek) {
+  const sourceWeekId = sourceWeek.id;
+  const newWeekId = generateId();
+  const newWeekKey = `mkg:week:${newWeekId}`;
+  const existingWeeks = getWeeks(db);
+  const maxOrder = existingWeeks.reduce((max, w) => Math.max(max, w.order), -1);
+  const newWeek = { id: newWeekId, label: `${sourceWeek.label} (copie)`, order: maxOrder + 1 };
+  const previousActiveWeekId = activeWeekId;
+
+  const contentEntries = [
+    ...duplicateContentEntries(getAllMarketItemsForWeek(db, sourceWeekId), 'mkg:market:', newWeekId),
+    ...duplicateContentEntries(getAllNewsItemsForWeek(db, sourceWeekId), 'mkg:content:news:', newWeekId),
+    ...duplicateContentEntries(getAllCompanyItemsForWeek(db, sourceWeekId), 'mkg:content:entreprises:', newWeekId),
+    ...duplicateContentEntries(getIaFintechItemsForWeek(db, sourceWeekId), 'mkg:content:ia-fintech:', newWeekId),
+  ];
+
+  db[newWeekKey] = newWeek;
+  for (const [key, value] of contentEntries) db[key] = value;
+  activeWeekId = newWeekId;
+  if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+  renderPanelForCurrentSelection();
+
+  client.writeDocsBatch([[newWeekKey, newWeek], ...contentEntries]).catch(() => {
+    delete db[newWeekKey];
+    for (const [key] of contentEntries) delete db[key];
+    // Same "only if the user hasn't since moved on" guard as handleWeekAdd/handleWeekDelete.
+    if (activeWeekId === newWeekId) activeWeekId = previousActiveWeekId;
+    if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Duplication en ligne échouée — la semaine dupliquée a été retirée');
+  });
+}
+
 const panel = initSidePanel({
   labelEl: document.getElementById('panel-region-label'),
   indicesEl: document.getElementById('panel-indices'),
@@ -450,6 +490,7 @@ function renderPanelForCurrentSelection() {
     onLabelEdit: handleWeekLabelEdit,
     onAddWeek: handleWeekAdd,
     onDeleteWeek: handleWeekDelete,
+    onDuplicateWeek: handleWeekDuplicate,
   });
 
   if (!activeWeekId) return;
