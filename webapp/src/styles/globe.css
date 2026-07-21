@@ -126,7 +126,8 @@ html, body {
 .side-panel.pdf-export .panel-index-name,
 .side-panel.pdf-export .panel-company-name,
 .side-panel.pdf-export .panel-news-block h3,
-.side-panel.pdf-export .panel-iafintech-card h3 {
+.side-panel.pdf-export .panel-iafintech-card h3,
+.side-panel.pdf-export .portfolio-region-label {
   color: #0f1730;
 }
 
@@ -143,6 +144,7 @@ html, body {
 .side-panel.pdf-export .panel-iafintech-delete,
 .side-panel.pdf-export .panel-iafintech-add,
 .side-panel.pdf-export .panel-compare-toggle,
-.side-panel.pdf-export .panel-chart-toggle {
+.side-panel.pdf-export .panel-chart-toggle,
+.side-panel.pdf-export .portfolio-export-btn {
   display: none !important;
 }
