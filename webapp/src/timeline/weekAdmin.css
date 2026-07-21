@@ -35,6 +35,22 @@
   background: rgba(201, 151, 31, 0.2);
 }
 
+.week-admin-duplicate {
+  width: 180px;
+  box-sizing: border-box;
+  background: rgba(15, 23, 48, 0.95);
+  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 6px 8px;
+}
+
+.week-admin-duplicate:hover {
+  background: rgba(201, 151, 31, 0.2);
+}
+
 .week-admin-delete {
   width: 180px;
   box-sizing: border-box;
