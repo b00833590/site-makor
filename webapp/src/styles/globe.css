@@ -131,6 +131,16 @@ html, body {
   color: #0f1730;
 }
 
+/* .portfolio-table th/td have an unconditional color:#fff (and a near-white
+   border) for the normal dark theme — without this override, both this
+   feature's portfolio-only export and the pre-existing full-panel export
+   render every row of actual portfolio data as white-on-white, invisible. */
+.side-panel.pdf-export .portfolio-table th,
+.side-panel.pdf-export .portfolio-table td {
+  color: #0f1730;
+  border-bottom-color: rgba(15, 23, 48, 0.15);
+}
+
 .side-panel.pdf-export .panel-index-delete,
 .side-panel.pdf-export .panel-index-add,
 .side-panel.pdf-export .panel-company-delete,
