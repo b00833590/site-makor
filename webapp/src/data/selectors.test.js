@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getWeekContentKeys } from './selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys } from './selectors.js';
 
 const DB = {
   'mkg:week:w2': { id: 'w2', label: 'Semaine 2', order: 1 },
@@ -13,6 +13,8 @@ const DB = {
   'mkg:content:entreprises:w1:c1': { id: 'c1', name: 'Some Co', region: 'Asie' },
   'mkg:content:entreprises:w1:c2': { id: 'c2', name: 'Reliance Industries', region: 'BRICS', yahooSymbol: 'RELIANCE.NS', flag: '🇮🇳', country: 'Inde', marketCap: '210 Md$', bullets: ['Point clé 1'] },
   'mkg:content:entreprises:w2:c3': { id: 'c3', name: 'Toyota', region: 'Asie' },
+  'mkg:content:ia-fintech:w1:ia1': { id: 'ia1', tag: 'IA générative', title: 'OpenAI lève 6,5 Md$', description: 'Détail.', statLabel: 'Valorisation', statValue: '150 Md$' },
+  'mkg:content:ia-fintech:w2:ia2': { id: 'ia2', tag: 'Fintech', title: 'Stripe atteint 1 000 Md$ de volume', description: 'Détail.' },
 };
 
 describe('getWeeks', () => {
@@ -97,6 +99,23 @@ describe('getCompanyItemsForWeekAndRegion', () => {
   });
 });
 
+describe('getIaFintechItemsForWeek', () => {
+  it('returns only IA & Fintech items for the given week', () => {
+    const items = getIaFintechItemsForWeek(DB, 'w1');
+    expect(items).toHaveLength(1);
+    expect(items[0].title).toBe('OpenAI lève 6,5 Md$');
+  });
+
+  it('does not leak items from a different week', () => {
+    const items = getIaFintechItemsForWeek(DB, 'w1');
+    expect(items.some(i => i.id === 'ia2')).toBe(false);
+  });
+
+  it('returns an empty array when nothing matches', () => {
+    expect(getIaFintechItemsForWeek(DB, 'w9')).toEqual([]);
+  });
+});
+
 describe('getWeekContentKeys', () => {
   const DB = {
     'mkg:week:w1': { id: 'w1', label: 'Semaine 1', order: 0 },
@@ -104,14 +123,16 @@ describe('getWeekContentKeys', () => {
     'mkg:market:w1:m2': { id: 'm2' },
     'mkg:content:news:w1:n1': { id: 'n1' },
     'mkg:content:entreprises:w1:c1': { id: 'c1' },
+    'mkg:content:ia-fintech:w1:ia1': { id: 'ia1' },
     'mkg:market:w2:m3': { id: 'm3' },
     'mkg:portfolio:p1': { id: 'p1' },
   };
 
-  it('returns every market/news/entreprises key for the given week, plus the week document itself', () => {
+  it('returns every market/news/entreprises/ia-fintech key for the given week, plus the week document itself', () => {
     const keys = getWeekContentKeys(DB, 'w1');
     expect(keys.sort()).toEqual([
       'mkg:content:entreprises:w1:c1',
+      'mkg:content:ia-fintech:w1:ia1',
       'mkg:content:news:w1:n1',
       'mkg:market:w1:m1',
       'mkg:market:w1:m2',

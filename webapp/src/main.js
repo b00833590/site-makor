@@ -11,7 +11,7 @@ import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getWeekContentKeys } from './data/selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys } from './data/selectors.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
@@ -269,6 +269,56 @@ function handleNewsDelete(item) {
   });
 }
 
+function iaFintechItemKey(item) {
+  return `mkg:content:ia-fintech:${activeWeekId}:${item.id}`;
+}
+
+function handleIaFintechEdit(item, patch) {
+  const key = iaFintechItemKey(item);
+  const previous = db[key];
+  const updated = { ...previous, ...patch };
+  db[key] = updated;
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, updated).catch(() => {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
+  });
+}
+
+function handleIaFintechAdd() {
+  const id = generateId();
+  const key = `mkg:content:ia-fintech:${activeWeekId}:${id}`;
+  const newItem = {
+    id,
+    tag: '',
+    title: 'Nouvel élément',
+    description: 'Description à compléter.',
+    statLabel: '',
+    statValue: '',
+    link: '',
+  };
+  db[key] = newItem;
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, newItem).catch(() => {
+    delete db[key];
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — le nouvel élément a été retiré');
+  });
+}
+
+function handleIaFintechDelete(item) {
+  const key = iaFintechItemKey(item);
+  const previous = db[key];
+  delete db[key];
+  renderPanelForCurrentSelection();
+  client.deleteDocByKey(key).catch(() => {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — l'élément a été restauré");
+  });
+}
+
 function weekItemKey(week) {
   return `mkg:week:${week.id}`;
 }
@@ -355,6 +405,7 @@ const panel = initSidePanel({
   compareEl: document.getElementById('panel-compare'),
   portfolioLabelEl: document.getElementById('panel-portfolio-region-label'),
   portfolioEl: document.getElementById('panel-portfolio'),
+  iaFintechEl: document.getElementById('panel-ia-fintech'),
   onOpenChart: item => chartModal.open(item, currentPortfolioEntriesForChart),
   onIndexEdit: handleIndexEdit,
   onIndexAdd: handleIndexAdd,
@@ -371,6 +422,9 @@ const panel = initSidePanel({
   onNewsEdit: handleNewsEdit,
   onNewsAdd: handleNewsAdd,
   onNewsDelete: handleNewsDelete,
+  onIaFintechEdit: handleIaFintechEdit,
+  onIaFintechAdd: handleIaFintechAdd,
+  onIaFintechDelete: handleIaFintechDelete,
 });
 
 function updateIndicator(regionId) {
@@ -409,6 +463,7 @@ function renderPanelForCurrentSelection() {
     companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
     portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
     portfolioEntries,
+    iaFintechItems: getIaFintechItemsForWeek(db, activeWeekId),
     isEditing,
   });
 
