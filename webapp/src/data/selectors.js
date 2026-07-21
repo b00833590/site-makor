@@ -38,6 +38,27 @@ export function getIaFintechItemsForWeek(db, weekId) {
     .map(key => db[key]);
 }
 
+export function getAllMarketItemsForWeek(db, weekId) {
+  const prefix = `mkg:market:${weekId}:`;
+  return Object.keys(db)
+    .filter(key => key.startsWith(prefix))
+    .map(key => db[key]);
+}
+
+export function getAllNewsItemsForWeek(db, weekId) {
+  const prefix = `mkg:content:news:${weekId}:`;
+  return Object.keys(db)
+    .filter(key => key.startsWith(prefix))
+    .map(key => db[key]);
+}
+
+export function getAllCompanyItemsForWeek(db, weekId) {
+  const prefix = `mkg:content:entreprises:${weekId}:`;
+  return Object.keys(db)
+    .filter(key => key.startsWith(prefix))
+    .map(key => db[key]);
+}
+
 export function getWeekContentKeys(db, weekId) {
   const prefixes = [
     `mkg:market:${weekId}:`,
