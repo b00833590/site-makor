@@ -7,6 +7,7 @@ import './timeline/weekTimeline.css';
 import './timeline/weekAdmin.css';
 import './admin/passwordModal.css';
 import './admin/toast.css';
+import './admin/colorPicker.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
@@ -102,6 +103,12 @@ function handleIndexDelete(item) {
     renderPanelForCurrentSelection();
     showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — l'indice a été restauré");
   });
+}
+
+function handleIndexColorChange(item, field, color) {
+  const colors = { ...(item.colors || {}) };
+  if (color) colors[field] = color; else delete colors[field];
+  handleIndexEdit(item, { colors });
 }
 
 function companyItemKey(item) {
@@ -450,6 +457,7 @@ const panel = initSidePanel({
   onIndexEdit: handleIndexEdit,
   onIndexAdd: handleIndexAdd,
   onIndexDelete: handleIndexDelete,
+  onIndexColorChange: handleIndexColorChange,
   onCompanyEdit: handleCompanyEdit,
   onCompanyAdd: handleCompanyAdd,
   onCompanyDelete: handleCompanyDelete,
