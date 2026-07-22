@@ -364,7 +364,15 @@ async function handlePresentationDelete(item) {
   if (!window.confirm(`Supprimer la présentation "${item.title || 'Sans titre'}" et son PDF ? Cette action ne peut pas être annulée.`)) return;
   const key = `mkg:presentation:${item.id}`;
   const previous = db[key];
-  const chunkKeys = await client.fetchKeysWithPrefix(`mkg:pdfchunk:${item.id}:`);
+  let chunkKeys;
+  try {
+    chunkKeys = await client.fetchKeysWithPrefix(`mkg:pdfchunk:${item.id}:`);
+  } catch {
+    // Nothing has been mutated locally yet at this point, so there's nothing
+    // to roll back — just let the admin know and stop.
+    showToast(document.getElementById('admin-toast'), '⚠️ Suppression en ligne échouée — vérifie ta connexion et réessaie');
+    return;
+  }
   delete db[key];
   renderPanelForCurrentSelection();
   try {
