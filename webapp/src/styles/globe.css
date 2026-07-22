@@ -85,6 +85,31 @@ html, body {
   background: rgba(201, 151, 31, 0.25);
 }
 
+/* Hidden by default; main.js reveals it only while edit mode is unlocked,
+   mirroring production's own display:none-until-editing button. */
+.undo-all-btn {
+  display: none;
+  position: fixed;
+  top: 16px;
+  right: 320px;
+  z-index: 15;
+  background: rgba(15, 23, 48, 0.9);
+  border: 1px solid rgba(224, 118, 106, 0.5);
+  border-radius: 6px;
+  color: #e0736a;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 8px 14px;
+}
+
+.undo-all-btn.visible {
+  display: block;
+}
+
+.undo-all-btn:hover {
+  background: rgba(224, 118, 106, 0.15);
+}
+
 .export-pdf-btn {
   position: fixed;
   top: 16px;
