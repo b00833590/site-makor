@@ -1,5 +1,3 @@
-import html2pdf from 'html2pdf.js';
-
 function sanitizeForFilename(value) {
   const withoutAccents = (value || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   return withoutAccents.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
@@ -13,8 +11,9 @@ export function buildPortfolioExportFilename(regionLabel, weekLabel) {
   return `Makor_Portefeuille_${sanitizeForFilename(regionLabel)}_${sanitizeForFilename(weekLabel)}.pdf`;
 }
 
-export async function exportElementAsPDF(element, filename, html2pdfFn = html2pdf) {
-  await html2pdfFn()
+export async function exportElementAsPDF(element, filename, html2pdfFn) {
+  const fn = html2pdfFn || (await import('html2pdf.js')).default;
+  await fn()
     .set({
       margin: 8,
       filename,

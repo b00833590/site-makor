@@ -2,6 +2,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { buildExportFilename, exportElementAsPDF, buildPortfolioExportFilename } from './pdfExport.js';
 
+vi.mock('html2pdf.js', () => ({ default: vi.fn() }));
+
 describe('buildExportFilename', () => {
   it('builds a filename from the region and week labels', () => {
     expect(buildExportFilename('Asie', 'Semaine 13-17 JUILLET')).toBe('Makor_Asie_Semaine_13_17_JUILLET.pdf');
@@ -68,5 +70,20 @@ describe('exportElementAsPDF', () => {
     const element = document.createElement('div');
 
     await expect(exportElementAsPDF(element, 'test.pdf', html2pdfFn)).rejects.toThrow('canvas render failed');
+  });
+
+  it('dynamically imports the real html2pdf.js module when no override function is given', async () => {
+    const html2pdfModule = await import('html2pdf.js');
+    const save = vi.fn().mockResolvedValue(undefined);
+    const from = vi.fn(() => ({ save }));
+    const set = vi.fn(() => ({ from }));
+    html2pdfModule.default.mockReturnValue({ set });
+
+    const element = document.createElement('div');
+    await exportElementAsPDF(element, 'test.pdf');
+
+    expect(html2pdfModule.default).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenCalledWith(expect.objectContaining({ filename: 'test.pdf' }));
+    expect(save).toHaveBeenCalledTimes(1);
   });
 });
