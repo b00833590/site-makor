@@ -584,20 +584,29 @@ const exportPortfolioPdfBtn = document.getElementById('export-portfolio-pdf-btn'
 
 exportPortfolioPdfBtn.addEventListener('click', async () => {
   const sidePanelEl = document.querySelector('.side-panel');
-  const portfolioSectionEl = document.getElementById('panel-portfolio-section');
   const portfolioRegion = getPortfolioRegion(db, activeRegionId);
   const activeWeek = getWeeks(db).find(w => w.id === activeWeekId);
   const filename = buildPortfolioExportFilename(portfolioRegion ? portfolioRegion.label : '', activeWeek ? activeWeek.label : '');
 
   exportPortfolioPdfBtn.disabled = true;
   exportPortfolioPdfBtn.textContent = '⏳';
-  sidePanelEl.classList.add('pdf-export');
+  // Captures the *whole* .side-panel (same element and code path already proven
+  // correct by the full-panel export) with every other section hidden via the
+  // pdf-export-portfolio-only class, rather than pointing html2canvas at the
+  // narrower #panel-portfolio-section element directly. Verified live that the
+  // narrower-target approach silently mis-crops: html2canvas computes its render
+  // window before the .side-panel reflow (position:fixed -> static) settles, so
+  // a target element positioned deep inside that reflowed ancestor gets captured
+  // at the wrong coordinates — the exported PDF showed only the header row, no
+  // data. Capturing the same root as the working full-panel export sidesteps
+  // that mismatch entirely.
+  sidePanelEl.classList.add('pdf-export', 'pdf-export-portfolio-only');
   try {
-    await exportElementAsPDF(portfolioSectionEl, filename);
+    await exportElementAsPDF(sidePanelEl, filename);
   } catch (error) {
     console.error('Portfolio PDF export failed', error);
   } finally {
-    sidePanelEl.classList.remove('pdf-export');
+    sidePanelEl.classList.remove('pdf-export', 'pdf-export-portfolio-only');
     exportPortfolioPdfBtn.disabled = false;
     exportPortfolioPdfBtn.textContent = '📄';
   }

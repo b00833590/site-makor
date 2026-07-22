@@ -158,3 +158,18 @@ html, body {
 .side-panel.pdf-export .portfolio-export-btn {
   display: none !important;
 }
+
+/* Applied together with .pdf-export only for the per-region portfolio-only
+   export — hides every other panel section so the (still whole-.side-panel)
+   capture shows just the portfolio region label + table. See main.js's
+   export-portfolio-pdf-btn handler for why the capture target is the whole
+   .side-panel rather than the narrower portfolio section element. */
+.side-panel.pdf-export-portfolio-only #panel-region-label,
+.side-panel.pdf-export-portfolio-only .panel-section-label,
+.side-panel.pdf-export-portfolio-only #panel-indices,
+.side-panel.pdf-export-portfolio-only #panel-news,
+.side-panel.pdf-export-portfolio-only #panel-companies,
+.side-panel.pdf-export-portfolio-only #panel-compare,
+.side-panel.pdf-export-portfolio-only #panel-ia-fintech {
+  display: none !important;
+}
