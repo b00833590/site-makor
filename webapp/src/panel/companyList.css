@@ -104,7 +104,8 @@
 .panel-company-name-input,
 .panel-company-sub-input,
 .panel-company-cap-input,
-.panel-company-stat-input {
+.panel-company-stat-input,
+.panel-company-stat-label-input {
   width: 100%;
   box-sizing: border-box;
   background: #0f1730;

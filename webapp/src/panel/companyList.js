@@ -16,7 +16,11 @@ function buildStatsGrid(item, isEditing, onEditItem) {
 
     const label = document.createElement('span');
     label.className = 'panel-company-stat-label';
-    label.textContent = item[labelField] || defaultLabel;
+    if (isEditing) {
+      label.appendChild(buildEditableInput(item[labelField] || defaultLabel, 'text', 'panel-company-stat-label-input', v => onEditItem(item, { [labelField]: v })));
+    } else {
+      label.textContent = item[labelField] || defaultLabel;
+    }
 
     const value = document.createElement('span');
     value.className = 'panel-company-stat-value';
