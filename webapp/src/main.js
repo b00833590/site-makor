@@ -60,6 +60,28 @@ function marketItemKey(item) {
   return `mkg:market:${activeWeekId}:${item.id}`;
 }
 
+function setItemLocal(key, value, rollbackMessage) {
+  const previous = db[key];
+  db[key] = value;
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, value).catch(() => {
+    if (previous === undefined) delete db[key]; else db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), rollbackMessage);
+  });
+}
+
+function deleteItemLocal(key, rollbackMessage) {
+  const previous = db[key];
+  delete db[key];
+  renderPanelForCurrentSelection();
+  client.deleteDocByKey(key).catch(() => {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), rollbackMessage);
+  });
+}
+
 function handleIndexEdit(item, patch) {
   const key = marketItemKey(item);
   const previous = db[key];
