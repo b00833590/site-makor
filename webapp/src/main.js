@@ -60,17 +60,31 @@ function marketItemKey(item) {
   return `mkg:market:${activeWeekId}:${item.id}`;
 }
 
-function handleIndexEdit(item, patch) {
-  const key = marketItemKey(item);
+function setItemLocal(key, value, rollbackMessage) {
   const previous = db[key];
-  const updated = { ...previous, ...patch };
-  db[key] = updated;
+  db[key] = value;
   renderPanelForCurrentSelection();
-  client.writeDoc(key, updated).catch(() => {
+  client.writeDoc(key, value).catch(() => {
+    if (previous === undefined) delete db[key]; else db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), rollbackMessage);
+  });
+}
+
+function deleteItemLocal(key, rollbackMessage) {
+  const previous = db[key];
+  delete db[key];
+  renderPanelForCurrentSelection();
+  client.deleteDocByKey(key).catch(() => {
     db[key] = previous;
     renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
+    showToast(document.getElementById('admin-toast'), rollbackMessage);
   });
+}
+
+function handleIndexEdit(item, patch) {
+  const key = marketItemKey(item);
+  setItemLocal(key, { ...db[key], ...patch }, '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
 }
 
 function handleIndexAdd() {
@@ -84,25 +98,11 @@ function handleIndexAdd() {
     value: '',
     weekChange: 0,
   };
-  db[key] = newItem;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, newItem).catch(() => {
-    delete db[key];
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — le nouvel indice a été retiré');
-  });
+  setItemLocal(key, newItem, '⚠️ Ajout en ligne échoué — le nouvel indice a été retiré');
 }
 
 function handleIndexDelete(item) {
-  const key = marketItemKey(item);
-  const previous = db[key];
-  delete db[key];
-  renderPanelForCurrentSelection();
-  client.deleteDocByKey(key).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — l'indice a été restauré");
-  });
+  deleteItemLocal(marketItemKey(item), "⚠️ Suppression en ligne échouée — l'indice a été restauré");
 }
 
 function handleIndexColorChange(item, field, color) {
@@ -117,15 +117,7 @@ function companyItemKey(item) {
 
 function handleCompanyEdit(item, patch) {
   const key = companyItemKey(item);
-  const previous = db[key];
-  const updated = { ...previous, ...patch };
-  db[key] = updated;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, updated).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
-  });
+  setItemLocal(key, { ...db[key], ...patch }, '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
 }
 
 function handleCompanyAdd() {
@@ -145,25 +137,11 @@ function handleCompanyAdd() {
     targetPrice: '',
     bullets: [],
   };
-  db[key] = newItem;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, newItem).catch(() => {
-    delete db[key];
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — la nouvelle entreprise a été retirée');
-  });
+  setItemLocal(key, newItem, '⚠️ Ajout en ligne échoué — la nouvelle entreprise a été retirée');
 }
 
 function handleCompanyDelete(item) {
-  const key = companyItemKey(item);
-  const previous = db[key];
-  delete db[key];
-  renderPanelForCurrentSelection();
-  client.deleteDocByKey(key).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — l'entreprise a été restaurée");
-  });
+  deleteItemLocal(companyItemKey(item), "⚠️ Suppression en ligne échouée — l'entreprise a été restaurée");
 }
 
 function handleCompanyBulletAdd(item) {
@@ -184,15 +162,7 @@ function portfolioItemKey(item) {
 
 function handlePortfolioEdit(item, patch) {
   const key = portfolioItemKey(item);
-  const previous = db[key];
-  const updated = { ...previous, ...patch };
-  db[key] = updated;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, updated).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
-  });
+  setItemLocal(key, { ...db[key], ...patch }, '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
 }
 
 function handlePortfolioAdd() {
@@ -208,25 +178,11 @@ function handlePortfolioAdd() {
     depuis: 0,
     ytd: 0,
   };
-  db[key] = newItem;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, newItem).catch(() => {
-    delete db[key];
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — la nouvelle ligne a été retirée');
-  });
+  setItemLocal(key, newItem, '⚠️ Ajout en ligne échoué — la nouvelle ligne a été retirée');
 }
 
 function handlePortfolioDelete(item) {
-  const key = portfolioItemKey(item);
-  const previous = db[key];
-  delete db[key];
-  renderPanelForCurrentSelection();
-  client.deleteDocByKey(key).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — la ligne a été restaurée");
-  });
+  deleteItemLocal(portfolioItemKey(item), "⚠️ Suppression en ligne échouée — la ligne a été restaurée");
 }
 
 function newsItemKey(item) {
@@ -235,15 +191,7 @@ function newsItemKey(item) {
 
 function handleNewsEdit(item, patch) {
   const key = newsItemKey(item);
-  const previous = db[key];
-  const updated = { ...previous, ...patch };
-  db[key] = updated;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, updated).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
-  });
+  setItemLocal(key, { ...db[key], ...patch }, '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
 }
 
 function handleNewsAdd() {
@@ -255,25 +203,11 @@ function handleNewsAdd() {
     title: 'Nouvelle brève',
     description: 'Description à compléter.',
   };
-  db[key] = newItem;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, newItem).catch(() => {
-    delete db[key];
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — la nouvelle brève a été retirée');
-  });
+  setItemLocal(key, newItem, '⚠️ Ajout en ligne échoué — la nouvelle brève a été retirée');
 }
 
 function handleNewsDelete(item) {
-  const key = newsItemKey(item);
-  const previous = db[key];
-  delete db[key];
-  renderPanelForCurrentSelection();
-  client.deleteDocByKey(key).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — la brève a été restaurée");
-  });
+  deleteItemLocal(newsItemKey(item), "⚠️ Suppression en ligne échouée — la brève a été restaurée");
 }
 
 function iaFintechItemKey(item) {
@@ -282,15 +216,7 @@ function iaFintechItemKey(item) {
 
 function handleIaFintechEdit(item, patch) {
   const key = iaFintechItemKey(item);
-  const previous = db[key];
-  const updated = { ...previous, ...patch };
-  db[key] = updated;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, updated).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
-  });
+  setItemLocal(key, { ...db[key], ...patch }, '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
 }
 
 function handleIaFintechAdd() {
@@ -305,25 +231,11 @@ function handleIaFintechAdd() {
     statValue: '',
     link: '',
   };
-  db[key] = newItem;
-  renderPanelForCurrentSelection();
-  client.writeDoc(key, newItem).catch(() => {
-    delete db[key];
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), '⚠️ Ajout en ligne échoué — le nouvel élément a été retiré');
-  });
+  setItemLocal(key, newItem, '⚠️ Ajout en ligne échoué — le nouvel élément a été retiré');
 }
 
 function handleIaFintechDelete(item) {
-  const key = iaFintechItemKey(item);
-  const previous = db[key];
-  delete db[key];
-  renderPanelForCurrentSelection();
-  client.deleteDocByKey(key).catch(() => {
-    db[key] = previous;
-    renderPanelForCurrentSelection();
-    showToast(document.getElementById('admin-toast'), "⚠️ Suppression en ligne échouée — l'élément a été restauré");
-  });
+  deleteItemLocal(iaFintechItemKey(item), "⚠️ Suppression en ligne échouée — l'élément a été restauré");
 }
 
 function weekItemKey(week) {
