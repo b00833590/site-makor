@@ -126,8 +126,19 @@ html, body {
 .side-panel.pdf-export .panel-index-name,
 .side-panel.pdf-export .panel-company-name,
 .side-panel.pdf-export .panel-news-block h3,
-.side-panel.pdf-export .panel-iafintech-card h3 {
+.side-panel.pdf-export .panel-iafintech-card h3,
+.side-panel.pdf-export .portfolio-region-label {
   color: #0f1730;
+}
+
+/* .portfolio-table th/td have an unconditional color:#fff (and a near-white
+   border) for the normal dark theme — without this override, both this
+   feature's portfolio-only export and the pre-existing full-panel export
+   render every row of actual portfolio data as white-on-white, invisible. */
+.side-panel.pdf-export .portfolio-table th,
+.side-panel.pdf-export .portfolio-table td {
+  color: #0f1730;
+  border-bottom-color: rgba(15, 23, 48, 0.15);
 }
 
 .side-panel.pdf-export .panel-index-delete,
@@ -143,6 +154,22 @@ html, body {
 .side-panel.pdf-export .panel-iafintech-delete,
 .side-panel.pdf-export .panel-iafintech-add,
 .side-panel.pdf-export .panel-compare-toggle,
-.side-panel.pdf-export .panel-chart-toggle {
+.side-panel.pdf-export .panel-chart-toggle,
+.side-panel.pdf-export .portfolio-export-btn {
+  display: none !important;
+}
+
+/* Applied together with .pdf-export only for the per-region portfolio-only
+   export — hides every other panel section so the (still whole-.side-panel)
+   capture shows just the portfolio region label + table. See main.js's
+   export-portfolio-pdf-btn handler for why the capture target is the whole
+   .side-panel rather than the narrower portfolio section element. */
+.side-panel.pdf-export-portfolio-only #panel-region-label,
+.side-panel.pdf-export-portfolio-only .panel-section-label,
+.side-panel.pdf-export-portfolio-only #panel-indices,
+.side-panel.pdf-export-portfolio-only #panel-news,
+.side-panel.pdf-export-portfolio-only #panel-companies,
+.side-panel.pdf-export-portfolio-only #panel-compare,
+.side-panel.pdf-export-portfolio-only #panel-ia-fintech {
   display: none !important;
 }
