@@ -85,6 +85,17 @@
   padding: 2px 4px;
 }
 
+/* Overrides the shared color:#fff above so a custom color set on the parent
+   .panel-index-value span (via the color picker) is visible while editing
+   too, not just in the read-only view — an explicit color on this input
+   would otherwise always win over the parent's inline style regardless of
+   specificity, since inline styles don't cascade onto child elements that
+   have their own explicit color. Resolves to the same white by default
+   (inherited from .side-panel's own color:#fff) when no custom color is set. */
+.panel-index-value-input {
+  color: inherit;
+}
+
 .panel-index-delete {
   background: transparent;
   border: none;

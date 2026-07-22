@@ -3,6 +3,7 @@ import { toggleCompanySelection } from './compareSelection.js';
 import { sortPortfolioEntries, nextSort } from './portfolioSort.js';
 import { renderPortfolioTable } from './portfolioTable.js';
 import { buildEditableInput } from '../admin/editableInput.js';
+import { buildColorDot } from '../admin/colorPicker.js';
 
 // Only http(s) links are ever rendered as a clickable anchor — admin-entered
 // text is otherwise trusted, but an editor could paste a javascript: URI
@@ -11,7 +12,7 @@ function isSafeHttpUrl(value) {
   return typeof value === 'string' && /^https?:\/\//i.test(value);
 }
 
-function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, onAddItem }) {
+function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, onAddItem, onColorChange }) {
   container.replaceChildren();
   for (const item of items) {
     const row = document.createElement('div');
@@ -23,8 +24,11 @@ function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, 
 
     const value = document.createElement('span');
     value.className = 'panel-index-value';
+    const valueColor = item.colors && item.colors.value;
+    if (valueColor) value.style.color = valueColor;
     if (isEditing) {
       value.appendChild(buildEditableInput(item.value, 'text', 'panel-index-value-input', v => onEditItem(item, { value: v })));
+      value.appendChild(buildColorDot(valueColor, color => onColorChange(item, 'value', color)));
     } else {
       value.textContent = item.value ?? '';
     }
@@ -201,7 +205,7 @@ function renderIaFintech(container, items, isEditing, { onEditItem, onAddItem, o
 
 export function initSidePanel({
   labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
-  onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete,
+  onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete, onIndexColorChange,
   onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete,
   onPortfolioEdit, onPortfolioAdd, onPortfolioDelete,
   onNewsEdit, onNewsAdd, onNewsDelete,
@@ -254,7 +258,7 @@ export function initSidePanel({
 
   function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [], iaFintechItems = [], isEditing = false }) {
     labelEl.textContent = regionLabel;
-    renderIndices(indicesEl, marketItems, isEditing, { onEditItem: onIndexEdit, onDeleteItem: onIndexDelete, onAddItem: onIndexAdd });
+    renderIndices(indicesEl, marketItems, isEditing, { onEditItem: onIndexEdit, onDeleteItem: onIndexDelete, onAddItem: onIndexAdd, onColorChange: onIndexColorChange });
     renderNews(newsEl, newsItems, isEditing, { onEditItem: onNewsEdit, onAddItem: onNewsAdd, onDeleteItem: onNewsDelete });
     currentCompanyItems = companyItems;
     currentIsEditing = isEditing;

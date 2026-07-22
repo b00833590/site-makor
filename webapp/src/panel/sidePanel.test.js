@@ -249,6 +249,44 @@ describe('initSidePanel', () => {
       expect(onIndexEdit).toHaveBeenCalledWith(ITEM, { weekChange: 2.5 });
     });
 
+    it('applies a custom color to the value span, in both read-only and editing modes, when the item has one', () => {
+      const coloredItem = { ...ITEM, colors: { value: '#e74c3c' } };
+      panel.showRegion('Europe', { marketItems: [coloredItem], newsItems: [] });
+      expect(indicesEl.querySelector('.panel-index-value').style.color).toBe('rgb(231, 76, 60)');
+
+      panel.showRegion('Europe', { marketItems: [coloredItem], newsItems: [], isEditing: true });
+      expect(indicesEl.querySelector('.panel-index-value').style.color).toBe('rgb(231, 76, 60)');
+    });
+
+    it('renders no custom color on the value span when the item has none', () => {
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [] });
+      expect(indicesEl.querySelector('.panel-index-value').style.color).toBe('');
+    });
+
+    it('renders a color dot next to the value input in edit mode', () => {
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+      expect(indicesEl.querySelector('.panel-index-value .color-dot')).not.toBeNull();
+    });
+
+    it('does not render a color dot when not editing', () => {
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [] });
+      expect(indicesEl.querySelector('.color-dot')).toBeNull();
+    });
+
+    it('calls onColorChange with the item, "value", and the picked color when a swatch is chosen', () => {
+      const onColorChange = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {}, onIndexColorChange: onColorChange,
+      });
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+
+      indicesEl.querySelector('.color-dot').click();
+      document.getElementById('active-color-popup').querySelector('.color-swatch').click();
+
+      expect(onColorChange).toHaveBeenCalledWith(ITEM, 'value', expect.any(String));
+    });
+
     it('renders a delete button per row in edit mode that calls onIndexDelete with the item', () => {
       const onIndexDelete = vi.fn();
       panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete });
