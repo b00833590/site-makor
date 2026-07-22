@@ -98,13 +98,14 @@ describe('editable company fields', () => {
     renderCompanies(container, [COMPANY], [], { onToggle: () => {}, onOpenChart: () => {} });
     expect(container.querySelector('input')).toBeNull();
     expect(container.querySelector('.panel-company-name').textContent).toBe('Reliance Industries');
+    expect(container.querySelector('.panel-company-stat-label').textContent).toBe('Croissance CA');
   });
 
-  it('renders name, symbol, flag, country, market cap, and the 4 stat values as inputs when isEditing is true', () => {
+  it('renders name, symbol, flag, country, market cap, and the 4 stat labels + values as inputs when isEditing is true', () => {
     const container = document.createElement('div');
     renderCompanies(container, [COMPANY], [], EDIT_OPTS);
     const inputs = container.querySelectorAll('input');
-    expect(inputs).toHaveLength(9); // name + symbol + flag + country + marketCap + 4 stat values
+    expect(inputs).toHaveLength(13); // name + symbol + flag + country + marketCap + 4 stat labels + 4 stat values
   });
 
   it('calls onEditItem with a name patch when the name input changes', () => {
@@ -127,6 +128,33 @@ describe('editable company fields', () => {
       input.value = `new-${i}`;
       input.dispatchEvent(new Event('change'));
       expect(onEditItem).toHaveBeenNthCalledWith(i + 1, COMPANY, { [expectedFields[i]]: `new-${i}` });
+    });
+  });
+
+  it('pre-fills each stat label input with the default label when the company has no custom label set', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], EDIT_OPTS);
+    const labelInputs = [...container.querySelectorAll('.panel-company-stat-label-input')].map(el => el.value);
+    expect(labelInputs).toEqual(['Croissance CA', 'EV/EBITDA', 'Cours actuel', 'Objectif']);
+  });
+
+  it('pre-fills a stat label input with the custom label when the company has one set', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [{ ...COMPANY, salesGrowthLabel: 'Sales growth (fwd)' }], [], EDIT_OPTS);
+    const labelInputs = container.querySelectorAll('.panel-company-stat-label-input');
+    expect(labelInputs[0].value).toBe('Sales growth (fwd)');
+  });
+
+  it('calls onEditItem with the correct field patch for each of the 4 stat label inputs', () => {
+    const onEditItem = vi.fn();
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY], [], { ...EDIT_OPTS, onEditItem });
+    const labelInputs = container.querySelectorAll('.panel-company-stat-label-input');
+    const expectedFields = ['salesGrowthLabel', 'evEbitdaLabel', 'coursActuelLabel', 'targetPriceLabel'];
+    labelInputs.forEach((input, i) => {
+      input.value = `Custom label ${i}`;
+      input.dispatchEvent(new Event('change'));
+      expect(onEditItem).toHaveBeenNthCalledWith(i + 1, COMPANY, { [expectedFields[i]]: `Custom label ${i}` });
     });
   });
 
