@@ -26,7 +26,7 @@ import { initPasswordModal } from './admin/passwordModal.js';
 import { showToast } from './admin/toast.js';
 import { generateId } from './admin/uid.js';
 import { ADMIN_PASSWORD } from './admin/config.js';
-import { computeSessionRestore } from './admin/sessionUndo.js';
+import { computeSessionRestore, splitUnrestorablePresentationDeletes } from './admin/sessionUndo.js';
 
 const GROUP_LABEL_BY_REGION = {
   asia: 'ASIE',
@@ -558,14 +558,28 @@ editToggleBtn.addEventListener('click', () => {
 function handleUndoAll() {
   if (!sessionSnapshot) return;
 
-  const { writes, deletes } = computeSessionRestore(sessionSnapshot, db);
+  const { writes: rawWrites, deletes } = computeSessionRestore(sessionSnapshot, db);
+  // A deleted presentation's PDF chunks are gone forever (handlePresentationDelete
+  // removes them atomically with the metadata doc, and they're never tracked in
+  // db to begin with) — restoring just the metadata doc would resurrect a card
+  // that looks fine but can never open. Exclude those, tell the admin plainly.
+  const { safeWrites: writes, unrestorablePresentationTitles } = splitUnrestorablePresentationDeletes(rawWrites, db);
+
   if (writes.length === 0 && deletes.length === 0) {
-    showToast(document.getElementById('admin-toast'), 'Rien à annuler');
+    if (unrestorablePresentationTitles.length > 0) {
+      showToast(document.getElementById('admin-toast'), `⚠️ Rien à restaurer — ${unrestorablePresentationTitles.join(', ')} ne peuvent pas être récupérées (PDF définitivement supprimé)`);
+    } else {
+      showToast(document.getElementById('admin-toast'), 'Rien à annuler');
+    }
     return;
   }
 
   const total = writes.length + deletes.length;
-  if (!window.confirm(`Annuler toutes les modifications faites depuis le début de cette session d'édition ? ${total} élément(s) seront restaurés à leur état initial.`)) return;
+  let confirmMessage = `Annuler toutes les modifications faites depuis le début de cette session d'édition ? ${total} élément(s) seront restaurés à leur état initial.`;
+  if (unrestorablePresentationTitles.length > 0) {
+    confirmMessage += `\n\n⚠️ ${unrestorablePresentationTitles.join(', ')} ne peuvent pas être restaurées (PDF définitivement supprimé) et resteront supprimées.`;
+  }
+  if (!window.confirm(confirmMessage)) return;
 
   // Capture only the keys this undo actually touches, so a failed commit
   // restores exactly those and nothing else. Deliberately NOT a full copy of
@@ -589,6 +603,11 @@ function handleUndoAll() {
   if (!restoredWeeks.some(w => w.id === activeWeekId)) {
     activeWeekId = restoredWeeks.length ? restoredWeeks[restoredWeeks.length - 1].id : null;
   }
+  // Recorded so the failure path below can tell "the admin hasn't navigated
+  // since this optimistic restore" apart from "they have" — same guard
+  // handleWeekAdd/handleWeekDelete already use, so a failed commit doesn't
+  // silently snap the admin back to a week they've since moved on from.
+  const activeWeekIdAfterRestore = activeWeekId;
   if (weekTimelineHandle) weekTimelineHandle.setWeeks(restoredWeeks, activeWeekId);
   renderPanelForCurrentSelection();
 
@@ -604,7 +623,7 @@ function handleUndoAll() {
     for (const key of touchedKeys) {
       if (beforeUndo[key] === undefined) delete db[key]; else db[key] = beforeUndo[key];
     }
-    activeWeekId = previousActiveWeekId;
+    if (activeWeekId === activeWeekIdAfterRestore) activeWeekId = previousActiveWeekId;
     if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
     renderPanelForCurrentSelection();
     showToast(document.getElementById('admin-toast'), '⚠️ Annulation en ligne échouée — vos modifications ont été conservées');

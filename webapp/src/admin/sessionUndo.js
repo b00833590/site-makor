@@ -25,3 +25,33 @@ export function computeSessionRestore(snapshot, current) {
 
   return { writes, deletes };
 }
+
+const PRESENTATION_KEY_PREFIX = 'mkg:presentation:';
+
+// A "write" in computeSessionRestore's output covers two different cases:
+// putting an *edited* document's fields back (safe for any content type), and
+// re-creating a document that was *deleted* during the session (current[key]
+// is undefined — a genuine resurrection). For presentations specifically,
+// resurrection is unsafe: handlePresentationDelete always removes the PDF's
+// chunk documents in the same batch as the metadata doc, and those chunks are
+// never part of db/sessionSnapshot to begin with (they're fetched from
+// Firestore on demand, never bulk-loaded — see presentationPdf.js). Writing
+// the metadata doc back would resurrect a card that renders and looks
+// restored, but can never open — a permanently broken phantom entry, not a
+// real undo. This finds those specific writes so the caller can exclude them
+// and tell the admin plainly, instead of silently promising a restore that
+// doesn't work.
+export function splitUnrestorablePresentationDeletes(writes, current) {
+  const safeWrites = [];
+  const unrestorablePresentationTitles = [];
+  for (const entry of writes) {
+    const [key, value] = entry;
+    const isResurrection = current[key] === undefined;
+    if (isResurrection && key.startsWith(PRESENTATION_KEY_PREFIX)) {
+      unrestorablePresentationTitles.push(value.title || 'Sans titre');
+    } else {
+      safeWrites.push(entry);
+    }
+  }
+  return { safeWrites, unrestorablePresentationTitles };
+}

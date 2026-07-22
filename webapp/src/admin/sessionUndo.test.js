@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeSessionRestore } from './sessionUndo.js';
+import { computeSessionRestore, splitUnrestorablePresentationDeletes } from './sessionUndo.js';
 
 describe('computeSessionRestore', () => {
   it('returns nothing to do when nothing changed', () => {
@@ -75,5 +75,54 @@ describe('computeSessionRestore', () => {
     const result = computeSessionRestore(snapshot, current);
     result.writes[0][1].value = 'muté';
     expect(snapshot.a.value).toBe('original');
+  });
+});
+
+describe('splitUnrestorablePresentationDeletes', () => {
+  it('excludes a deleted presentation from safeWrites and reports its title', () => {
+    const writes = [['mkg:presentation:p1', { id: 'p1', title: 'Deck A' }]];
+    const current = {}; // deleted during the session — key absent from current
+    const result = splitUnrestorablePresentationDeletes(writes, current);
+    expect(result.safeWrites).toEqual([]);
+    expect(result.unrestorablePresentationTitles).toEqual(['Deck A']);
+  });
+
+  it('falls back to "Sans titre" when the deleted presentation had no title', () => {
+    const writes = [['mkg:presentation:p1', { id: 'p1' }]];
+    const result = splitUnrestorablePresentationDeletes(writes, {});
+    expect(result.unrestorablePresentationTitles).toEqual(['Sans titre']);
+  });
+
+  it('keeps an edited (still-existing) presentation in safeWrites — only deletions are unrestorable', () => {
+    const writes = [['mkg:presentation:p1', { id: 'p1', title: 'Titre original' }]];
+    const current = { 'mkg:presentation:p1': { id: 'p1', title: 'Titre modifié' } };
+    const result = splitUnrestorablePresentationDeletes(writes, current);
+    expect(result.safeWrites).toEqual(writes);
+    expect(result.unrestorablePresentationTitles).toEqual([]);
+  });
+
+  it('leaves every non-presentation write untouched, deleted or not', () => {
+    const writes = [
+      ['mkg:market:w1:i1', { id: 'i1', value: '100' }],
+      ['mkg:content:entreprises:w1:c1', { id: 'c1', name: 'Reliance' }],
+    ];
+    const result = splitUnrestorablePresentationDeletes(writes, {});
+    expect(result.safeWrites).toEqual(writes);
+    expect(result.unrestorablePresentationTitles).toEqual([]);
+  });
+
+  it('handles a mix of a restorable presentation edit, an unrestorable presentation delete, and an unrelated write in one call', () => {
+    const writes = [
+      ['mkg:presentation:edited', { id: 'edited', title: 'Toujours là' }],
+      ['mkg:presentation:deleted', { id: 'deleted', title: 'Disparu' }],
+      ['mkg:market:w1:i1', { id: 'i1', value: '100' }],
+    ];
+    const current = { 'mkg:presentation:edited': { id: 'edited', title: 'Modifié' }, 'mkg:market:w1:i1': { id: 'i1', value: '999' } };
+    const result = splitUnrestorablePresentationDeletes(writes, current);
+    expect(result.safeWrites).toEqual([
+      ['mkg:presentation:edited', { id: 'edited', title: 'Toujours là' }],
+      ['mkg:market:w1:i1', { id: 'i1', value: '100' }],
+    ]);
+    expect(result.unrestorablePresentationTitles).toEqual(['Disparu']);
   });
 });
