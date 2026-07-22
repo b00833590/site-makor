@@ -26,6 +26,7 @@ import { initPasswordModal } from './admin/passwordModal.js';
 import { showToast } from './admin/toast.js';
 import { generateId } from './admin/uid.js';
 import { ADMIN_PASSWORD } from './admin/config.js';
+import { computeSessionRestore } from './admin/sessionUndo.js';
 
 const GROUP_LABEL_BY_REGION = {
   asia: 'ASIE',
@@ -57,6 +58,9 @@ let activeRegionId = 'asia';
 let liveRefreshHandle = null;
 let isEditing = false;
 let weekTimelineHandle = null;
+// Deep copy of db taken when edit mode is unlocked, so "Tout annuler" can
+// restore the session's starting point. null whenever edit mode is off.
+let sessionSnapshot = null;
 
 function marketItemKey(item) {
   return `mkg:market:${activeWeekId}:${item.id}`;
@@ -519,6 +523,7 @@ prevBtn.addEventListener('click', () => scene.goToPrevRegion());
 nextBtn.addEventListener('click', () => scene.goToNextRegion());
 
 const editToggleBtn = document.getElementById('edit-toggle-btn');
+const undoAllBtn = document.getElementById('undo-all-btn');
 
 const passwordModal = initPasswordModal({
   modalEl: document.getElementById('password-modal'),
@@ -529,8 +534,10 @@ const passwordModal = initPasswordModal({
   expectedPassword: ADMIN_PASSWORD,
   onUnlock: () => {
     isEditing = true;
+    sessionSnapshot = JSON.parse(JSON.stringify(db));
     editToggleBtn.textContent = '🔒 Terminer';
     editToggleBtn.classList.add('active');
+    undoAllBtn.classList.add('visible');
     renderPanelForCurrentSelection();
   },
 });
@@ -538,13 +545,73 @@ const passwordModal = initPasswordModal({
 editToggleBtn.addEventListener('click', () => {
   if (isEditing) {
     isEditing = false;
+    sessionSnapshot = null;
     editToggleBtn.textContent = '✏️ Éditer';
     editToggleBtn.classList.remove('active');
+    undoAllBtn.classList.remove('visible');
     renderPanelForCurrentSelection();
   } else {
     passwordModal.open();
   }
 });
+
+function handleUndoAll() {
+  if (!sessionSnapshot) return;
+
+  const { writes, deletes } = computeSessionRestore(sessionSnapshot, db);
+  if (writes.length === 0 && deletes.length === 0) {
+    showToast(document.getElementById('admin-toast'), 'Rien à annuler');
+    return;
+  }
+
+  const total = writes.length + deletes.length;
+  if (!window.confirm(`Annuler toutes les modifications faites depuis le début de cette session d'édition ? ${total} élément(s) seront restaurés à leur état initial.`)) return;
+
+  // Capture only the keys this undo actually touches, so a failed commit
+  // restores exactly those and nothing else. Deliberately NOT a full copy of
+  // db: the batch commit is async (and retries for up to ~1.8s), so an admin
+  // can legitimately edit another section while it is in flight — wholesale
+  // restoring db would silently wipe that concurrent, unrelated work.
+  // Capturing references is safe here because no handler in this file ever
+  // mutates a db value in place; they all build a new object and reassign.
+  const touchedKeys = [...writes.map(([key]) => key), ...deletes];
+  const beforeUndo = {};
+  for (const key of touchedKeys) beforeUndo[key] = db[key];
+  const previousActiveWeekId = activeWeekId;
+
+  for (const [key, value] of writes) db[key] = value;
+  for (const key of deletes) delete db[key];
+
+  // A week created during this session is now gone; don't leave the app
+  // pointing at a week that no longer exists. Same fallback handleWeekDelete
+  // uses: land on the last remaining week, or nothing if there are none.
+  const restoredWeeks = getWeeks(db);
+  if (!restoredWeeks.some(w => w.id === activeWeekId)) {
+    activeWeekId = restoredWeeks.length ? restoredWeeks[restoredWeeks.length - 1].id : null;
+  }
+  if (weekTimelineHandle) weekTimelineHandle.setWeeks(restoredWeeks, activeWeekId);
+  renderPanelForCurrentSelection();
+
+  client.applyBatch({ writes, deletes }).then(() => {
+    // sessionSnapshot is deliberately left untouched. db now matches it for
+    // every key this restore covered, so a second click already computes an
+    // empty diff — and keeping the original snapshot means any edit made
+    // concurrently during the commit stays undoable, which re-snapshotting
+    // from db would silently forfeit. (Production re-snapshots here; that is
+    // equivalent only when nothing changed mid-flight.)
+    showToast(document.getElementById('admin-toast'), '↺ Modifications de la session annulées');
+  }).catch(() => {
+    for (const key of touchedKeys) {
+      if (beforeUndo[key] === undefined) delete db[key]; else db[key] = beforeUndo[key];
+    }
+    activeWeekId = previousActiveWeekId;
+    if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Annulation en ligne échouée — vos modifications ont été conservées');
+  });
+}
+
+undoAllBtn.addEventListener('click', handleUndoAll);
 
 const exportPdfBtn = document.getElementById('export-pdf-btn');
 
