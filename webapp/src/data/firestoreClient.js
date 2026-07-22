@@ -87,6 +87,32 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     });
   }
 
+  // Single all-or-nothing commit combining sets and deletes. Used by the
+  // session-undo restore, where a partially-applied restore would leave the
+  // admin in a state that is neither "before" nor "after" — worse than
+  // failing outright. Routes each key to its own collection, so a restore
+  // spanning mkg_data and mkg_pdfchunks stays atomic across both.
+  //
+  // Firestore caps a batch at 500 operations; a session touching more than
+  // 500 documents will reject rather than half-apply. Deliberately not
+  // chunked — see the plan's Global Constraints.
+  async function applyBatch({ writes, deletes }) {
+    if (writes.length === 0 && deletes.length === 0) return;
+    await writeWithRetry(async () => {
+      const batch = writeBatch(db);
+      for (const [key, value] of writes) {
+        batch.set(doc(db, collectionForKey(key), key), {
+          value: JSON.stringify(value),
+          updatedAt: serverTimestamp(),
+        });
+      }
+      for (const key of deletes) {
+        batch.delete(doc(db, collectionForKey(key), key));
+      }
+      await batch.commit();
+    });
+  }
+
   async function fetchKeysWithPrefix(prefix) {
     const coll = collectionForKey(prefix);
     const q = query(
@@ -103,7 +129,7 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     return snap.exists() ? snap.data().value : null;
   }
 
-  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch, writeDocsBatch, fetchKeysWithPrefix, fetchRawValue };
+  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch, writeDocsBatch, fetchKeysWithPrefix, fetchRawValue, applyBatch };
 }
 
 export async function loadAllWithRetry(loadOnceFn, delayMs = EMPTY_RETRY_DELAY_MS) {
