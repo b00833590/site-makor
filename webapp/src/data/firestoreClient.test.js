@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { loadAllWithRetry, writeWithRetry } from './firestoreClient.js';
+import { loadAllWithRetry, writeWithRetry, collectionForKey } from './firestoreClient.js';
 
 describe('loadAllWithRetry', () => {
   it('returns the first result immediately when it is non-empty', async () => {
@@ -31,6 +31,18 @@ describe('loadAllWithRetry', () => {
     const result = await loadAllWithRetry(loadOnce, 0);
     expect(result).toEqual({});
     expect(loadOnce).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('collectionForKey', () => {
+  it('routes pdfchunk keys to the mkg_pdfchunks collection', () => {
+    expect(collectionForKey('mkg:pdfchunk:abc123:0')).toBe('mkg_pdfchunks');
+  });
+
+  it('routes every other key to the main mkg_data collection', () => {
+    expect(collectionForKey('mkg:presentation:abc123')).toBe('mkg_data');
+    expect(collectionForKey('mkg:week:w1')).toBe('mkg_data');
+    expect(collectionForKey('mkg:market:w1:idx1')).toBe('mkg_data');
   });
 });
 
