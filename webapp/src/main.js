@@ -8,15 +8,17 @@ import './timeline/weekAdmin.css';
 import './admin/passwordModal.css';
 import './admin/toast.css';
 import './admin/colorPicker.css';
+import './panel/presentations.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek } from './data/selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getPresentations } from './data/selectors.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
 import { buildExportFilename, exportElementAsPDF, buildPortfolioExportFilename } from './panel/pdfExport.js';
+import { openPresentationPdf } from './panel/presentationPdf.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
 import { renderWeekAdmin } from './timeline/weekAdmin.js';
 import { startPortfolioLiveRefresh } from './panel/portfolioLiveRefresh.js';
@@ -326,6 +328,58 @@ function handleIaFintechDelete(item) {
   });
 }
 
+async function handlePresentationOpen(item) {
+  showToast(document.getElementById('admin-toast'), 'Chargement de la présentation...');
+  const result = await openPresentationPdf(item.id, client, (done, total) => {
+    if (done % 5 === 0 || done === total) {
+      showToast(document.getElementById('admin-toast'), `Chargement de la présentation... (${done}/${total})`);
+    }
+  });
+  if (!result.ok) {
+    const messages = {
+      'not-ready': "⚠️ Cette présentation n'est pas encore complètement intégrée — réessaie dans une minute",
+      'chunk-failed': '⚠️ Échec du chargement — vérifie ta connexion et réessaie',
+      'reassembly-failed': "⚠️ Erreur lors de l'ouverture du PDF",
+    };
+    showToast(document.getElementById('admin-toast'), messages[result.reason] || "⚠️ Erreur lors de l'ouverture du PDF");
+    return;
+  }
+  window.open(result.url, '_blank', 'noopener');
+}
+
+function handlePresentationTitleEdit(item, title) {
+  const key = `mkg:presentation:${item.id}`;
+  const previous = db[key];
+  const updated = { ...previous, title };
+  db[key] = updated;
+  renderPanelForCurrentSelection();
+  client.writeDoc(key, updated).catch(() => {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
+  });
+}
+
+async function handlePresentationDelete(item) {
+  if (!window.confirm(`Supprimer la présentation "${item.title || 'Sans titre'}" et son PDF ? Cette action ne peut pas être annulée.`)) return;
+  const key = `mkg:presentation:${item.id}`;
+  const previous = db[key];
+  const chunkKeys = await client.fetchKeysWithPrefix(`mkg:pdfchunk:${item.id}:`);
+  delete db[key];
+  renderPanelForCurrentSelection();
+  try {
+    await client.deleteDocsBatch([...chunkKeys, key]);
+  } catch {
+    db[key] = previous;
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), '⚠️ Suppression en ligne échouée — la présentation a été restaurée');
+  }
+}
+
+function handlePresentationAddClick() {
+  showToast(document.getElementById('admin-toast'), "Pour ajouter une présentation, transmets le PDF à la personne qui administre le site — la vignette et l'intégration se font manuellement.");
+}
+
 function weekItemKey(week) {
   return `mkg:week:${week.id}`;
 }
@@ -453,6 +507,7 @@ const panel = initSidePanel({
   portfolioLabelEl: document.getElementById('panel-portfolio-region-label'),
   portfolioEl: document.getElementById('panel-portfolio'),
   iaFintechEl: document.getElementById('panel-ia-fintech'),
+  presentationsEl: document.getElementById('panel-presentations'),
   onOpenChart: item => chartModal.open(item, currentPortfolioEntriesForChart),
   onIndexEdit: handleIndexEdit,
   onIndexAdd: handleIndexAdd,
@@ -473,6 +528,10 @@ const panel = initSidePanel({
   onIaFintechEdit: handleIaFintechEdit,
   onIaFintechAdd: handleIaFintechAdd,
   onIaFintechDelete: handleIaFintechDelete,
+  onPresentationOpen: handlePresentationOpen,
+  onPresentationDelete: handlePresentationDelete,
+  onPresentationTitleEdit: handlePresentationTitleEdit,
+  onPresentationAddClick: handlePresentationAddClick,
 });
 
 function updateIndicator(regionId) {
@@ -513,6 +572,7 @@ function renderPanelForCurrentSelection() {
     portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
     portfolioEntries,
     iaFintechItems: getIaFintechItemsForWeek(db, activeWeekId),
+    presentations: getPresentations(db),
     isEditing,
   });
 
