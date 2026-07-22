@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp, writeBatch, query, where, documentId } from 'firebase/firestore';
 
 const DEFAULT_CONFIG = {
   apiKey: 'AIzaSyDSq-wkq28uEsU3CO5WT6aW0CQgU1SW7bk',
@@ -12,9 +12,15 @@ const DEFAULT_CONFIG = {
 };
 
 const MAIN_COLLECTION = 'mkg_data';
+const PDF_PREFIX = 'mkg:pdfchunk:';
+const PDF_COLLECTION = 'mkg_pdfchunks';
 const EMPTY_RETRY_DELAY_MS = 1200;
 const WRITE_RETRY_COUNT = 2;
 const WRITE_RETRY_DELAY_MS = 900;
+
+export function collectionForKey(key) {
+  return key.startsWith(PDF_PREFIX) ? PDF_COLLECTION : MAIN_COLLECTION;
+}
 
 export async function writeWithRetry(writeFn, retries = WRITE_RETRY_COUNT, delayMs = WRITE_RETRY_DELAY_MS) {
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -46,14 +52,14 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
   }
 
   async function writeDoc(key, value) {
-    await writeWithRetry(() => setDoc(doc(db, MAIN_COLLECTION, key), {
+    await writeWithRetry(() => setDoc(doc(db, collectionForKey(key), key), {
       value: JSON.stringify(value),
       updatedAt: serverTimestamp(),
     }));
   }
 
   async function deleteDocByKey(key) {
-    await writeWithRetry(() => deleteDoc(doc(db, MAIN_COLLECTION, key)));
+    await writeWithRetry(() => deleteDoc(doc(db, collectionForKey(key), key)));
   }
 
   async function deleteDocsBatch(keys) {
@@ -61,7 +67,7 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     await writeWithRetry(async () => {
       const batch = writeBatch(db);
       for (const key of keys) {
-        batch.delete(doc(db, MAIN_COLLECTION, key));
+        batch.delete(doc(db, collectionForKey(key), key));
       }
       await batch.commit();
     });
@@ -72,7 +78,7 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     await writeWithRetry(async () => {
       const batch = writeBatch(db);
       for (const [key, value] of entries) {
-        batch.set(doc(db, MAIN_COLLECTION, key), {
+        batch.set(doc(db, collectionForKey(key), key), {
           value: JSON.stringify(value),
           updatedAt: serverTimestamp(),
         });
@@ -81,7 +87,23 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     });
   }
 
-  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch, writeDocsBatch };
+  async function fetchKeysWithPrefix(prefix) {
+    const coll = collectionForKey(prefix);
+    const q = query(
+      collection(db, coll),
+      where(documentId(), '>=', prefix),
+      where(documentId(), '<', prefix + ''),
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => d.id);
+  }
+
+  async function fetchRawValue(key) {
+    const snap = await getDoc(doc(db, collectionForKey(key), key));
+    return snap.exists() ? snap.data().value : null;
+  }
+
+  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch, writeDocsBatch, fetchKeysWithPrefix, fetchRawValue };
 }
 
 export async function loadAllWithRetry(loadOnceFn, delayMs = EMPTY_RETRY_DELAY_MS) {

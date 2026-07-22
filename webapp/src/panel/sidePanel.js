@@ -4,6 +4,7 @@ import { sortPortfolioEntries, nextSort } from './portfolioSort.js';
 import { renderPortfolioTable } from './portfolioTable.js';
 import { buildEditableInput } from '../admin/editableInput.js';
 import { buildColorDot } from '../admin/colorPicker.js';
+import { renderPresentations } from './presentations.js';
 
 // Only http(s) links are ever rendered as a clickable anchor — admin-entered
 // text is otherwise trusted, but an editor could paste a javascript: URI
@@ -204,12 +205,13 @@ function renderIaFintech(container, items, isEditing, { onEditItem, onAddItem, o
 }
 
 export function initSidePanel({
-  labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+  labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
   onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete, onIndexColorChange,
   onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete,
   onPortfolioEdit, onPortfolioAdd, onPortfolioDelete,
   onNewsEdit, onNewsAdd, onNewsDelete,
   onIaFintechEdit, onIaFintechAdd, onIaFintechDelete,
+  onPresentationOpen, onPresentationDelete, onPresentationTitleEdit, onPresentationAddClick,
 }) {
   let selectedCompanyIds = [];
   let currentCompanyItems = [];
@@ -256,7 +258,7 @@ export function initSidePanel({
     renderPortfolioSection();
   }
 
-  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [], iaFintechItems = [], isEditing = false }) {
+  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [], iaFintechItems = [], presentations = [], isEditing = false }) {
     labelEl.textContent = regionLabel;
     renderIndices(indicesEl, marketItems, isEditing, { onEditItem: onIndexEdit, onDeleteItem: onIndexDelete, onAddItem: onIndexAdd, onColorChange: onIndexColorChange });
     renderNews(newsEl, newsItems, isEditing, { onEditItem: onNewsEdit, onAddItem: onNewsAdd, onDeleteItem: onNewsDelete });
@@ -268,6 +270,12 @@ export function initSidePanel({
     currentPortfolioEntries = portfolioEntries;
     renderPortfolioSection();
     renderIaFintech(iaFintechEl, iaFintechItems, isEditing, { onEditItem: onIaFintechEdit, onAddItem: onIaFintechAdd, onDeleteItem: onIaFintechDelete });
+    renderPresentations(presentationsEl, presentations, isEditing, {
+      onOpen: onPresentationOpen,
+      onDelete: onPresentationDelete,
+      onTitleEdit: onPresentationTitleEdit,
+      onAddClick: onPresentationAddClick,
+    });
   }
 
   function updateLiveQuotes(overrides) {

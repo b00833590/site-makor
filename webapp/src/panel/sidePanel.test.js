@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { initSidePanel } from './sidePanel.js';
 
 describe('initSidePanel', () => {
-  let labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, panel;
+  let labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, panel;
 
   beforeEach(() => {
     labelEl = document.createElement('div');
@@ -14,7 +14,8 @@ describe('initSidePanel', () => {
     portfolioLabelEl = document.createElement('div');
     portfolioEl = document.createElement('div');
     iaFintechEl = document.createElement('div');
-    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {} });
+    presentationsEl = document.createElement('div');
+    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {} });
   });
 
   it('sets the region label', () => {
@@ -227,7 +228,7 @@ describe('initSidePanel', () => {
 
     it('calls onIndexEdit with the item and a value patch when the value input changes', () => {
       const onIndexEdit = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       const valueInput = indicesEl.querySelectorAll('input')[0];
@@ -239,7 +240,7 @@ describe('initSidePanel', () => {
 
     it('calls onIndexEdit with a numeric weekChange patch when the change input changes', () => {
       const onIndexEdit = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       const changeInput = indicesEl.querySelectorAll('input')[1];
@@ -276,7 +277,7 @@ describe('initSidePanel', () => {
     it('calls onColorChange with the item, "value", and the picked color when a swatch is chosen', () => {
       const onColorChange = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {}, onIndexColorChange: onColorChange,
       });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
@@ -289,7 +290,7 @@ describe('initSidePanel', () => {
 
     it('renders a delete button per row in edit mode that calls onIndexDelete with the item', () => {
       const onIndexDelete = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       indicesEl.querySelector('.panel-index-delete').click();
@@ -304,7 +305,7 @@ describe('initSidePanel', () => {
 
     it('renders an add-index button in edit mode that calls onIndexAdd', () => {
       const onIndexAdd = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd, onIndexDelete: () => {} });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       indicesEl.querySelector('.panel-index-add').click();
@@ -328,7 +329,7 @@ describe('initSidePanel', () => {
     it('calls onCompanyEdit when a company field is edited through the panel', () => {
       const onCompanyEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -365,7 +366,7 @@ describe('initSidePanel', () => {
     it('calls onPortfolioEdit when a portfolio field is edited through the panel', () => {
       const onPortfolioEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -419,7 +420,7 @@ describe('initSidePanel', () => {
     it('calls onNewsEdit with a title patch when the title input changes', () => {
       const onNewsEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -438,7 +439,7 @@ describe('initSidePanel', () => {
     it('calls onNewsEdit with a description patch when the description textarea changes', () => {
       const onNewsEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -457,7 +458,7 @@ describe('initSidePanel', () => {
     it('renders a delete button per brief in edit mode that calls onNewsDelete with the item', () => {
       const onNewsDelete = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -479,7 +480,7 @@ describe('initSidePanel', () => {
     it('renders an add-brief button in edit mode that calls onNewsAdd', () => {
       const onNewsAdd = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -551,7 +552,7 @@ describe('initSidePanel', () => {
     it('calls onIaFintechEdit with a title patch when the title input changes', () => {
       const onIaFintechEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -571,7 +572,7 @@ describe('initSidePanel', () => {
     it('calls onIaFintechEdit with a statValue patch when the stat value input changes', () => {
       const onIaFintechEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -591,7 +592,7 @@ describe('initSidePanel', () => {
     it('calls onIaFintechEdit with a tag patch when the tag input changes', () => {
       const onIaFintechEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -611,7 +612,7 @@ describe('initSidePanel', () => {
     it('calls onIaFintechEdit with a description patch when the description textarea changes', () => {
       const onIaFintechEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -631,7 +632,7 @@ describe('initSidePanel', () => {
     it('calls onIaFintechEdit with a statLabel patch when the stat label input changes', () => {
       const onIaFintechEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -651,7 +652,7 @@ describe('initSidePanel', () => {
     it('calls onIaFintechEdit with a link patch when the link input changes', () => {
       const onIaFintechEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -671,7 +672,7 @@ describe('initSidePanel', () => {
     it('renders a delete button per card in edit mode that calls onIaFintechDelete with the item', () => {
       const onIaFintechDelete = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -694,7 +695,7 @@ describe('initSidePanel', () => {
     it('renders an add button in edit mode that calls onIaFintechAdd', () => {
       const onIaFintechAdd = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -707,5 +708,10 @@ describe('initSidePanel', () => {
       iaFintechEl.querySelector('.panel-iafintech-add').click();
       expect(onIaFintechAdd).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('renders the presentations grid via showRegion, independent of the active region', () => {
+    panel.showRegion('Asie', { marketItems: [], newsItems: [], presentations: [{ id: 'p1', title: 'Deck A', thumb: '', createdAt: 1 }] });
+    expect(presentationsEl.querySelector('.presentation-name').textContent).toBe('Deck A');
   });
 });

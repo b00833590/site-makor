@@ -59,6 +59,13 @@ export function getAllCompanyItemsForWeek(db, weekId) {
     .map(key => db[key]);
 }
 
+export function getPresentations(db) {
+  return Object.keys(db)
+    .filter(key => key.startsWith('mkg:presentation:'))
+    .map(key => db[key])
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+}
+
 export function getWeekContentKeys(db, weekId) {
   const prefixes = [
     `mkg:market:${weekId}:`,
