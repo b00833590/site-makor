@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek } from './selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getPresentations } from './selectors.js';
 
 const DB = {
   'mkg:week:w2': { id: 'w2', label: 'Semaine 2', order: 1 },
@@ -156,6 +156,26 @@ describe('getAllCompanyItemsForWeek', () => {
 
   it('returns an empty array when nothing matches', () => {
     expect(getAllCompanyItemsForWeek(DB, 'w9')).toEqual([]);
+  });
+});
+
+describe('getPresentations', () => {
+  const DB = {
+    'mkg:presentation:p2': { id: 'p2', title: 'Deck B', thumb: 'data:...', createdAt: 200 },
+    'mkg:presentation:p1': { id: 'p1', title: 'Deck A', thumb: 'data:...', createdAt: 100 },
+    'mkg:week:w1': { id: 'w1', label: 'Semaine 1', order: 0 },
+  };
+
+  it('returns every presentation, sorted by createdAt ascending', () => {
+    expect(getPresentations(DB).map(p => p.id)).toEqual(['p1', 'p2']);
+  });
+
+  it('does not include unrelated keys', () => {
+    expect(getPresentations(DB).some(p => p.id === 'w1')).toBe(false);
+  });
+
+  it('returns an empty array when there are no presentations', () => {
+    expect(getPresentations({ 'mkg:week:w1': { id: 'w1' } })).toEqual([]);
   });
 });
 
