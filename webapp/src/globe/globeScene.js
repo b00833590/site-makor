@@ -1,11 +1,18 @@
 import Globe from 'globe.gl';
+import { feature } from 'topojson-client';
+import worldAtlas from 'world-atlas/countries-110m.json';
 import { cameraForRegion } from './camera.js';
 import { nextRegionId, prevRegionId } from './cycle.js';
+import { regionIdForCountryName } from './regionPolygons.js';
 
 const EARTH_TEXTURE_URL = '/textures/earth-blue-marble.jpg';
 const SKY_TEXTURE_URL = '/textures/night-sky.png';
 const CAMERA_TRANSITION_MS = 1200;
 const MARKER_COLOR = '#e0b53d';
+const POLYGON_CAP_COLOR = 'rgba(224, 181, 61, 0.28)';
+const POLYGON_CAP_HOVER_COLOR = 'rgba(224, 181, 61, 0.6)';
+const POLYGON_SIDE_COLOR = 'rgba(15, 23, 48, 0.55)';
+const POLYGON_STROKE_COLOR = 'rgba(224, 181, 61, 0.55)';
 
 export function initGlobeScene(container, { regions, initialRegionId, onRegionSelect }) {
   let currentRegionId = initialRegionId;
@@ -13,6 +20,10 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
   const points = regions.flatMap(region =>
     region.points.map(point => ({ ...point, regionId: region.id }))
   );
+
+  const countryFeatures = feature(worldAtlas, worldAtlas.objects.countries).features
+    .map(f => ({ ...f, regionId: regionIdForCountryName(f.properties?.name) }))
+    .filter(f => f.regionId);
 
   const world = Globe()(container)
     .globeImageUrl(EARTH_TEXTURE_URL)
@@ -24,7 +35,18 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
     .pointAltitude(0.015)
     .pointRadius(0.35)
     .pointLabel('name')
-    .onPointClick(point => selectRegion(point.regionId));
+    .polygonsData(countryFeatures)
+    .polygonCapColor(() => POLYGON_CAP_COLOR)
+    .polygonSideColor(() => POLYGON_SIDE_COLOR)
+    .polygonStrokeColor(() => POLYGON_STROKE_COLOR)
+    .polygonAltitude(0.006)
+    .polygonLabel(d => regions.find(r => r.id === d.regionId)?.label || '')
+    .onPolygonHover(hoverD => {
+      world
+        .polygonCapColor(d => (d === hoverD ? POLYGON_CAP_HOVER_COLOR : POLYGON_CAP_COLOR))
+        .polygonAltitude(d => (d === hoverD ? 0.014 : 0.006));
+    })
+    .onPolygonClick(polygon => selectRegion(polygon.regionId));
 
   world.controls().autoRotate = true;
   world.controls().autoRotateSpeed = 0.4;
@@ -52,7 +74,7 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
 
   // Update the position indicator for the initial region without stopping
   // auto-rotate or animating the camera — that only happens on real user
-  // interaction (marker click or arrow navigation), so the globe is still
+  // interaction (country click or arrow navigation), so the globe is still
   // visibly auto-rotating on first render.
   currentRegionId = initialRegionId;
   onRegionSelect(initialRegionId);
