@@ -12,7 +12,9 @@
   "dependencies": {
     "firebase": "^12.16.0",
     "globe.gl": "^2.46.1",
-    "html2pdf.js": "^0.14.0"
+    "html2pdf.js": "^0.14.0",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
