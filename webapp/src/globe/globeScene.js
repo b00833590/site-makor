@@ -61,6 +61,17 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
   // country ourselves (already reliable, see onPolygonHover above) and
   // fire selectRegion from our own pointerdown/pointerup pair, using a
   // small pixel-distance threshold to still ignore a genuine rotate-drag.
+  // A window-level capture-phase listener runs before container's own
+  // pointerdown below, and clears any stale position whenever a gesture
+  // starts OUTSIDE the globe (e.g. selecting text or scrolling inside the
+  // adjacent, non-overlapping side panel) — otherwise that gesture ending
+  // with a release over the globe could fire selectRegion using leftover
+  // coordinates from an earlier, unrelated click on the globe itself.
+  // container's own pointerdown (bubble phase, fires right after) then
+  // still sets the real position whenever the gesture genuinely starts here.
+  window.addEventListener('pointerdown', event => {
+    if (!container.contains(event.target)) pointerDownPos = null;
+  }, { capture: true });
   container.addEventListener('pointerdown', event => {
     pointerDownPos = { x: event.clientX, y: event.clientY };
   });
