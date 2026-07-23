@@ -8,6 +8,7 @@ import './timeline/weekAdmin.css';
 import './admin/passwordModal.css';
 import './admin/toast.css';
 import './admin/colorPicker.css';
+import './admin/presentationUploadModal.css';
 import './panel/presentations.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
@@ -23,10 +24,12 @@ import { initWeekTimeline } from './timeline/weekTimeline.js';
 import { renderWeekAdmin } from './timeline/weekAdmin.js';
 import { startPortfolioLiveRefresh } from './panel/portfolioLiveRefresh.js';
 import { initPasswordModal } from './admin/passwordModal.js';
+import { initPresentationUploadModal } from './admin/presentationUploadModal.js';
 import { showToast } from './admin/toast.js';
 import { generateId } from './admin/uid.js';
 import { ADMIN_PASSWORD } from './admin/config.js';
 import { computeSessionRestore, splitUnrestorablePresentationDeletes } from './admin/sessionUndo.js';
+import { arrayBufferToBase64, validatePresentationFile, uploadPresentation, MAX_FILE_SIZE_BYTES } from './panel/presentationUpload.js';
 
 const GROUP_LABEL_BY_REGION = {
   asia: 'ASIE',
@@ -301,7 +304,48 @@ async function handlePresentationDelete(item) {
 }
 
 function handlePresentationAddClick() {
-  showToast(document.getElementById('admin-toast'), "Pour ajouter une présentation, transmets le PDF à la personne qui administre le site — la vignette et l'intégration se font manuellement.");
+  presentationUploadModal.open();
+}
+
+async function handlePresentationUpload(file, title) {
+  const invalidReason = validatePresentationFile(file);
+  if (invalidReason) {
+    const messages = {
+      'wrong-type': 'Seuls les fichiers PDF sont acceptés.',
+      'too-large': `Fichier trop volumineux (max ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} Mo).`,
+    };
+    presentationUploadModal.showError(messages[invalidReason] || 'Fichier invalide.');
+    return;
+  }
+
+  presentationUploadModal.setSubmitting(true);
+  const id = generateId();
+  const buffer = await file.arrayBuffer();
+  const base64 = arrayBufferToBase64(buffer);
+
+  const result = await uploadPresentation({
+    id,
+    title,
+    base64,
+    client,
+    onProgress: (done, total) => {
+      if (done % 3 === 0 || done === total) {
+        showToast(document.getElementById('admin-toast'), `Envoi de la présentation... (${done}/${total})`);
+      }
+    },
+  });
+
+  presentationUploadModal.setSubmitting(false);
+
+  if (!result.ok) {
+    presentationUploadModal.showError("Échec de l'envoi — vérifie ta connexion et réessaie.");
+    return;
+  }
+
+  db[result.key] = result.value;
+  renderPanelForCurrentSelection();
+  presentationUploadModal.close();
+  showToast(document.getElementById('admin-toast'), '✓ Présentation ajoutée');
 }
 
 function weekItemKey(week) {
@@ -540,6 +584,16 @@ const passwordModal = initPasswordModal({
     undoAllBtn.classList.add('visible');
     renderPanelForCurrentSelection();
   },
+});
+
+const presentationUploadModal = initPresentationUploadModal({
+  modalEl: document.getElementById('presentation-upload-modal'),
+  fileInputEl: document.getElementById('presentation-upload-file'),
+  titleInputEl: document.getElementById('presentation-upload-title'),
+  errorEl: document.getElementById('presentation-upload-error'),
+  cancelBtn: document.getElementById('presentation-upload-cancel'),
+  okBtn: document.getElementById('presentation-upload-ok'),
+  onSubmit: handlePresentationUpload,
 });
 
 editToggleBtn.addEventListener('click', () => {
