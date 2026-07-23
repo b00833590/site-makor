@@ -220,10 +220,9 @@ describe('initSidePanel', () => {
 
     it('renders value and weekChange as inputs when isEditing is true', () => {
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
-      const inputs = indicesEl.querySelectorAll('input');
-      expect(inputs).toHaveLength(2);
-      expect(inputs[0].value).toBe('7 500');
-      expect(Number(inputs[1].value)).toBe(1.2);
+      expect(indicesEl.querySelectorAll('input')).toHaveLength(3);
+      expect(indicesEl.querySelector('.panel-index-value-input').value).toBe('7 500');
+      expect(Number(indicesEl.querySelector('.panel-index-change-input').value)).toBe(1.2);
     });
 
     it('calls onIndexEdit with the item and a value patch when the value input changes', () => {
@@ -231,7 +230,7 @@ describe('initSidePanel', () => {
       panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
-      const valueInput = indicesEl.querySelectorAll('input')[0];
+      const valueInput = indicesEl.querySelector('.panel-index-value-input');
       valueInput.value = '7 600';
       valueInput.dispatchEvent(new Event('change'));
 
@@ -243,7 +242,7 @@ describe('initSidePanel', () => {
       panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
-      const changeInput = indicesEl.querySelectorAll('input')[1];
+      const changeInput = indicesEl.querySelector('.panel-index-change-input');
       changeInput.value = '2.5';
       changeInput.dispatchEvent(new Event('change'));
 
@@ -282,10 +281,79 @@ describe('initSidePanel', () => {
       });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
-      indicesEl.querySelector('.color-dot').click();
+      indicesEl.querySelector('.panel-index-value .color-dot').click();
       document.getElementById('active-color-popup').querySelector('.color-swatch').click();
 
       expect(onColorChange).toHaveBeenCalledWith(ITEM, 'value', expect.any(String));
+    });
+
+    it('renders name as an editable input with the flag as a static prefix, and calls onIndexEdit on change', () => {
+      const onIndexEdit = vi.fn();
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+
+      expect(indicesEl.querySelector('.panel-index-name').textContent).toContain(ITEM.flag);
+      const nameInput = indicesEl.querySelector('.panel-index-name-input');
+      expect(nameInput).not.toBeNull();
+      nameInput.value = 'CAC 40 Renommé';
+      nameInput.dispatchEvent(new Event('change'));
+
+      expect(onIndexEdit).toHaveBeenCalledWith(ITEM, { name: 'CAC 40 Renommé' });
+    });
+
+    it('applies a custom color to the name span, in both read-only and editing modes, when the item has one', () => {
+      const coloredItem = { ...ITEM, colors: { name: '#2f6fed' } };
+      panel.showRegion('Europe', { marketItems: [coloredItem], newsItems: [] });
+      expect(indicesEl.querySelector('.panel-index-name').style.color).toBe('rgb(47, 111, 237)');
+
+      panel.showRegion('Europe', { marketItems: [coloredItem], newsItems: [], isEditing: true });
+      expect(indicesEl.querySelector('.panel-index-name').style.color).toBe('rgb(47, 111, 237)');
+    });
+
+    it('renders a color dot next to the name input in edit mode, and calls onColorChange with "name"', () => {
+      const onColorChange = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {}, onIndexColorChange: onColorChange,
+      });
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+
+      indicesEl.querySelector('.panel-index-name .color-dot').click();
+      document.getElementById('active-color-popup').querySelector('.color-swatch').click();
+
+      expect(onColorChange).toHaveBeenCalledWith(ITEM, 'name', expect.any(String));
+    });
+
+    it('renders a color dot next to the change input in edit mode', () => {
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+      expect(indicesEl.querySelector('.panel-index-change .color-dot')).not.toBeNull();
+    });
+
+    it('applies a custom color to the change span that overrides the positive/negative class color', () => {
+      const coloredItem = { ...ITEM, weekChange: 1.2, colors: { weekChange: '#9b59b6' } };
+      panel.showRegion('Europe', { marketItems: [coloredItem], newsItems: [] });
+      const change = indicesEl.querySelector('.panel-index-change');
+      expect(change.classList.contains('positive')).toBe(true);
+      expect(change.style.color).toBe('rgb(155, 89, 182)');
+    });
+
+    it('renders no custom color on the change span when the item has none', () => {
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [] });
+      expect(indicesEl.querySelector('.panel-index-change').style.color).toBe('');
+    });
+
+    it('calls onColorChange with the item, "weekChange", and the picked color from the change color dot', () => {
+      const onColorChange = vi.fn();
+      panel = initSidePanel({
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {}, onIndexColorChange: onColorChange,
+      });
+      panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
+
+      indicesEl.querySelector('.panel-index-change .color-dot').click();
+      document.getElementById('active-color-popup').querySelector('.color-swatch').click();
+
+      expect(onColorChange).toHaveBeenCalledWith(ITEM, 'weekChange', expect.any(String));
     });
 
     it('renders a delete button per row in edit mode that calls onIndexDelete with the item', () => {
