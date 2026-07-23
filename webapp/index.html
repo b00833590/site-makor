@@ -56,6 +56,18 @@
       </div>
     </div>
   </div>
+  <div id="presentation-upload-modal" class="presentation-upload-modal">
+    <div class="presentation-upload-modal-content">
+      <h3>📤 Ajouter une présentation</h3>
+      <input type="file" id="presentation-upload-file" accept="application/pdf" />
+      <input type="text" id="presentation-upload-title" placeholder="Titre (optionnel — par défaut, le nom du fichier)" />
+      <div id="presentation-upload-error" class="presentation-upload-modal-error"></div>
+      <div class="presentation-upload-modal-actions">
+        <button id="presentation-upload-cancel" type="button">Annuler</button>
+        <button id="presentation-upload-ok" type="button">Envoyer</button>
+      </div>
+    </div>
+  </div>
   <div id="admin-toast" class="admin-toast"></div>
   <script type="module" src="/src/main.js"></script>
 </body>
