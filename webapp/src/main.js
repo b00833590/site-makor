@@ -319,21 +319,29 @@ async function handlePresentationUpload(file, title) {
   }
 
   presentationUploadModal.setSubmitting(true);
-  const id = generateId();
-  const buffer = await file.arrayBuffer();
-  const base64 = arrayBufferToBase64(buffer);
 
-  const result = await uploadPresentation({
-    id,
-    title,
-    base64,
-    client,
-    onProgress: (done, total) => {
-      if (done % 3 === 0 || done === total) {
-        showToast(document.getElementById('admin-toast'), `Envoi de la présentation... (${done}/${total})`);
-      }
-    },
-  });
+  let result;
+  try {
+    const id = generateId();
+    const buffer = await file.arrayBuffer();
+    const base64 = arrayBufferToBase64(buffer);
+
+    result = await uploadPresentation({
+      id,
+      title,
+      base64,
+      client,
+      onProgress: (done, total) => {
+        if (done % 3 === 0 || done === total) {
+          showToast(document.getElementById('admin-toast'), `Envoi de la présentation... (${done}/${total})`);
+        }
+      },
+    });
+  } catch {
+    presentationUploadModal.setSubmitting(false);
+    presentationUploadModal.showError("Échec de l'envoi — vérifie ta connexion et réessaie.");
+    return;
+  }
 
   presentationUploadModal.setSubmitting(false);
 
