@@ -29,9 +29,17 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
   world.controls().autoRotate = true;
   world.controls().autoRotateSpeed = 0.4;
 
-  window.addEventListener('resize', () => {
+  // Remplace un simple listener window:resize — un ResizeObserver sur le
+  // conteneur couvre déjà le resize de fenêtre (le conteneur est en
+  // position:fixed; inset:0, donc sa taille suit toujours celle du viewport)
+  // ET capte en plus les changements de taille purement CSS (ex. l'animation
+  // d'ouverture/fermeture du panneau latéral), pour que le globe se
+  // redimensionne et se recentre en continu et fluidement pendant la
+  // transition, sans que main.js ait à orchestrer quoi que ce soit.
+  const resizeObserver = new ResizeObserver(() => {
     world.width(container.clientWidth).height(container.clientHeight);
   });
+  resizeObserver.observe(container);
 
   function selectRegion(regionId) {
     const region = regions.find(r => r.id === regionId);
