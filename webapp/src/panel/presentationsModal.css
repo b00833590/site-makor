@@ -1,0 +1,65 @@
+.presentations-trigger-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 54px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(15, 23, 48, 0.9);
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  color: var(--gold-light, #e0b53d);
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 6;
+}
+
+.presentations-trigger-btn:hover {
+  background: rgba(201, 151, 31, 0.25);
+}
+
+.presentations-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+}
+
+.presentations-modal.open {
+  display: flex;
+}
+
+.presentations-modal-content {
+  background: rgba(15, 23, 48, 0.98);
+  border: 1px solid rgba(224, 181, 61, 0.3);
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 640px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.presentations-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.presentations-modal-header h3 {
+  color: #fff;
+  font-size: 15px;
+  margin: 0;
+}
+
+.presentations-modal-header button {
+  background: transparent;
+  border: none;
+  color: var(--gold-light, #e0b53d);
+  cursor: pointer;
+  font-size: 16px;
+}
