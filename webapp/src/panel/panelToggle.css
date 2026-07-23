@@ -1,6 +1,6 @@
 .panel-toggle-btn {
   position: fixed;
-  top: 50%;
+  top: calc(50% - 90px);
   right: 0;
   transform: translateY(-50%);
   width: 28px;
@@ -22,5 +22,5 @@
 }
 
 body.panel-open .panel-toggle-btn {
-  right: var(--panel-width, 340px);
+  right: var(--panel-width, 460px);
 }
