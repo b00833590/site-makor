@@ -26,7 +26,7 @@ html, body {
 }
 
 body.panel-open #globe-container {
-  right: var(--panel-width, 340px);
+  right: var(--panel-width, 460px);
 }
 
 .region-indicator {
@@ -46,7 +46,7 @@ body.panel-open #globe-container {
 }
 
 body.panel-open .region-indicator {
-  left: calc((100% - var(--panel-width, 340px)) / 2);
+  left: calc((100% - var(--panel-width, 460px)) / 2);
 }
 
 .arrow-btn {
@@ -80,7 +80,7 @@ body.panel-open .region-indicator {
 }
 
 body.panel-open .arrow-next {
-  right: calc(var(--panel-width, 340px) + 20px);
+  right: calc(var(--panel-width, 460px) + 20px);
 }
 
 .edit-toggle-btn {
