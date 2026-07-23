@@ -10,6 +10,7 @@ import './admin/toast.css';
 import './admin/colorPicker.css';
 import './admin/presentationUploadModal.css';
 import './panel/presentations.css';
+import './panel/panelToggle.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
@@ -17,6 +18,7 @@ import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.
 import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getPresentations } from './data/selectors.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
+import { initPanelToggle } from './panel/panelToggle.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
 import { buildExportFilename, exportElementAsPDF, buildPortfolioExportFilename } from './panel/pdfExport.js';
 import { openPresentationPdf } from './panel/presentationPdf.js';
@@ -573,6 +575,11 @@ const scene = initGlobeScene(container, {
 
 prevBtn.addEventListener('click', () => scene.goToPrevRegion());
 nextBtn.addEventListener('click', () => scene.goToNextRegion());
+
+initPanelToggle({
+  toggleBtn: document.getElementById('panel-toggle-btn'),
+  bodyEl: document.body,
+});
 
 const editToggleBtn = document.getElementById('edit-toggle-btn');
 const undoAllBtn = document.getElementById('undo-all-btn');

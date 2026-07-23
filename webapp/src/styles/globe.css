@@ -21,6 +21,12 @@ html, body {
 #globe-container {
   position: fixed;
   inset: 0;
+  right: 0;
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.panel-open #globe-container {
+  right: var(--panel-width, 340px);
 }
 
 .region-indicator {
@@ -36,6 +42,11 @@ html, body {
   font-size: 13px;
   letter-spacing: 0.3px;
   z-index: 5;
+  transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.panel-open .region-indicator {
+  left: calc((100% - var(--panel-width, 340px)) / 2);
 }
 
 .arrow-btn {
@@ -64,6 +75,11 @@ html, body {
 }
 
 .arrow-next {
+  right: 20px;
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.panel-open .arrow-next {
   right: calc(var(--panel-width, 340px) + 20px);
 }
 

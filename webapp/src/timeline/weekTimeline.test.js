@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { initWeekTimeline } from './weekTimeline.js';
 
 const WEEKS = [
@@ -74,5 +74,46 @@ describe('setWeeks', () => {
     timeline.setWeeks(newWeeks, 'w1');
     container.querySelectorAll('.week-dot')[2].click();
     expect(onSelect).toHaveBeenCalledWith('w3');
+  });
+});
+
+afterEach(() => {
+  document.getElementById('active-week-tooltip')?.remove();
+});
+
+describe('week hover tooltip', () => {
+  it('shows the week label on hover', () => {
+    const container = document.createElement('div');
+    initWeekTimeline({ container, weeks: WEEKS, activeWeekId: 'w1', onSelect: () => {} });
+    container.querySelectorAll('.week-dot')[1].dispatchEvent(new MouseEvent('mouseenter'));
+    const tooltip = document.getElementById('active-week-tooltip');
+    expect(tooltip).not.toBeNull();
+    expect(tooltip.textContent).toBe('Semaine 2');
+  });
+
+  it('removes the tooltip on mouseleave', () => {
+    const container = document.createElement('div');
+    initWeekTimeline({ container, weeks: WEEKS, activeWeekId: 'w1', onSelect: () => {} });
+    const dot = container.querySelectorAll('.week-dot')[0];
+    dot.dispatchEvent(new MouseEvent('mouseenter'));
+    dot.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(document.getElementById('active-week-tooltip')).toBeNull();
+  });
+
+  it('removes the tooltip when a dot is clicked', () => {
+    const container = document.createElement('div');
+    initWeekTimeline({ container, weeks: WEEKS, activeWeekId: 'w1', onSelect: () => {} });
+    const dot = container.querySelectorAll('.week-dot')[0];
+    dot.dispatchEvent(new MouseEvent('mouseenter'));
+    dot.click();
+    expect(document.getElementById('active-week-tooltip')).toBeNull();
+  });
+
+  it('closes a stale tooltip when the timeline re-renders via setWeeks', () => {
+    const container = document.createElement('div');
+    const timeline = initWeekTimeline({ container, weeks: WEEKS, activeWeekId: 'w1', onSelect: () => {} });
+    container.querySelectorAll('.week-dot')[0].dispatchEvent(new MouseEvent('mouseenter'));
+    timeline.setWeeks(WEEKS, 'w2');
+    expect(document.getElementById('active-week-tooltip')).toBeNull();
   });
 });

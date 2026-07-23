@@ -16,6 +16,22 @@
   color: #fff;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   z-index: 4;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.panel-open .side-panel {
+  transform: translateX(0);
+}
+
+/* L'export PDF doit toujours capturer le panneau entièrement visible, quel
+   que soit l'état replié/ouvert au moment du clic — sinon html2canvas
+   capture un élément hors écran (même classe de bug que le "734x0" de la
+   phase 13). transition:none évite qu'il se figure à mi-animation pendant
+   que la capture démarre : le panneau doit apparaître instantanément. */
+.side-panel.pdf-export {
+  transform: none;
+  transition: none;
 }
 
 .panel-region-label {
