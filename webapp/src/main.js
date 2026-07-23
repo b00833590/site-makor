@@ -11,6 +11,7 @@ import './admin/colorPicker.css';
 import './admin/presentationUploadModal.css';
 import './panel/presentations.css';
 import './panel/panelToggle.css';
+import './panel/presentationsModal.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
@@ -19,6 +20,7 @@ import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion,
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initPanelToggle } from './panel/panelToggle.js';
+import { initPresentationsModal } from './panel/presentationsModal.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
 import { buildExportFilename, exportElementAsPDF, buildPortfolioExportFilename } from './panel/pdfExport.js';
 import { openPresentationPdf } from './panel/presentationPdf.js';
@@ -579,6 +581,12 @@ nextBtn.addEventListener('click', () => scene.goToNextRegion());
 initPanelToggle({
   toggleBtn: document.getElementById('panel-toggle-btn'),
   bodyEl: document.body,
+});
+
+initPresentationsModal({
+  modalEl: document.getElementById('presentations-modal'),
+  closeBtn: document.getElementById('presentations-modal-close'),
+  triggerBtn: document.getElementById('presentations-trigger-btn'),
 });
 
 const editToggleBtn = document.getElementById('edit-toggle-btn');
