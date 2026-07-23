@@ -13,9 +13,12 @@ const POLYGON_CAP_COLOR = 'rgba(224, 181, 61, 0.28)';
 const POLYGON_CAP_HOVER_COLOR = 'rgba(224, 181, 61, 0.6)';
 const POLYGON_SIDE_COLOR = 'rgba(15, 23, 48, 0.55)';
 const POLYGON_STROKE_COLOR = 'rgba(224, 181, 61, 0.55)';
+const CLICK_DRAG_THRESHOLD_PX = 5;
 
 export function initGlobeScene(container, { regions, initialRegionId, onRegionSelect }) {
   let currentRegionId = initialRegionId;
+  let hoveredPolygon = null;
+  let pointerDownPos = null;
 
   const points = regions.flatMap(region =>
     region.points.map(point => ({ ...point, regionId: region.id }))
@@ -42,11 +45,33 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
     .polygonAltitude(0.006)
     .polygonLabel(d => regions.find(r => r.id === d.regionId)?.label || '')
     .onPolygonHover(hoverD => {
+      hoveredPolygon = hoverD;
       world
         .polygonCapColor(d => (d === hoverD ? POLYGON_CAP_HOVER_COLOR : POLYGON_CAP_COLOR))
         .polygonAltitude(d => (d === hoverD ? 0.014 : 0.006));
-    })
-    .onPolygonClick(polygon => selectRegion(polygon.regionId));
+    });
+
+  // globe.gl's own onPolygonClick silently never fires for a 'mouse'
+  // pointerType if ANY pointermove occurred while the button was down —
+  // no distance threshold at all, unlike touch/pen — and it isn't
+  // configurable via a public method in this version (an internal
+  // `clickAfterDrag` Kapsule prop exists but isn't re-exposed on the
+  // returned instance). A real click routinely includes a sub-pixel move,
+  // so this bypasses that logic entirely: track the currently-hovered
+  // country ourselves (already reliable, see onPolygonHover above) and
+  // fire selectRegion from our own pointerdown/pointerup pair, using a
+  // small pixel-distance threshold to still ignore a genuine rotate-drag.
+  container.addEventListener('pointerdown', event => {
+    pointerDownPos = { x: event.clientX, y: event.clientY };
+  });
+  container.addEventListener('pointerup', event => {
+    if (!pointerDownPos) return;
+    const dx = event.clientX - pointerDownPos.x;
+    const dy = event.clientY - pointerDownPos.y;
+    pointerDownPos = null;
+    if (Math.hypot(dx, dy) > CLICK_DRAG_THRESHOLD_PX) return;
+    if (hoveredPolygon) selectRegion(hoveredPolygon.regionId);
+  });
 
   world.controls().autoRotate = true;
   world.controls().autoRotateSpeed = 0.4;
