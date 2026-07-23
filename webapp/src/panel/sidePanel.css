@@ -73,6 +73,17 @@
   color: #b7bdd6;
 }
 
+.panel-index-name-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0f1730;
+  border: 1px solid rgba(224, 181, 61, 0.4);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 4px;
+}
+
 .panel-index-value-input,
 .panel-index-change-input {
   width: 64px;
@@ -86,13 +97,17 @@
 }
 
 /* Overrides the shared color:#fff above so a custom color set on the parent
-   .panel-index-value span (via the color picker) is visible while editing
-   too, not just in the read-only view — an explicit color on this input
-   would otherwise always win over the parent's inline style regardless of
-   specificity, since inline styles don't cascade onto child elements that
-   have their own explicit color. Resolves to the same white by default
-   (inherited from .side-panel's own color:#fff) when no custom color is set. */
-.panel-index-value-input {
+   .panel-index-name/.panel-index-value/.panel-index-change span (via the
+   color picker) is visible while editing too, not just in the read-only
+   view — an explicit color on this input would otherwise always win over
+   the parent's inline style regardless of specificity, since inline styles
+   don't cascade onto child elements that have their own explicit color.
+   Resolves to the same white by default (inherited from .side-panel's own
+   color:#fff, or from .positive/.negative for weekChange) when no custom
+   color is set. */
+.panel-index-name-input,
+.panel-index-value-input,
+.panel-index-change-input {
   color: inherit;
 }
 

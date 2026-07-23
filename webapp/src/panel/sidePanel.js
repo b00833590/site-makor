@@ -21,7 +21,15 @@ function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, 
 
     const name = document.createElement('span');
     name.className = 'panel-index-name';
-    name.textContent = [item.flag, item.name].filter(Boolean).join(' ');
+    const nameColor = item.colors && item.colors.name;
+    if (nameColor) name.style.color = nameColor;
+    if (isEditing) {
+      if (item.flag) name.appendChild(document.createTextNode(`${item.flag} `));
+      name.appendChild(buildEditableInput(item.name, 'text', 'panel-index-name-input', v => onEditItem(item, { name: v })));
+      name.appendChild(buildColorDot(nameColor, color => onColorChange(item, 'name', color)));
+    } else {
+      name.textContent = [item.flag, item.name].filter(Boolean).join(' ');
+    }
 
     const value = document.createElement('span');
     value.className = 'panel-index-value';
@@ -37,8 +45,11 @@ function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, 
     const change = document.createElement('span');
     const isNegative = Number(item.weekChange) < 0;
     change.className = `panel-index-change ${isNegative ? 'negative' : 'positive'}`;
+    const changeColor = item.colors && item.colors.weekChange;
+    if (changeColor) change.style.color = changeColor;
     if (isEditing) {
       change.appendChild(buildEditableInput(item.weekChange, 'number', 'panel-index-change-input', v => onEditItem(item, { weekChange: v })));
+      change.appendChild(buildColorDot(changeColor, color => onColorChange(item, 'weekChange', color)));
     } else {
       change.textContent = `${item.weekChange}%`;
     }
