@@ -6,13 +6,6 @@ import { buildEditableInput } from '../admin/editableInput.js';
 import { buildColorDot } from '../admin/colorPicker.js';
 import { renderPresentations } from './presentations.js';
 
-// Only http(s) links are ever rendered as a clickable anchor — admin-entered
-// text is otherwise trusted, but an editor could paste a javascript: URI
-// into this field, and unlike every other field here it becomes a real href.
-function isSafeHttpUrl(value) {
-  return typeof value === 'string' && /^https?:\/\//i.test(value);
-}
-
 function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, onAddItem, onColorChange }) {
   container.replaceChildren();
   for (const item of items) {
@@ -128,100 +121,12 @@ function renderNews(container, items, isEditing, { onEditItem, onAddItem, onDele
   }
 }
 
-function renderIaFintech(container, items, isEditing, { onEditItem, onAddItem, onDeleteItem }) {
-  container.replaceChildren();
-  for (const item of items) {
-    const card = document.createElement('div');
-    card.className = 'panel-iafintech-card';
-
-    if (item.tag || isEditing) {
-      const tag = document.createElement('div');
-      tag.className = 'panel-iafintech-tag';
-      if (isEditing) {
-        tag.appendChild(buildEditableInput(item.tag, 'text', 'panel-iafintech-tag-input', v => onEditItem(item, { tag: v })));
-      } else {
-        tag.textContent = item.tag;
-      }
-      card.appendChild(tag);
-    }
-
-    const title = document.createElement('h3');
-    if (isEditing) {
-      title.appendChild(buildEditableInput(item.title, 'text', 'panel-iafintech-title-input', v => onEditItem(item, { title: v })));
-    } else {
-      title.textContent = item.title;
-    }
-    card.appendChild(title);
-
-    const description = document.createElement('p');
-    if (isEditing) {
-      const textarea = document.createElement('textarea');
-      textarea.className = 'panel-iafintech-description-input';
-      textarea.value = item.description ?? '';
-      textarea.addEventListener('change', () => onEditItem(item, { description: textarea.value }));
-      description.appendChild(textarea);
-    } else {
-      description.textContent = item.description;
-    }
-    card.appendChild(description);
-
-    if (item.statLabel || item.statValue || isEditing) {
-      const stat = document.createElement('div');
-      stat.className = 'panel-iafintech-stat';
-      if (isEditing) {
-        stat.appendChild(buildEditableInput(item.statLabel, 'text', 'panel-iafintech-stat-label-input', v => onEditItem(item, { statLabel: v })));
-        stat.appendChild(document.createTextNode(' : '));
-        stat.appendChild(buildEditableInput(item.statValue, 'text', 'panel-iafintech-stat-value-input', v => onEditItem(item, { statValue: v })));
-      } else {
-        stat.textContent = `${item.statLabel} : ${item.statValue}`;
-      }
-      card.appendChild(stat);
-    }
-
-    if (item.link || isEditing) {
-      if (isEditing) {
-        card.appendChild(buildEditableInput(item.link, 'text', 'panel-iafintech-link-input', v => onEditItem(item, { link: v })));
-      } else if (isSafeHttpUrl(item.link)) {
-        const link = document.createElement('a');
-        link.className = 'panel-iafintech-link';
-        link.href = item.link;
-        link.target = '_blank';
-        link.rel = 'noopener';
-        link.textContent = 'Lire la source →';
-        card.appendChild(link);
-      }
-    }
-
-    if (isEditing) {
-      const delBtn = document.createElement('button');
-      delBtn.type = 'button';
-      delBtn.className = 'panel-iafintech-delete';
-      delBtn.setAttribute('aria-label', `Supprimer ${item.title}`);
-      delBtn.textContent = '✕ Supprimer';
-      delBtn.addEventListener('click', () => onDeleteItem(item));
-      card.appendChild(delBtn);
-    }
-
-    container.appendChild(card);
-  }
-
-  if (isEditing) {
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.className = 'panel-iafintech-add';
-    addBtn.textContent = '+ Ajouter un élément';
-    addBtn.addEventListener('click', () => onAddItem());
-    container.appendChild(addBtn);
-  }
-}
-
 export function initSidePanel({
-  labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+  labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
   onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete, onIndexColorChange,
   onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete,
   onPortfolioEdit, onPortfolioAdd, onPortfolioDelete,
   onNewsEdit, onNewsAdd, onNewsDelete,
-  onIaFintechEdit, onIaFintechAdd, onIaFintechDelete,
   onPresentationOpen, onPresentationDelete, onPresentationTitleEdit, onPresentationAddClick,
 }) {
   let selectedCompanyIds = [];
@@ -269,7 +174,7 @@ export function initSidePanel({
     renderPortfolioSection();
   }
 
-  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [], iaFintechItems = [], presentations = [], isEditing = false }) {
+  function showRegion(regionLabel, { marketItems, newsItems, companyItems = [], portfolioRegionLabel = '', portfolioEntries = [], presentations = [], isEditing = false }) {
     labelEl.textContent = regionLabel;
     renderIndices(indicesEl, marketItems, isEditing, { onEditItem: onIndexEdit, onDeleteItem: onIndexDelete, onAddItem: onIndexAdd, onColorChange: onIndexColorChange });
     renderNews(newsEl, newsItems, isEditing, { onEditItem: onNewsEdit, onAddItem: onNewsAdd, onDeleteItem: onNewsDelete });
@@ -280,7 +185,6 @@ export function initSidePanel({
     portfolioLabelEl.textContent = portfolioRegionLabel;
     currentPortfolioEntries = portfolioEntries;
     renderPortfolioSection();
-    renderIaFintech(iaFintechEl, iaFintechItems, isEditing, { onEditItem: onIaFintechEdit, onAddItem: onIaFintechAdd, onDeleteItem: onIaFintechDelete });
     renderPresentations(presentationsEl, presentations, isEditing, {
       onOpen: onPresentationOpen,
       onDelete: onPresentationDelete,

@@ -223,34 +223,6 @@ function handleNewsDelete(item) {
   deleteItemLocal(newsItemKey(item), "⚠️ Suppression en ligne échouée — la brève a été restaurée");
 }
 
-function iaFintechItemKey(item) {
-  return `mkg:content:ia-fintech:${activeWeekId}:${item.id}`;
-}
-
-function handleIaFintechEdit(item, patch) {
-  const key = iaFintechItemKey(item);
-  setItemLocal(key, { ...db[key], ...patch }, '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
-}
-
-function handleIaFintechAdd() {
-  const id = generateId();
-  const key = `mkg:content:ia-fintech:${activeWeekId}:${id}`;
-  const newItem = {
-    id,
-    tag: '',
-    title: 'Nouvel élément',
-    description: 'Description à compléter.',
-    statLabel: '',
-    statValue: '',
-    link: '',
-  };
-  setItemLocal(key, newItem, '⚠️ Ajout en ligne échoué — le nouvel élément a été retiré');
-}
-
-function handleIaFintechDelete(item) {
-  deleteItemLocal(iaFintechItemKey(item), "⚠️ Suppression en ligne échouée — l'élément a été restauré");
-}
-
 async function handlePresentationOpen(item) {
   showToast(document.getElementById('admin-toast'), 'Chargement de la présentation...');
   const result = await openPresentationPdf(item.id, client, (done, total) => {
@@ -486,7 +458,6 @@ const panel = initSidePanel({
   compareEl: document.getElementById('panel-compare'),
   portfolioLabelEl: document.getElementById('panel-portfolio-region-label'),
   portfolioEl: document.getElementById('panel-portfolio'),
-  iaFintechEl: document.getElementById('panel-ia-fintech'),
   presentationsEl: document.getElementById('panel-presentations'),
   onOpenChart: item => chartModal.open(item, currentPortfolioEntriesForChart),
   onIndexEdit: handleIndexEdit,
@@ -505,9 +476,6 @@ const panel = initSidePanel({
   onNewsEdit: handleNewsEdit,
   onNewsAdd: handleNewsAdd,
   onNewsDelete: handleNewsDelete,
-  onIaFintechEdit: handleIaFintechEdit,
-  onIaFintechAdd: handleIaFintechAdd,
-  onIaFintechDelete: handleIaFintechDelete,
   onPresentationOpen: handlePresentationOpen,
   onPresentationDelete: handlePresentationDelete,
   onPresentationTitleEdit: handlePresentationTitleEdit,
@@ -551,7 +519,6 @@ function renderPanelForCurrentSelection() {
     companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
     portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
     portfolioEntries,
-    iaFintechItems: getIaFintechItemsForWeek(db, activeWeekId),
     presentations: getPresentations(db),
     isEditing,
   });
