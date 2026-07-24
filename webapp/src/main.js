@@ -23,6 +23,8 @@ import { initPanelToggle } from './panel/panelToggle.js';
 import { initPresentationsModal } from './panel/presentationsModal.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
 import { buildExportFilename, exportElementAsPDF, buildPortfolioExportFilename } from './panel/pdfExport.js';
+import { buildReportElement } from './panel/pdfReport.js';
+import './panel/pdfReport.css';
 import { openPresentationPdf } from './panel/presentationPdf.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
 import { renderWeekAdmin } from './timeline/weekAdmin.js';
@@ -712,20 +714,29 @@ undoAllBtn.addEventListener('click', handleUndoAll);
 const exportPdfBtn = document.getElementById('export-pdf-btn');
 
 exportPdfBtn.addEventListener('click', async () => {
-  const sidePanelEl = document.querySelector('.side-panel');
   const region = REGIONS.find(r => r.id === activeRegionId);
   const activeWeek = getWeeks(db).find(w => w.id === activeWeekId);
+  const portfolioRegion = getPortfolioRegion(db, activeRegionId);
   const filename = buildExportFilename(region ? region.label : '', activeWeek ? activeWeek.label : '');
 
   exportPdfBtn.disabled = true;
   exportPdfBtn.textContent = '⏳ Génération...';
-  sidePanelEl.classList.add('pdf-export');
+  const reportEl = buildReportElement({
+    regionLabel: region ? region.label : '',
+    weekLabel: activeWeek ? activeWeek.label : '',
+    portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
+    marketItems: getMarketItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+    newsItems: getNewsItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+    companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+    portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
+  });
+  document.body.appendChild(reportEl);
   try {
-    await exportElementAsPDF(sidePanelEl, filename);
+    await exportElementAsPDF(reportEl, filename);
   } catch (error) {
     console.error('PDF export failed', error);
   } finally {
-    sidePanelEl.classList.remove('pdf-export');
+    reportEl.remove();
     exportPdfBtn.disabled = false;
     exportPdfBtn.textContent = '📄 Exporter en PDF';
   }
@@ -734,30 +745,26 @@ exportPdfBtn.addEventListener('click', async () => {
 const exportPortfolioPdfBtn = document.getElementById('export-portfolio-pdf-btn');
 
 exportPortfolioPdfBtn.addEventListener('click', async () => {
-  const sidePanelEl = document.querySelector('.side-panel');
   const portfolioRegion = getPortfolioRegion(db, activeRegionId);
   const activeWeek = getWeeks(db).find(w => w.id === activeWeekId);
   const filename = buildPortfolioExportFilename(portfolioRegion ? portfolioRegion.label : '', activeWeek ? activeWeek.label : '');
 
   exportPortfolioPdfBtn.disabled = true;
   exportPortfolioPdfBtn.textContent = '⏳';
-  // Captures the *whole* .side-panel (same element and code path already proven
-  // correct by the full-panel export) with every other section hidden via the
-  // pdf-export-portfolio-only class, rather than pointing html2canvas at the
-  // narrower #panel-portfolio-section element directly. Verified live that the
-  // narrower-target approach silently mis-crops: html2canvas computes its render
-  // window before the .side-panel reflow (position:fixed -> static) settles, so
-  // a target element positioned deep inside that reflowed ancestor gets captured
-  // at the wrong coordinates — the exported PDF showed only the header row, no
-  // data. Capturing the same root as the working full-panel export sidesteps
-  // that mismatch entirely.
-  sidePanelEl.classList.add('pdf-export', 'pdf-export-portfolio-only');
+  const reportEl = buildReportElement({
+    regionLabel: portfolioRegion ? portfolioRegion.label : '',
+    weekLabel: activeWeek ? activeWeek.label : '',
+    portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
+    portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
+    sections: ['portfolio'],
+  });
+  document.body.appendChild(reportEl);
   try {
-    await exportElementAsPDF(sidePanelEl, filename);
+    await exportElementAsPDF(reportEl, filename);
   } catch (error) {
     console.error('Portfolio PDF export failed', error);
   } finally {
-    sidePanelEl.classList.remove('pdf-export', 'pdf-export-portfolio-only');
+    reportEl.remove();
     exportPortfolioPdfBtn.disabled = false;
     exportPortfolioPdfBtn.textContent = '📄';
   }
