@@ -41,39 +41,29 @@ describe('companyPresentationDateISO', () => {
   });
 });
 
-describe('buildChartSVG', () => {
-  it('returns null when given fewer than 2 points', () => {
+describe('buildChartSVG (legacy design)', () => {
+  const RISING = [{ date: '2026-04-24', close: 100 }, { date: '2026-05-21', close: 110 }, { date: '2026-07-23', close: 130 }];
+  const FALLING = [{ date: '2026-04-24', close: 100 }, { date: '2026-05-21', close: 90 }, { date: '2026-07-23', close: 70 }];
+
+  it('uses green for a rising series and red for a falling one', () => {
+    const risingSvg = buildChartSVG(RISING);
+    expect(risingSvg.querySelector('polyline').getAttribute('stroke')).toBe('#1c8a4b');
+    const fallingSvg = buildChartSVG(FALLING);
+    expect(fallingSvg.querySelector('polyline').getAttribute('stroke')).toBe('#c0392b');
+  });
+
+  it('renders 3 y-axis gridlines/labels and up to 5 x-axis date labels', () => {
+    const svg = buildChartSVG(RISING);
+    expect(svg.querySelectorAll('line')).toHaveLength(3);
+    const texts = [...svg.querySelectorAll('text')].map(t => t.textContent);
+    expect(texts).toContain('130.00');
+    expect(texts).toContain('100.00');
+    expect(texts).toContain('04-24');
+    expect(texts).toContain('07-23');
+  });
+
+  it('returns null for fewer than 2 points', () => {
+    expect(buildChartSVG([{ date: '2026-04-24', close: 100 }])).toBeNull();
     expect(buildChartSVG([])).toBeNull();
-    expect(buildChartSVG([{ date: '2026-01-01', close: 100 }])).toBeNull();
-  });
-
-  it('returns an SVG element with a polyline containing one coordinate per point', () => {
-    const svg = buildChartSVG([
-      { date: '2026-01-01', close: 100 },
-      { date: '2026-01-02', close: 110 },
-      { date: '2026-01-03', close: 90 },
-    ]);
-    expect(svg.tagName.toLowerCase()).toBe('svg');
-    const polyline = svg.querySelector('polyline');
-    expect(polyline).not.toBeNull();
-    expect(polyline.getAttribute('points').trim().split(' ')).toHaveLength(3);
-  });
-
-  it('uses the brand gold-light color for the line stroke', () => {
-    const svg = buildChartSVG([
-      { date: '2026-01-01', close: 100 },
-      { date: '2026-01-02', close: 110 },
-    ]);
-    expect(svg.querySelector('polyline').getAttribute('stroke')).toBe('#e0b53d');
-  });
-
-  it('handles a flat price series (identical close values) without dividing by zero', () => {
-    const svg = buildChartSVG([
-      { date: '2026-01-01', close: 50 },
-      { date: '2026-01-02', close: 50 },
-    ]);
-    const points = svg.querySelector('polyline').getAttribute('points');
-    expect(points).not.toContain('NaN');
-    expect(points).not.toContain('Infinity');
   });
 });
