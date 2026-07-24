@@ -63,6 +63,7 @@ let db = {};
 let activeWeekId = null;
 let activeRegionId = 'asia';
 let liveRefreshHandle = null;
+let liveRefreshRegionId = null;
 let isEditing = false;
 let weekTimelineHandle = null;
 // Deep copy of db taken when edit mode is unlocked, so "Tout annuler" can
@@ -556,11 +557,14 @@ function renderPanelForCurrentSelection() {
     isEditing,
   });
 
-  if (liveRefreshHandle) liveRefreshHandle.stop();
-  liveRefreshHandle = startPortfolioLiveRefresh({
-    getEntries: () => portfolioEntries,
-    onOverrides: overrides => panel.updateLiveQuotes(overrides),
-  });
+  if (activeRegionId !== liveRefreshRegionId) {
+    liveRefreshRegionId = activeRegionId;
+    if (liveRefreshHandle) liveRefreshHandle.stop();
+    liveRefreshHandle = startPortfolioLiveRefresh({
+      getEntries: () => portfolioEntries,
+      onOverrides: overrides => panel.updateLiveQuotes(overrides),
+    });
+  }
 }
 
 function handleRegionSelect(regionId) {
