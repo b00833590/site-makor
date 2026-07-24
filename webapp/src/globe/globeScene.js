@@ -8,7 +8,6 @@ import { regionIdForCountryName } from './regionPolygons.js';
 const EARTH_TEXTURE_URL = '/textures/earth-blue-marble.jpg';
 const SKY_TEXTURE_URL = '/textures/night-sky.png';
 const CAMERA_TRANSITION_MS = 1200;
-const MARKER_COLOR = '#e0b53d';
 const POLYGON_CAP_COLOR = 'rgba(224, 181, 61, 0.28)';
 const POLYGON_CAP_HOVER_COLOR = 'rgba(224, 181, 61, 0.6)';
 const POLYGON_SIDE_COLOR = 'rgba(15, 23, 48, 0.55)';
@@ -20,10 +19,6 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
   let hoveredPolygon = null;
   let pointerDownPos = null;
 
-  const points = regions.flatMap(region =>
-    region.points.map(point => ({ ...point, regionId: region.id }))
-  );
-
   const countryFeatures = feature(worldAtlas, worldAtlas.objects.countries).features
     .map(f => ({ ...f, regionId: regionIdForCountryName(f.properties?.name) }))
     .filter(f => f.regionId);
@@ -31,13 +26,6 @@ export function initGlobeScene(container, { regions, initialRegionId, onRegionSe
   const world = Globe()(container)
     .globeImageUrl(EARTH_TEXTURE_URL)
     .backgroundImageUrl(SKY_TEXTURE_URL)
-    .pointsData(points)
-    .pointLat('lat')
-    .pointLng('lng')
-    .pointColor(() => MARKER_COLOR)
-    .pointAltitude(0.015)
-    .pointRadius(0.35)
-    .pointLabel('name')
     .polygonsData(countryFeatures)
     .polygonCapColor(() => POLYGON_CAP_COLOR)
     .polygonSideColor(() => POLYGON_SIDE_COLOR)

@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { initSidePanel } from './sidePanel.js';
 
 describe('initSidePanel', () => {
-  let labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, panel;
+  let labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl, panel;
 
   beforeEach(() => {
     labelEl = document.createElement('div');
@@ -13,9 +13,8 @@ describe('initSidePanel', () => {
     compareEl = document.createElement('div');
     portfolioLabelEl = document.createElement('div');
     portfolioEl = document.createElement('div');
-    iaFintechEl = document.createElement('div');
     presentationsEl = document.createElement('div');
-    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {} });
+    panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {} });
   });
 
   it('sets the region label', () => {
@@ -227,7 +226,7 @@ describe('initSidePanel', () => {
 
     it('calls onIndexEdit with the item and a value patch when the value input changes', () => {
       const onIndexEdit = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       const valueInput = indicesEl.querySelector('.panel-index-value-input');
@@ -239,7 +238,7 @@ describe('initSidePanel', () => {
 
     it('calls onIndexEdit with a numeric weekChange patch when the change input changes', () => {
       const onIndexEdit = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       const changeInput = indicesEl.querySelector('.panel-index-change-input');
@@ -276,7 +275,7 @@ describe('initSidePanel', () => {
     it('calls onColorChange with the item, "value", and the picked color when a swatch is chosen', () => {
       const onColorChange = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {}, onIndexColorChange: onColorChange,
       });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
@@ -289,7 +288,7 @@ describe('initSidePanel', () => {
 
     it('renders name as an editable input with the flag as a static prefix, and calls onIndexEdit on change', () => {
       const onIndexEdit = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl, onOpenChart: () => {}, onIndexEdit, onIndexAdd: () => {}, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       expect(indicesEl.querySelector('.panel-index-name').textContent).toContain(ITEM.flag);
@@ -313,7 +312,7 @@ describe('initSidePanel', () => {
     it('renders a color dot next to the name input in edit mode, and calls onColorChange with "name"', () => {
       const onColorChange = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {}, onIndexColorChange: onColorChange,
       });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
@@ -345,7 +344,7 @@ describe('initSidePanel', () => {
     it('calls onColorChange with the item, "weekChange", and the picked color from the change color dot', () => {
       const onColorChange = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {}, onIndexColorChange: onColorChange,
       });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
@@ -358,7 +357,7 @@ describe('initSidePanel', () => {
 
     it('renders a delete button per row in edit mode that calls onIndexDelete with the item', () => {
       const onIndexDelete = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       indicesEl.querySelector('.panel-index-delete').click();
@@ -373,7 +372,7 @@ describe('initSidePanel', () => {
 
     it('renders an add-index button in edit mode that calls onIndexAdd', () => {
       const onIndexAdd = vi.fn();
-      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd, onIndexDelete: () => {} });
+      panel = initSidePanel({ labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl, onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd, onIndexDelete: () => {} });
       panel.showRegion('Europe', { marketItems: [ITEM], newsItems: [], isEditing: true });
 
       indicesEl.querySelector('.panel-index-add').click();
@@ -397,7 +396,7 @@ describe('initSidePanel', () => {
     it('calls onCompanyEdit when a company field is edited through the panel', () => {
       const onCompanyEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -434,7 +433,7 @@ describe('initSidePanel', () => {
     it('calls onPortfolioEdit when a portfolio field is edited through the panel', () => {
       const onPortfolioEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -488,7 +487,7 @@ describe('initSidePanel', () => {
     it('calls onNewsEdit with a title patch when the title input changes', () => {
       const onNewsEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -507,7 +506,7 @@ describe('initSidePanel', () => {
     it('calls onNewsEdit with a description patch when the description textarea changes', () => {
       const onNewsEdit = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -526,7 +525,7 @@ describe('initSidePanel', () => {
     it('renders a delete button per brief in edit mode that calls onNewsDelete with the item', () => {
       const onNewsDelete = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -548,7 +547,7 @@ describe('initSidePanel', () => {
     it('renders an add-brief button in edit mode that calls onNewsAdd', () => {
       const onNewsAdd = vi.fn();
       panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
+        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
         onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
         onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
         onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
@@ -559,222 +558,6 @@ describe('initSidePanel', () => {
 
       newsEl.querySelector('.panel-news-add').click();
       expect(onNewsAdd).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('IA & Fintech section', () => {
-    const IA_ITEM = { id: 'ia1', tag: 'IA générative', title: 'Titre', description: 'Description.', statLabel: 'Valorisation', statValue: '150 Md$', link: 'https://example.com/source' };
-
-    it('renders one card per item with tag, title, description and stat line', () => {
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM] });
-      expect(iaFintechEl.querySelector('.panel-iafintech-tag').textContent).toBe('IA générative');
-      expect(iaFintechEl.querySelector('.panel-iafintech-card h3').textContent).toBe('Titre');
-      expect(iaFintechEl.querySelector('.panel-iafintech-card p').textContent).toBe('Description.');
-      expect(iaFintechEl.querySelector('.panel-iafintech-stat').textContent).toContain('Valorisation');
-      expect(iaFintechEl.querySelector('.panel-iafintech-stat').textContent).toContain('150 Md$');
-    });
-
-    it('renders the link as an anchor when present and not editing', () => {
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM] });
-      const link = iaFintechEl.querySelector('.panel-iafintech-link');
-      expect(link.tagName).toBe('A');
-      expect(link.getAttribute('href')).toBe('https://example.com/source');
-    });
-
-    it('never renders a javascript: (or other non-http) link as a clickable anchor', () => {
-      panel.showRegion('Asie', {
-        marketItems: [], newsItems: [],
-        iaFintechItems: [{ id: 'ia4', title: 'T', description: 'D', link: 'javascript:alert(document.cookie)' }],
-      });
-      expect(iaFintechEl.querySelector('.panel-iafintech-link')).toBeNull();
-    });
-
-    it('omits the tag pill and stat line when absent and not editing', () => {
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [{ id: 'ia2', title: 'T', description: 'D' }] });
-      expect(iaFintechEl.querySelector('.panel-iafintech-tag')).toBeNull();
-      expect(iaFintechEl.querySelector('.panel-iafintech-stat')).toBeNull();
-      expect(iaFintechEl.querySelector('.panel-iafintech-link')).toBeNull();
-    });
-
-    it('defaults iaFintechItems to an empty list when omitted', () => {
-      expect(() => panel.showRegion('Asie', { marketItems: [], newsItems: [] })).not.toThrow();
-      expect(iaFintechEl.children.length).toBe(0);
-    });
-
-    it('never interprets stored content as HTML', () => {
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [{ id: 'ia3', title: '<img src=x onerror=alert(1)>', description: 'ok' }] });
-      expect(iaFintechEl.querySelector('.panel-iafintech-card h3').textContent).toBe('<img src=x onerror=alert(1)>');
-      expect(iaFintechEl.querySelector('img')).toBeNull();
-    });
-
-    it('renders title/description/tag/stat as editable inputs when isEditing is true', () => {
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-      expect(iaFintechEl.querySelector('.panel-iafintech-title-input').value).toBe('Titre');
-      expect(iaFintechEl.querySelector('.panel-iafintech-description-input').value).toBe('Description.');
-      expect(iaFintechEl.querySelector('.panel-iafintech-tag-input').value).toBe('IA générative');
-      expect(iaFintechEl.querySelector('.panel-iafintech-stat-label-input').value).toBe('Valorisation');
-      expect(iaFintechEl.querySelector('.panel-iafintech-stat-value-input').value).toBe('150 Md$');
-      expect(iaFintechEl.querySelector('.panel-iafintech-link-input').value).toBe('https://example.com/source');
-    });
-
-    it('calls onIaFintechEdit with a title patch when the title input changes', () => {
-      const onIaFintechEdit = vi.fn();
-      panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
-        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
-        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
-        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
-        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
-        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete: () => {},
-        onIaFintechEdit, onIaFintechAdd: () => {}, onIaFintechDelete: () => {},
-      });
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-
-      const titleInput = iaFintechEl.querySelector('.panel-iafintech-title-input');
-      titleInput.value = 'Nouveau titre';
-      titleInput.dispatchEvent(new Event('change'));
-
-      expect(onIaFintechEdit).toHaveBeenCalledWith(IA_ITEM, { title: 'Nouveau titre' });
-    });
-
-    it('calls onIaFintechEdit with a statValue patch when the stat value input changes', () => {
-      const onIaFintechEdit = vi.fn();
-      panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
-        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
-        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
-        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
-        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
-        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete: () => {},
-        onIaFintechEdit, onIaFintechAdd: () => {}, onIaFintechDelete: () => {},
-      });
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-
-      const statValueInput = iaFintechEl.querySelector('.panel-iafintech-stat-value-input');
-      statValueInput.value = '200 Md$';
-      statValueInput.dispatchEvent(new Event('change'));
-
-      expect(onIaFintechEdit).toHaveBeenCalledWith(IA_ITEM, { statValue: '200 Md$' });
-    });
-
-    it('calls onIaFintechEdit with a tag patch when the tag input changes', () => {
-      const onIaFintechEdit = vi.fn();
-      panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
-        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
-        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
-        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
-        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
-        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete: () => {},
-        onIaFintechEdit, onIaFintechAdd: () => {}, onIaFintechDelete: () => {},
-      });
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-
-      const tagInput = iaFintechEl.querySelector('.panel-iafintech-tag-input');
-      tagInput.value = 'Fintech';
-      tagInput.dispatchEvent(new Event('change'));
-
-      expect(onIaFintechEdit).toHaveBeenCalledWith(IA_ITEM, { tag: 'Fintech' });
-    });
-
-    it('calls onIaFintechEdit with a description patch when the description textarea changes', () => {
-      const onIaFintechEdit = vi.fn();
-      panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
-        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
-        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
-        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
-        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
-        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete: () => {},
-        onIaFintechEdit, onIaFintechAdd: () => {}, onIaFintechDelete: () => {},
-      });
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-
-      const textarea = iaFintechEl.querySelector('.panel-iafintech-description-input');
-      textarea.value = 'Nouvelle description.';
-      textarea.dispatchEvent(new Event('change'));
-
-      expect(onIaFintechEdit).toHaveBeenCalledWith(IA_ITEM, { description: 'Nouvelle description.' });
-    });
-
-    it('calls onIaFintechEdit with a statLabel patch when the stat label input changes', () => {
-      const onIaFintechEdit = vi.fn();
-      panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
-        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
-        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
-        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
-        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
-        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete: () => {},
-        onIaFintechEdit, onIaFintechAdd: () => {}, onIaFintechDelete: () => {},
-      });
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-
-      const statLabelInput = iaFintechEl.querySelector('.panel-iafintech-stat-label-input');
-      statLabelInput.value = 'Financement';
-      statLabelInput.dispatchEvent(new Event('change'));
-
-      expect(onIaFintechEdit).toHaveBeenCalledWith(IA_ITEM, { statLabel: 'Financement' });
-    });
-
-    it('calls onIaFintechEdit with a link patch when the link input changes', () => {
-      const onIaFintechEdit = vi.fn();
-      panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
-        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
-        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
-        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
-        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
-        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete: () => {},
-        onIaFintechEdit, onIaFintechAdd: () => {}, onIaFintechDelete: () => {},
-      });
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-
-      const linkInput = iaFintechEl.querySelector('.panel-iafintech-link-input');
-      linkInput.value = 'https://example.com/other-source';
-      linkInput.dispatchEvent(new Event('change'));
-
-      expect(onIaFintechEdit).toHaveBeenCalledWith(IA_ITEM, { link: 'https://example.com/other-source' });
-    });
-
-    it('renders a delete button per card in edit mode that calls onIaFintechDelete with the item', () => {
-      const onIaFintechDelete = vi.fn();
-      panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
-        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
-        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
-        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
-        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
-        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete: () => {},
-        onIaFintechEdit: () => {}, onIaFintechAdd: () => {}, onIaFintechDelete,
-      });
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-
-      iaFintechEl.querySelector('.panel-iafintech-delete').click();
-      expect(onIaFintechDelete).toHaveBeenCalledWith(IA_ITEM);
-    });
-
-    it('does not render delete/add buttons when isEditing is false', () => {
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM] });
-      expect(iaFintechEl.querySelector('.panel-iafintech-delete')).toBeNull();
-      expect(iaFintechEl.querySelector('.panel-iafintech-add')).toBeNull();
-    });
-
-    it('renders an add button in edit mode that calls onIaFintechAdd', () => {
-      const onIaFintechAdd = vi.fn();
-      panel = initSidePanel({
-        labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, iaFintechEl, presentationsEl,
-        onOpenChart: () => {}, onIndexEdit: () => {}, onIndexAdd: () => {}, onIndexDelete: () => {},
-        onCompanyEdit: () => {}, onCompanyAdd: () => {}, onCompanyDelete: () => {},
-        onCompanyBulletAdd: () => {}, onCompanyBulletEdit: () => {}, onCompanyBulletDelete: () => {},
-        onPortfolioEdit: () => {}, onPortfolioAdd: () => {}, onPortfolioDelete: () => {},
-        onNewsEdit: () => {}, onNewsAdd: () => {}, onNewsDelete: () => {},
-        onIaFintechEdit: () => {}, onIaFintechAdd, onIaFintechDelete: () => {},
-      });
-      panel.showRegion('Asie', { marketItems: [], newsItems: [], iaFintechItems: [IA_ITEM], isEditing: true });
-
-      iaFintechEl.querySelector('.panel-iafintech-add').click();
-      expect(onIaFintechAdd).toHaveBeenCalledTimes(1);
     });
   });
 
