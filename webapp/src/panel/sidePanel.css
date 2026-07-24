@@ -25,16 +25,6 @@ body.panel-open .side-panel {
   transform: translateX(0);
 }
 
-/* L'export PDF doit toujours capturer le panneau entièrement visible, quel
-   que soit l'état replié/ouvert au moment du clic — sinon html2canvas
-   capture un élément hors écran (même classe de bug que le "734x0" de la
-   phase 13). transition:none évite qu'il se figure à mi-animation pendant
-   que la capture démarre : le panneau doit apparaître instantanément. */
-.side-panel.pdf-export {
-  transform: none;
-  transition: none;
-}
-
 .panel-region-label {
   color: var(--gold-light, #e0b53d);
   font-size: 13px;
