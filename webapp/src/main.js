@@ -561,7 +561,7 @@ function renderPanelForCurrentSelection() {
     liveRefreshRegionId = activeRegionId;
     if (liveRefreshHandle) liveRefreshHandle.stop();
     liveRefreshHandle = startPortfolioLiveRefresh({
-      getEntries: () => portfolioEntries,
+      getEntries: () => getPortfolioEntriesForRegion(db, activeRegionId),
       onOverrides: overrides => panel.updateLiveQuotes(overrides),
     });
   }
