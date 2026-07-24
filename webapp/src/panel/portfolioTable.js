@@ -44,6 +44,9 @@ export function renderPortfolioTable(container, entries, { sortField, sortDirect
         td.appendChild(buildEditableInput(raw, col.type, 'portfolio-cell-input', v => onEditItem(entry, { [col.field]: v })));
       } else if (PERCENT_FIELDS.has(col.field)) {
         td.textContent = raw === undefined || raw === null || raw === '' ? '' : `${raw}%`;
+        if (raw !== undefined && raw !== null && raw !== '') {
+          td.classList.add(Number(raw) < 0 ? 'portfolio-cell-negative' : 'portfolio-cell-positive');
+        }
       } else {
         td.textContent = raw ?? '';
       }

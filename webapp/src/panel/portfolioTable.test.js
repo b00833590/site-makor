@@ -93,6 +93,24 @@ describe('renderPortfolioTable', () => {
     expect(container.textContent).toContain('<img src=x onerror=alert(1)>');
     expect(container.querySelector('img')).toBeNull();
   });
+
+  it('colors a positive DEPUIS/YTD value green and a negative one red, in read-only mode', () => {
+    const container = document.createElement('div');
+    renderPortfolioTable(container, ENTRIES, { sortField: 'date', sortDirection: 'asc', onSort: () => {} });
+    const cells = [...container.querySelectorAll('tbody tr')[0].querySelectorAll('td')];
+    expect(cells[4].classList.contains('portfolio-cell-positive')).toBe(true); // depuis: 5.2
+    expect(cells[5].classList.contains('portfolio-cell-positive')).toBe(true); // ytd: 5.0
+    const secondRowCells = [...container.querySelectorAll('tbody tr')[1].querySelectorAll('td')];
+    expect(secondRowCells[4].classList.contains('portfolio-cell-negative')).toBe(true); // depuis: -1.1
+  });
+
+  it('applies no color class when the DEPUIS/YTD value is missing', () => {
+    const container = document.createElement('div');
+    renderPortfolioTable(container, [{ id: 'p3', date: '01/01', entreprise: 'X', stagiaire: 'Y', symbol: 'Z' }], { sortField: 'date', sortDirection: 'asc', onSort: () => {} });
+    const cells = [...container.querySelectorAll('tbody td')];
+    expect(cells[4].className).toBe('');
+    expect(cells[5].className).toBe('');
+  });
 });
 
 describe('editable portfolio table', () => {

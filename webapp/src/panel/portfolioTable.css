@@ -25,6 +25,14 @@
   color: #fff;
 }
 
+.portfolio-cell-positive {
+  color: #1c8a4b;
+}
+
+.portfolio-cell-negative {
+  color: #c0392b;
+}
+
 .portfolio-region-header {
   display: flex;
   justify-content: space-between;
