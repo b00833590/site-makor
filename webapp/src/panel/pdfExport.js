@@ -11,20 +11,20 @@ export function buildPortfolioExportFilename(regionLabel, weekLabel) {
   return `Makor_Portefeuille_${sanitizeForFilename(regionLabel)}_${sanitizeForFilename(weekLabel)}.pdf`;
 }
 
-const A4_WIDTH_MM = 210;
-const MARGIN_SIDE_MM = 10;
-const MARGIN_BOTTOM_MM = 12;
+export const A4_WIDTH_MM = 210;
+export const MARGIN_SIDE_MM = 10;
+export const MARGIN_BOTTOM_MM = 12;
 const HEADER_MARGIN_TOP_MM = 8;
 const HEADER_ASPECT_RATIO = 802 / 116;
 const HEADER_WIDTH_MM = A4_WIDTH_MM - MARGIN_SIDE_MM * 2;
 const HEADER_HEIGHT_MM = HEADER_WIDTH_MM / HEADER_ASPECT_RATIO;
-const CONTENT_MARGIN_TOP_MM = HEADER_MARGIN_TOP_MM + HEADER_HEIGHT_MM + 6;
-const HEADER_IMAGE_URL = '/assets/header-makor.png';
+export const CONTENT_MARGIN_TOP_MM = HEADER_MARGIN_TOP_MM + HEADER_HEIGHT_MM + 6;
+export const HEADER_IMAGE_URL = '/assets/header-makor.png';
 
 // Non testable en jsdom (canvas.getContext('2d') n'y est pas implémenté) —
-// c'est pourquoi exportElementAsPDF accepte loadHeaderImageFn en injection,
-// exactement comme html2pdfFn : les tests couvrent l'orchestration réelle
-// en mockant ce point d'entrée, pas cette fonction elle-même.
+// c'est pourquoi les appelants (pdfReportBuilder.js) acceptent loadHeaderImageFn
+// en injection : les tests couvrent l'orchestration réelle en mockant ce point
+// d'entrée, pas cette fonction elle-même.
 export function loadImageAsDataURL(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -47,24 +47,4 @@ export function addHeaderToEveryPage(pdf, headerDataUrl) {
     pdf.setPage(i);
     pdf.addImage(headerDataUrl, 'PNG', MARGIN_SIDE_MM, HEADER_MARGIN_TOP_MM, HEADER_WIDTH_MM, HEADER_HEIGHT_MM);
   }
-}
-
-export async function exportElementAsPDF(element, filename, { html2pdfFn, loadHeaderImageFn = loadImageAsDataURL } = {}) {
-  const fn = html2pdfFn || (await import('html2pdf.js')).default;
-  const headerDataUrl = await loadHeaderImageFn(HEADER_IMAGE_URL);
-
-  await fn()
-    .set({
-      margin: [CONTENT_MARGIN_TOP_MM, MARGIN_SIDE_MM, MARGIN_BOTTOM_MM, MARGIN_SIDE_MM],
-      filename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['css', 'legacy'] },
-    })
-    .from(element)
-    .toPdf()
-    .get('pdf')
-    .then(pdf => addHeaderToEveryPage(pdf, headerDataUrl))
-    .save();
 }

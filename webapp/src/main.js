@@ -22,9 +22,8 @@ import { initSidePanel } from './panel/sidePanel.js';
 import { initPanelToggle } from './panel/panelToggle.js';
 import { initPresentationsModal } from './panel/presentationsModal.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
-import { buildExportFilename, exportElementAsPDF, buildPortfolioExportFilename } from './panel/pdfExport.js';
-import { buildReportElement } from './panel/pdfReport.js';
-import './panel/pdfReport.css';
+import { buildExportFilename, buildPortfolioExportFilename } from './panel/pdfExport.js';
+import { generateReportPDF } from './panel/pdfReportBuilder.js';
 import { openPresentationPdf } from './panel/presentationPdf.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
 import { renderWeekAdmin } from './timeline/weekAdmin.js';
@@ -720,22 +719,19 @@ exportPdfBtn.addEventListener('click', async () => {
 
   exportPdfBtn.disabled = true;
   exportPdfBtn.textContent = '⏳ Génération...';
-  const reportEl = buildReportElement({
-    regionLabel: region ? region.label : '',
-    weekLabel: activeWeek ? activeWeek.label : '',
-    portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
-    marketItems: getMarketItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
-    newsItems: getNewsItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
-    companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
-    portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
-  });
-  document.body.appendChild(reportEl);
   try {
-    await exportElementAsPDF(reportEl, filename);
+    await generateReportPDF({
+      regionLabel: region ? region.label : '',
+      weekLabel: activeWeek ? activeWeek.label : '',
+      portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
+      marketItems: getMarketItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+      newsItems: getNewsItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+      companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+      portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
+    }, filename);
   } catch (error) {
     console.error('PDF export failed', error);
   } finally {
-    reportEl.remove();
     exportPdfBtn.disabled = false;
     exportPdfBtn.textContent = '📄 Exporter en PDF';
   }
@@ -750,20 +746,17 @@ exportPortfolioPdfBtn.addEventListener('click', async () => {
 
   exportPortfolioPdfBtn.disabled = true;
   exportPortfolioPdfBtn.textContent = '⏳';
-  const reportEl = buildReportElement({
-    regionLabel: portfolioRegion ? portfolioRegion.label : '',
-    weekLabel: activeWeek ? activeWeek.label : '',
-    portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
-    portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
-    sections: ['portfolio'],
-  });
-  document.body.appendChild(reportEl);
   try {
-    await exportElementAsPDF(reportEl, filename);
+    await generateReportPDF({
+      regionLabel: portfolioRegion ? portfolioRegion.label : '',
+      weekLabel: activeWeek ? activeWeek.label : '',
+      portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
+      portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
+      sections: ['portfolio'],
+    }, filename);
   } catch (error) {
     console.error('Portfolio PDF export failed', error);
   } finally {
-    reportEl.remove();
     exportPortfolioPdfBtn.disabled = false;
     exportPortfolioPdfBtn.textContent = '📄';
   }

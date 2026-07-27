@@ -111,6 +111,16 @@ describe('renderPortfolioTable', () => {
     expect(cells[4].className).toBe('');
     expect(cells[5].className).toBe('');
   });
+
+  it('applies no color class (neutral) when the DEPUIS/YTD value is exactly zero', () => {
+    const container = document.createElement('div');
+    renderPortfolioTable(container, [{ id: 'p3', date: '01/01', entreprise: 'X', stagiaire: 'Y', symbol: 'Z', depuis: 0, ytd: 0 }], { sortField: 'date', sortDirection: 'asc', onSort: () => {} });
+    const cells = [...container.querySelectorAll('tbody td')];
+    expect(cells[4].className).toBe('');
+    expect(cells[5].className).toBe('');
+    expect(cells[4].textContent).toBe('0%');
+  });
+
 });
 
 describe('editable portfolio table', () => {

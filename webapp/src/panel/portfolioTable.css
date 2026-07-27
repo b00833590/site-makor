@@ -25,11 +25,18 @@
   color: #fff;
 }
 
-.portfolio-cell-positive {
+/*
+ * Scoped as ".portfolio-table td.portfolio-cell-*" (not just ".portfolio-cell-*")
+ * so this outranks ".portfolio-table td { color: #fff }" above — a plain single-class
+ * selector has LOWER specificity than a class+element selector and was silently
+ * losing the cascade despite the class being applied correctly (found live: the
+ * class was present on the cell, getComputedStyle(cell).color was still white).
+ */
+.portfolio-table td.portfolio-cell-positive {
   color: #1c8a4b;
 }
 
-.portfolio-cell-negative {
+.portfolio-table td.portfolio-cell-negative {
   color: #c0392b;
 }
 

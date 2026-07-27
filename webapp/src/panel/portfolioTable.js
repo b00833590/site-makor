@@ -45,7 +45,10 @@ export function renderPortfolioTable(container, entries, { sortField, sortDirect
       } else if (PERCENT_FIELDS.has(col.field)) {
         td.textContent = raw === undefined || raw === null || raw === '' ? '' : `${raw}%`;
         if (raw !== undefined && raw !== null && raw !== '') {
-          td.classList.add(Number(raw) < 0 ? 'portfolio-cell-negative' : 'portfolio-cell-positive');
+          const num = Number(raw);
+          if (num > 0) td.classList.add('portfolio-cell-positive');
+          else if (num < 0) td.classList.add('portfolio-cell-negative');
+          // exactly zero: no class added, stays the default neutral color
         }
       } else {
         td.textContent = raw ?? '';
