@@ -18,6 +18,7 @@ import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
 import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getPresentations } from './data/selectors.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
+import { fridayOfCurrentWeekDDMM } from './data/dateUtils.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initPanelToggle } from './panel/panelToggle.js';
 import { initPresentationsModal } from './panel/presentationsModal.js';
@@ -133,13 +134,32 @@ function companyItemKey(item) {
 function handleCompanyEdit(item, patch) {
   const key = companyItemKey(item);
   setItemLocal(key, { ...db[key], ...patch }, '⚠️ Sauvegarde en ligne échouée — la modification a été annulée');
+
+  // Keep the linked portfolio row's entreprise/symbol in sync — without this,
+  // renaming a company after creation (the normal workflow: add a blank card,
+  // then rename it) would silently break companyChart.js's entry.entreprise
+  // === item.name lookup, since the portfolio row would still hold the old
+  // placeholder name forever.
+  if (item.portfolioEntryId && ('name' in patch || 'yahooSymbol' in patch)) {
+    const linkedEntry = db[`mkg:portfolio:${item.portfolioEntryId}`];
+    if (linkedEntry) {
+      const portfolioPatch = {};
+      if ('name' in patch) portfolioPatch.entreprise = patch.name;
+      if ('yahooSymbol' in patch) portfolioPatch.symbol = patch.yahooSymbol;
+      handlePortfolioEdit(linkedEntry, portfolioPatch);
+    }
+  }
 }
 
 function handleCompanyAdd() {
   const id = generateId();
   const key = `mkg:content:entreprises:${activeWeekId}:${id}`;
+  const portfolioId = generateId();
+  const portfolioKey = `mkg:portfolio:${portfolioId}`;
+
   const newItem = {
     id,
+    portfolioEntryId: portfolioId,
     region: GROUP_LABEL_BY_REGION[activeRegionId] || '',
     name: 'Nouvelle entreprise',
     yahooSymbol: '',
@@ -152,7 +172,27 @@ function handleCompanyAdd() {
     targetPrice: '',
     bullets: [],
   };
-  setItemLocal(key, newItem, '⚠️ Ajout en ligne échoué — la nouvelle entreprise a été retirée');
+  const newPortfolioEntry = {
+    id: portfolioId,
+    date: fridayOfCurrentWeekDDMM(),
+    entreprise: newItem.name,
+    stagiaire: '',
+    symbol: '',
+    regionId: PORTFOLIO_REGION_BY_GLOBE_REGION[activeRegionId] || '',
+    depuis: 0,
+    ytd: 0,
+  };
+
+  db[key] = newItem;
+  db[portfolioKey] = newPortfolioEntry;
+  renderPanelForCurrentSelection();
+
+  client.writeDocsBatch([[key, newItem], [portfolioKey, newPortfolioEntry]]).catch(() => {
+    delete db[key];
+    delete db[portfolioKey];
+    renderPanelForCurrentSelection();
+    showToast(document.getElementById('admin-toast'), "⚠️ Ajout en ligne échoué — la nouvelle entreprise et sa ligne de portefeuille ont été retirées");
+  });
 }
 
 function handleCompanyDelete(item) {
