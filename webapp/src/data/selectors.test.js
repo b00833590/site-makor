@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getPresentations } from './selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getAllCompaniesEverPresented, getPresentations } from './selectors.js';
 
 const DB = {
   'mkg:week:w2': { id: 'w2', label: 'Semaine 2', order: 1 },
@@ -156,6 +156,33 @@ describe('getAllCompanyItemsForWeek', () => {
 
   it('returns an empty array when nothing matches', () => {
     expect(getAllCompanyItemsForWeek(DB, 'w9')).toEqual([]);
+  });
+});
+
+describe('getAllCompaniesEverPresented', () => {
+  it('returns every company across every week, sorted alphabetically by name', () => {
+    const names = getAllCompaniesEverPresented(DB).map(c => c.name);
+    expect(names).toEqual(['Reliance Industries', 'Some Co', 'Toyota']);
+  });
+
+  it("attaches each company's source weekId", () => {
+    const toyota = getAllCompaniesEverPresented(DB).find(c => c.name === 'Toyota');
+    expect(toyota.weekId).toBe('w2');
+  });
+
+  it('keeps only the most recent occurrence when the same name appears in multiple weeks', () => {
+    const dbWithDuplicate = {
+      ...DB,
+      'mkg:content:entreprises:w1:c9': { id: 'c9', name: 'Toyota', region: 'Asie', marketCap: 'old' },
+    };
+    const results = getAllCompaniesEverPresented(dbWithDuplicate).filter(c => c.name === 'Toyota');
+    expect(results).toHaveLength(1);
+    expect(results[0].weekId).toBe('w2'); // w2 has the higher order (1) than w1 (0)
+    expect(results[0].id).toBe('c3'); // the w2 occurrence, not the w1 duplicate
+  });
+
+  it('returns an empty array when there are no companies', () => {
+    expect(getAllCompaniesEverPresented({ 'mkg:week:w1': { id: 'w1', label: 'Semaine 1', order: 0 } })).toEqual([]);
   });
 });
 
