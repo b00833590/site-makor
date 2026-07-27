@@ -498,7 +498,10 @@ function handleWeekDuplicate(sourceWeek) {
   const contentEntries = [
     ...duplicateContentEntries(getAllMarketItemsForWeek(db, sourceWeekId), 'mkg:market:', newWeekId),
     ...duplicateContentEntries(getAllNewsItemsForWeek(db, sourceWeekId), 'mkg:content:news:', newWeekId),
-    ...duplicateContentEntries(getAllCompanyItemsForWeek(db, sourceWeekId), 'mkg:content:entreprises:', newWeekId),
+    ...duplicateContentEntries(
+      getAllCompanyItemsForWeek(db, sourceWeekId).map(({ portfolioEntryId, ...rest }) => rest),
+      'mkg:content:entreprises:', newWeekId,
+    ),
     ...duplicateContentEntries(getIaFintechItemsForWeek(db, sourceWeekId), 'mkg:content:ia-fintech:', newWeekId),
   ];
 
