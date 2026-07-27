@@ -160,6 +160,12 @@ function handleCompanyDelete(item) {
   deleteItemLocal(companyItemKey(item), "⚠️ Suppression en ligne échouée — l'entreprise a été restaurée");
 }
 
+function handleCompanyColorChange(item, field, color) {
+  const colors = { ...(item.colors || {}) };
+  if (color) colors[field] = color; else delete colors[field];
+  handleCompanyEdit(item, { colors });
+}
+
 function handleCompanyBulletAdd(item) {
   handleCompanyEdit(item, { bullets: [...(item.bullets || []), 'Nouveau point clé à compléter'] });
 }
@@ -468,6 +474,7 @@ const panel = initSidePanel({
   onIndexDelete: handleIndexDelete,
   onIndexColorChange: handleIndexColorChange,
   onCompanyEdit: handleCompanyEdit,
+  onCompanyColorChange: handleCompanyColorChange,
   onCompanyAdd: handleCompanyAdd,
   onCompanyDelete: handleCompanyDelete,
   onCompanyBulletAdd: handleCompanyBulletAdd,
