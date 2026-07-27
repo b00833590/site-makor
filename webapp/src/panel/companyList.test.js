@@ -299,3 +299,91 @@ describe('renderComparison', () => {
     expect(text).toContain('EV/EBITDA: 4,55x');
   });
 });
+
+describe('renderCompanies — color picker', () => {
+  it('renders no color dots when isEditing is false, even with colors set', () => {
+    const container = document.createElement('div');
+    const colored = { ...COMPANY_A, colors: { name: '#2f6fed', marketCap: '#c0392b', salesGrowth: '#16a34a', 'bullet-0': '#9b59b6' } };
+    renderCompanies(container, [colored], [], { onToggle: () => {}, onOpenChart: () => {} });
+    expect(container.querySelector('.color-dot')).toBeNull();
+  });
+
+  it('applies a stored color as inline style on name, marketCap, a stat value, and a bullet in read-only mode', () => {
+    const container = document.createElement('div');
+    const colored = { ...COMPANY_A, colors: { name: '#2f6fed', marketCap: '#c0392b', salesGrowth: '#16a34a', 'bullet-0': '#9b59b6' } };
+    renderCompanies(container, [colored], [], { onToggle: () => {}, onOpenChart: () => {} });
+    expect(container.querySelector('.panel-company-name').style.color).toBe('rgb(47, 111, 237)');
+    expect(container.querySelector('.panel-company-cap').style.color).toBe('rgb(192, 57, 43)');
+    expect(container.querySelectorAll('.panel-company-stat-value')[0].style.color).toBe('rgb(22, 163, 74)');
+    expect(container.querySelectorAll('.panel-company-bullets li')[0].style.color).toBe('rgb(155, 89, 182)');
+  });
+
+  it('renders a color dot next to name/marketCap in edit mode and calls onColorChange with the right field', () => {
+    const container = document.createElement('div');
+    const onColorChange = vi.fn();
+    renderCompanies(container, [COMPANY_A], [], {
+      onToggle: () => {}, onOpenChart: () => {}, isEditing: true,
+      onEditItem: () => {}, onAddItem: () => {}, onDeleteItem: () => {},
+      onBulletAdd: () => {}, onBulletEdit: () => {}, onBulletDelete: () => {},
+      onColorChange,
+    });
+    container.querySelector('.panel-company-name .color-dot').click();
+    document.querySelector('.color-swatch').click();
+    expect(onColorChange).toHaveBeenCalledWith(COMPANY_A, 'name', expect.any(String));
+
+    onColorChange.mockClear();
+    container.querySelector('.panel-company-cap .color-dot').click();
+    document.querySelector('.color-swatch').click();
+    expect(onColorChange).toHaveBeenCalledWith(COMPANY_A, 'marketCap', expect.any(String));
+  });
+
+  it('renders a color dot for each of the 4 stat values in edit mode and calls onColorChange with the correct value field', () => {
+    const container = document.createElement('div');
+    const onColorChange = vi.fn();
+    renderCompanies(container, [COMPANY_A], [], {
+      onToggle: () => {}, onOpenChart: () => {}, isEditing: true,
+      onEditItem: () => {}, onAddItem: () => {}, onDeleteItem: () => {},
+      onBulletAdd: () => {}, onBulletEdit: () => {}, onBulletDelete: () => {},
+      onColorChange,
+    });
+    const fields = ['salesGrowth', 'evEbitda', 'coursActuel', 'targetPrice'];
+    const dots = container.querySelectorAll('.panel-company-stat-value .color-dot');
+    expect(dots).toHaveLength(4);
+    dots.forEach((dot, i) => {
+      dot.click();
+      document.querySelector('.color-swatch').click();
+      expect(onColorChange).toHaveBeenNthCalledWith(i + 1, COMPANY_A, fields[i], expect.any(String));
+    });
+  });
+
+  it('renders one color dot per bullet in edit mode and calls onColorChange with the correct bullet-index field', () => {
+    const container = document.createElement('div');
+    const onColorChange = vi.fn();
+    renderCompanies(container, [COMPANY_A], [], {
+      onToggle: () => {}, onOpenChart: () => {}, isEditing: true,
+      onEditItem: () => {}, onAddItem: () => {}, onDeleteItem: () => {},
+      onBulletAdd: () => {}, onBulletEdit: () => {}, onBulletDelete: () => {},
+      onColorChange,
+    });
+    const dots = container.querySelectorAll('.panel-company-bullets li .color-dot');
+    expect(dots).toHaveLength(2); // COMPANY_A has 2 bullets
+    dots[1].click();
+    document.querySelector('.color-swatch').click();
+    expect(onColorChange).toHaveBeenCalledWith(COMPANY_A, 'bullet-1', expect.any(String));
+  });
+
+  it('clicking the reset swatch calls onColorChange with null', () => {
+    const container = document.createElement('div');
+    const onColorChange = vi.fn();
+    const colored = { ...COMPANY_A, colors: { name: '#2f6fed' } };
+    renderCompanies(container, [colored], [], {
+      onToggle: () => {}, onOpenChart: () => {}, isEditing: true,
+      onEditItem: () => {}, onAddItem: () => {}, onDeleteItem: () => {},
+      onBulletAdd: () => {}, onBulletEdit: () => {}, onBulletDelete: () => {},
+      onColorChange,
+    });
+    container.querySelector('.panel-company-name .color-dot').click();
+    document.querySelector('.color-swatch-reset').click();
+    expect(onColorChange).toHaveBeenCalledWith(colored, 'name', null);
+  });
+});

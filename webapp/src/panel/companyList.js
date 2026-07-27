@@ -1,4 +1,5 @@
 import { buildEditableInput } from '../admin/editableInput.js';
+import { buildColorDot } from '../admin/colorPicker.js';
 
 const STAT_FIELDS = [
   ['salesGrowthLabel', 'salesGrowth', 'Croissance CA'],
@@ -7,7 +8,7 @@ const STAT_FIELDS = [
   ['targetPriceLabel', 'targetPrice', 'Objectif'],
 ];
 
-function buildStatsGrid(item, isEditing, onEditItem) {
+function buildStatsGrid(item, isEditing, { onEditItem, onColorChange }) {
   const stats = document.createElement('div');
   stats.className = 'panel-company-stats';
   for (const [labelField, valueField, defaultLabel] of STAT_FIELDS) {
@@ -24,8 +25,11 @@ function buildStatsGrid(item, isEditing, onEditItem) {
 
     const value = document.createElement('span');
     value.className = 'panel-company-stat-value';
+    const valueColor = item.colors && item.colors[valueField];
+    if (valueColor) value.style.color = valueColor;
     if (isEditing) {
       value.appendChild(buildEditableInput(item[valueField], 'text', 'panel-company-stat-input', v => onEditItem(item, { [valueField]: v })));
+      value.appendChild(buildColorDot(valueColor, color => onColorChange(item, valueField, color)));
     } else {
       value.textContent = item[valueField] ?? '';
     }
@@ -36,12 +40,15 @@ function buildStatsGrid(item, isEditing, onEditItem) {
   return stats;
 }
 
-function buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBulletDelete }) {
+function buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBulletDelete, onColorChange }) {
   const bullets = document.createElement('ul');
   bullets.className = 'panel-company-bullets';
 
   (item.bullets || []).forEach((bullet, index) => {
     const li = document.createElement('li');
+    const field = `bullet-${index}`;
+    const bulletColor = item.colors && item.colors[field];
+    if (bulletColor) li.style.color = bulletColor;
     if (isEditing) {
       const textarea = document.createElement('textarea');
       textarea.className = 'panel-company-bullet-input';
@@ -55,7 +62,7 @@ function buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBullet
       delBtn.textContent = '✕';
       delBtn.addEventListener('click', () => onBulletDelete(item, index));
 
-      li.append(textarea, delBtn);
+      li.append(textarea, buildColorDot(bulletColor, color => onColorChange(item, field, color)), delBtn);
     } else {
       li.textContent = bullet;
     }
@@ -76,7 +83,7 @@ function buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBullet
   return bullets;
 }
 
-export function renderCompanies(container, items, selectedIds, { onToggle, onOpenChart, isEditing = false, onEditItem, onAddItem, onDeleteItem, onBulletAdd, onBulletEdit, onBulletDelete }) {
+export function renderCompanies(container, items, selectedIds, { onToggle, onOpenChart, isEditing = false, onEditItem, onAddItem, onDeleteItem, onBulletAdd, onBulletEdit, onBulletDelete, onColorChange }) {
   container.replaceChildren();
   for (const item of items) {
     const card = document.createElement('div');
@@ -87,8 +94,11 @@ export function renderCompanies(container, items, selectedIds, { onToggle, onOpe
 
     const name = document.createElement('span');
     name.className = 'panel-company-name';
+    const nameColor = item.colors && item.colors.name;
+    if (nameColor) name.style.color = nameColor;
     if (isEditing) {
       name.appendChild(buildEditableInput(item.name, 'text', 'panel-company-name-input', v => onEditItem(item, { name: v })));
+      name.appendChild(buildColorDot(nameColor, color => onColorChange(item, 'name', color)));
     } else {
       name.textContent = item.name;
     }
@@ -123,13 +133,16 @@ export function renderCompanies(container, items, selectedIds, { onToggle, onOpe
 
     const cap = document.createElement('div');
     cap.className = 'panel-company-cap';
+    const capColor = item.colors && item.colors.marketCap;
+    if (capColor) cap.style.color = capColor;
     if (isEditing) {
       cap.appendChild(buildEditableInput(item.marketCap, 'text', 'panel-company-cap-input', v => onEditItem(item, { marketCap: v })));
+      cap.appendChild(buildColorDot(capColor, color => onColorChange(item, 'marketCap', color)));
     } else {
       cap.textContent = item.marketCap ?? '';
     }
 
-    card.append(header, sub, cap, buildStatsGrid(item, isEditing, onEditItem), buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBulletDelete }));
+    card.append(header, sub, cap, buildStatsGrid(item, isEditing, { onEditItem, onColorChange }), buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBulletDelete, onColorChange }));
 
     if (isEditing) {
       const delBtn = document.createElement('button');

@@ -160,6 +160,12 @@ function handleCompanyDelete(item) {
   deleteItemLocal(companyItemKey(item), "⚠️ Suppression en ligne échouée — l'entreprise a été restaurée");
 }
 
+function handleCompanyColorChange(item, field, color) {
+  const colors = { ...(item.colors || {}) };
+  if (color) colors[field] = color; else delete colors[field];
+  handleCompanyEdit(item, { colors });
+}
+
 function handleCompanyBulletAdd(item) {
   handleCompanyEdit(item, { bullets: [...(item.bullets || []), 'Nouveau point clé à compléter'] });
 }
@@ -168,8 +174,29 @@ function handleCompanyBulletEdit(item, index, text) {
   handleCompanyEdit(item, { bullets: (item.bullets || []).map((bullet, i) => (i === index ? text : bullet)) });
 }
 
+function reindexBulletColors(colors, deletedIndex) {
+  const result = {};
+  for (const [key, value] of Object.entries(colors || {})) {
+    const match = key.match(/^bullet-(\d+)$/);
+    if (!match) {
+      result[key] = value;
+      continue;
+    }
+    const bulletIndex = Number(match[1]);
+    if (bulletIndex === deletedIndex) continue; // the deleted bullet's own color goes with it
+    result[bulletIndex > deletedIndex ? `bullet-${bulletIndex - 1}` : key] = value;
+  }
+  return result;
+}
+
 function handleCompanyBulletDelete(item, index) {
-  handleCompanyEdit(item, { bullets: (item.bullets || []).filter((_, i) => i !== index) });
+  handleCompanyEdit(item, {
+    bullets: (item.bullets || []).filter((_, i) => i !== index),
+    // colors are keyed by positional index (bullet-0, bullet-1, ...) — without this,
+    // deleting a non-last bullet would leave surviving bullets showing a sibling's
+    // stale color once the array reindexes (found in code review, 2026-07-27).
+    colors: reindexBulletColors(item.colors, index),
+  });
 }
 
 function portfolioItemKey(item) {
@@ -468,6 +495,7 @@ const panel = initSidePanel({
   onIndexDelete: handleIndexDelete,
   onIndexColorChange: handleIndexColorChange,
   onCompanyEdit: handleCompanyEdit,
+  onCompanyColorChange: handleCompanyColorChange,
   onCompanyAdd: handleCompanyAdd,
   onCompanyDelete: handleCompanyDelete,
   onCompanyBulletAdd: handleCompanyBulletAdd,

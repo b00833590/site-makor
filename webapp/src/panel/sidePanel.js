@@ -124,7 +124,7 @@ function renderNews(container, items, isEditing, { onEditItem, onAddItem, onDele
 export function initSidePanel({
   labelEl, indicesEl, newsEl, companiesEl, compareEl, portfolioLabelEl, portfolioEl, presentationsEl,
   onOpenChart, onIndexEdit, onIndexAdd, onIndexDelete, onIndexColorChange,
-  onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete,
+  onCompanyEdit, onCompanyAdd, onCompanyDelete, onCompanyBulletAdd, onCompanyBulletEdit, onCompanyBulletDelete, onCompanyColorChange,
   onPortfolioEdit, onPortfolioAdd, onPortfolioDelete,
   onNewsEdit, onNewsAdd, onNewsDelete,
   onPresentationOpen, onPresentationDelete, onPresentationTitleEdit, onPresentationAddClick,
@@ -147,6 +147,7 @@ export function initSidePanel({
       onBulletAdd: onCompanyBulletAdd,
       onBulletEdit: onCompanyBulletEdit,
       onBulletDelete: onCompanyBulletDelete,
+      onColorChange: onCompanyColorChange,
     });
     renderComparison(compareEl, currentCompanyItems, selectedCompanyIds);
   }

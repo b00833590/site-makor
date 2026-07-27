@@ -195,3 +195,10 @@
   font-size: 11px;
   padding: 4px 8px;
 }
+
+.panel-company-name-input,
+.panel-company-stat-input,
+.panel-company-cap-input,
+.panel-company-bullet-input {
+  color: inherit;
+}
