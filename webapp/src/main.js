@@ -4,6 +4,7 @@ import './panel/companyList.css';
 import './panel/portfolioTable.css';
 import './panel/chartModal.css';
 import './timeline/weekTimeline.css';
+import './timeline/topBanner.css';
 import './timeline/weekAdmin.css';
 import './admin/passwordModal.css';
 import './admin/toast.css';
@@ -16,7 +17,8 @@ import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
-import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getPresentations } from './data/selectors.js';
+import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getAllCompaniesEverPresented, getPresentations } from './data/selectors.js';
+import { normalizeRegionLabel } from './data/regionMatch.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initPanelToggle } from './panel/panelToggle.js';
@@ -26,6 +28,7 @@ import { buildExportFilename, buildPortfolioExportFilename } from './panel/pdfEx
 import { generateReportPDF } from './panel/pdfReportBuilder.js';
 import { openPresentationPdf } from './panel/presentationPdf.js';
 import { initWeekTimeline } from './timeline/weekTimeline.js';
+import { initTopBanner } from './timeline/topBanner.js';
 import { renderWeekAdmin } from './timeline/weekAdmin.js';
 import { startPortfolioLiveRefresh } from './panel/portfolioLiveRefresh.js';
 import { initPasswordModal } from './admin/passwordModal.js';
@@ -578,9 +581,45 @@ const scene = initGlobeScene(container, {
 prevBtn.addEventListener('click', () => scene.goToPrevRegion());
 nextBtn.addEventListener('click', () => scene.goToNextRegion());
 
-initPanelToggle({
+const panelToggleHandle = initPanelToggle({
   toggleBtn: document.getElementById('panel-toggle-btn'),
   bodyEl: document.body,
+});
+
+function handleSearchSelectCompany(company) {
+  activeWeekId = company.weekId;
+  if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+
+  const targetRegionId = normalizeRegionLabel(company.region);
+  if (targetRegionId && targetRegionId !== activeRegionId) {
+    scene.goToRegion(targetRegionId);
+    // goToRegion's onRegionSelect callback (handleRegionSelect) already calls
+    // renderPanelForCurrentSelection() — no need to call it a second time here.
+  } else {
+    renderPanelForCurrentSelection();
+  }
+
+  panelToggleHandle.open();
+
+  // The panel's CSS opening transition (globe.css, 0.35s) must finish before
+  // the target card exists at a stable scroll position — matches the timing
+  // already used elsewhere in this codebase for post-transition DOM work.
+  setTimeout(() => {
+    const card = [...document.querySelectorAll('.panel-company-name')]
+      .find(el => el.textContent === company.name)
+      ?.closest('.panel-company-card');
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('search-highlight');
+    setTimeout(() => card.classList.remove('search-highlight'), 1500);
+  }, 400);
+}
+
+initTopBanner({
+  searchInputEl: document.getElementById('top-banner-search-input'),
+  searchResultsEl: document.getElementById('top-banner-search-results'),
+  getAllCompanies: () => getAllCompaniesEverPresented(db),
+  onSelectCompany: handleSearchSelectCompany,
 });
 
 initPresentationsModal({
