@@ -606,9 +606,12 @@ function handleLexiqueSelectCompany(company) {
   panelToggleHandle.open();
 
   setTimeout(() => {
-    const card = [...document.querySelectorAll('.panel-company-name')]
-      .find(el => el.textContent === company.name)
-      ?.closest('.panel-company-card');
+    // Looked up via the card's own data-companyName attribute, not
+    // .panel-company-name's textContent: while editing, that span holds an
+    // <input> instead of plain text (companyList.js), so a textContent match
+    // would silently miss the card whenever edit mode is on (found in review).
+    const card = [...document.querySelectorAll('.panel-company-card')]
+      .find(el => el.dataset.companyName === company.name);
     if (!card) return;
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
     card.classList.add('search-highlight');
