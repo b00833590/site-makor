@@ -31,7 +31,7 @@ body.panel-open #globe-container {
 
 .region-indicator {
   position: fixed;
-  top: 16px;
+  top: 64px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(15, 23, 48, 0.85);
@@ -85,7 +85,7 @@ body.panel-open .arrow-next {
 
 .edit-toggle-btn {
   position: fixed;
-  top: 16px;
+  top: 64px;
   right: 16px;
   z-index: 15;
   background: rgba(15, 23, 48, 0.9);
@@ -106,7 +106,7 @@ body.panel-open .arrow-next {
 .undo-all-btn {
   display: none;
   position: fixed;
-  top: 16px;
+  top: 64px;
   right: 320px;
   z-index: 15;
   background: rgba(15, 23, 48, 0.9);
@@ -128,7 +128,7 @@ body.panel-open .arrow-next {
 
 .export-pdf-btn {
   position: fixed;
-  top: 16px;
+  top: 64px;
   right: 160px;
   z-index: 15;
   background: rgba(15, 23, 48, 0.9);
