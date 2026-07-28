@@ -6,7 +6,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--surface);
+  background: var(--surface-button);
   border: 1px solid rgba(74, 58, 130, 0.4);
   color: var(--accent, #4a3a82);
   font-size: 16px;
@@ -47,7 +47,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 18px 10px;
-  border-bottom: 1px solid rgba(36, 28, 61, 0.08);
+  border-bottom: 1px solid var(--border);
 }
 
 .lexique-modal-header h3 {

@@ -7,14 +7,21 @@
 
 .portfolio-table th,
 .portfolio-table td {
-  border-bottom: 1px solid rgba(36, 28, 61, 0.08);
+  border-bottom: 1px solid var(--border);
   padding: 5px 4px;
   text-align: left;
   color: var(--text);
 }
 
+/* En-têtes de colonnes forcés en blanc pur, sur demande explicite —
+   surcharge le var(--text) partagé avec les td juste au-dessus : les
+   cellules de données (td) gardent var(--text), seuls les th changent. */
+.portfolio-table th {
+  color: #ffffff;
+}
+
 .portfolio-table th.portfolio-sortable {
-  color: var(--accent, #4a3a82);
+  color: #ffffff;
   cursor: pointer;
   font-size: 10px;
   text-transform: uppercase;
@@ -33,11 +40,11 @@
  * class was present on the cell, getComputedStyle(cell).color was still white).
  */
 .portfolio-table td.portfolio-cell-positive {
-  color: #1c8a4b;
+  color: #4ade80;
 }
 
 .portfolio-table td.portfolio-cell-negative {
-  color: #c0392b;
+  color: #f87171;
 }
 
 .portfolio-region-header {
@@ -49,7 +56,7 @@
 }
 
 .portfolio-region-label {
-  color: var(--accent, #4a3a82);
+  color: #ffffff;
   font-size: 11px;
   font-weight: bold;
 }

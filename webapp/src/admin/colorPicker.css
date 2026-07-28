@@ -3,7 +3,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 1px solid rgba(36, 28, 61, 0.3);
+  border: 1px solid rgba(237, 235, 245, 0.3);
   margin-left: 6px;
   cursor: pointer;
   vertical-align: middle;
@@ -27,7 +27,7 @@
   height: 20px;
   border-radius: 4px;
   cursor: pointer;
-  border: 1px solid rgba(36, 28, 61, 0.15);
+  border: 1px solid rgba(237, 235, 245, 0.2);
 }
 
 .color-swatch-reset {

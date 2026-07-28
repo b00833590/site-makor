@@ -55,12 +55,12 @@
    light banner instead of blending into it. */
 .week-timeline-fade-left {
   left: 0;
-  background: linear-gradient(to right, var(--surface, #f3f1f8), transparent);
+  background: linear-gradient(to right, var(--surface, #1c1b2e), transparent);
 }
 
 .week-timeline-fade-right {
   right: 0;
-  background: linear-gradient(to left, var(--surface, #f3f1f8), transparent);
+  background: linear-gradient(to left, var(--surface, #1c1b2e), transparent);
 }
 
 .week-timeline-fade.visible {
@@ -87,7 +87,12 @@
 }
 
 .week-tab.active {
-  color: var(--surface, #f3f1f8);
+  /* var(--text), pas var(--surface) : le texte doit rester clair sur le
+     fond violet vif de l'accent, quelle que soit la teinte de --surface.
+     Un ancien réglage réutilisait --surface ici parce qu'il était toujours
+     clair par construction (thème blanc/perle) — devenu un bug de
+     contraste réel (1.78:1) maintenant que --surface est sombre. */
+  color: var(--text);
   background: var(--accent, #4a3a82);
   font-weight: bold;
 }

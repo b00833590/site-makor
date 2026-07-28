@@ -11,19 +11,30 @@
   --gold: #8a7cc0;
   --gold-light: #b3a5e0;
 
-  /* Nouveaux tokens pour le Groupe B (bandeau, panneau, cartes, modales) —
-     un violet plus profond, nécessaire pour un contraste correct sur fond
-     blanc (repris du dégradé réel de makor-group.com). */
+  /* Groupe B (bandeau, panneau, cartes, modales) — après 2 tentatives de
+     fond clair ("blanc pur" puis "gris perle", toutes deux jugées trop
+     "choquantes"), l'utilisateur a demandé un renversement complet vers un
+     thème sombre violet à 5 niveaux de hiérarchie (du fond de panneau au
+     plus foncé jusqu'à la mise en valeur d'une donnée chiffrée clé au plus
+     clair) — même logique de superposition que --surface/--surface-alt
+     avant, simplement étendue et inversée en luminosité. --accent (utilisé
+     pour les CTA/boutons actifs, ex. l'onglet de semaine sélectionné) reste
+     INCHANGÉ sur demande explicite de l'utilisateur : c'est le seul point
+     de contraste fort du thème. */
   --accent: #4a3a82;
-  /* Fond "gris perle" légèrement lavande plutôt que blanc pur — transition
-     plus douce vers l'accent violet, moins de rupture visuelle qu'un blanc
-     éclatant. --surface-alt reste un cran en dessous (mêmes ratios de
-     contraste qu'avant le changement, juste translatés vers le bas). */
-  --surface: #f3f1f8;
-  --surface-alt: #e9e5f2;
-  --border: #d7d2e4;
-  --text: #241c3d;
-  --text-muted: #5c5575;
+  --surface: #1c1b2e;
+  --surface-alt: #242239;
+  --surface-card: #2b2942;
+  --surface-button: #332f52;
+  --surface-highlight: #403a5c;
+  /* Bordure translucide claire plutôt qu'une teinte fixe : s'adapte
+     automatiquement aux 5 niveaux ci-dessus sans avoir à choisir une
+     nuance par palier (remplace les anciens rgba(36, 28, 61, X), qui étaient
+     calibrés pour un texte sombre sur fond clair et deviendraient
+     quasi invisibles sur un fond sombre). */
+  --border: rgba(237, 235, 245, 0.12);
+  --text: #edebf5;
+  --text-muted: #9490b0;
 }
 
 * {
@@ -77,7 +88,7 @@ body.panel-open .region-indicator {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(15, 23, 48, 0.85);
+  background: var(--surface-button);
   border: 1px solid rgba(179, 165, 224, 0.35);
   color: var(--gold-light);
   font-size: 18px;
@@ -109,7 +120,7 @@ body.panel-open .arrow-next {
   top: 64px;
   right: 16px;
   z-index: 15;
-  background: rgba(15, 23, 48, 0.9);
+  background: var(--surface-button);
   border: 1px solid rgba(179, 165, 224, 0.4);
   border-radius: 6px;
   color: var(--gold-light, #b3a5e0);
@@ -130,7 +141,7 @@ body.panel-open .arrow-next {
   top: 64px;
   right: 320px;
   z-index: 15;
-  background: rgba(15, 23, 48, 0.9);
+  background: var(--surface-button);
   border: 1px solid rgba(224, 118, 106, 0.5);
   border-radius: 6px;
   color: #e0736a;
@@ -152,7 +163,7 @@ body.panel-open .arrow-next {
   top: 64px;
   right: 160px;
   z-index: 15;
-  background: rgba(15, 23, 48, 0.9);
+  background: var(--surface-button);
   border: 1px solid rgba(179, 165, 224, 0.4);
   border-radius: 6px;
   color: var(--gold-light, #b3a5e0);

@@ -5,7 +5,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--surface);
+  background: var(--surface-button);
   border: 1px solid rgba(74, 58, 130, 0.4);
   color: var(--accent, #4a3a82);
   font-size: 16px;

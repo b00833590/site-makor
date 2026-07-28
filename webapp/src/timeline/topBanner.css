@@ -58,7 +58,7 @@
   text-align: left;
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(36, 28, 61, 0.08);
+  border-bottom: 1px solid var(--border);
   color: var(--text);
   font-size: 12px;
   padding: 8px 10px;
