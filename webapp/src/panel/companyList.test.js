@@ -233,7 +233,9 @@ describe('editable company bullets', () => {
     const container = document.createElement('div');
     renderCompanies(container, [COMPANY], [], { onToggle: () => {}, onOpenChart: () => {} });
     expect(container.querySelector('textarea')).toBeNull();
-    expect(container.querySelectorAll('.panel-company-bullets li')[0].textContent).toBe('Expansion retail');
+    const firstBullet = container.querySelectorAll('.panel-company-bullets li')[0];
+    expect(firstBullet.querySelector('.panel-bullet-arrow').textContent).toBe('▶');
+    expect(firstBullet.querySelector('.panel-bullet-text').textContent).toBe('Expansion retail');
   });
 
   it('renders each bullet as a textarea plus a delete button in edit mode', () => {

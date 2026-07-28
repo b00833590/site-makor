@@ -7,14 +7,14 @@
 
 .portfolio-table th,
 .portfolio-table td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(36, 28, 61, 0.08);
   padding: 5px 4px;
   text-align: left;
-  color: #fff;
+  color: var(--text);
 }
 
 .portfolio-table th.portfolio-sortable {
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 10px;
   text-transform: uppercase;
@@ -22,12 +22,12 @@
 }
 
 .portfolio-table th.portfolio-sortable:hover {
-  color: #fff;
+  color: var(--text);
 }
 
 /*
  * Scoped as ".portfolio-table td.portfolio-cell-*" (not just ".portfolio-cell-*")
- * so this outranks ".portfolio-table td { color: #fff }" above — a plain single-class
+ * so this outranks ".portfolio-table td { color: var(--text) }" above — a plain single-class
  * selector has LOWER specificity than a class+element selector and was silently
  * losing the cascade despite the class being applied correctly (found live: the
  * class was present on the cell, getComputedStyle(cell).color was still white).
@@ -49,16 +49,16 @@
 }
 
 .portfolio-region-label {
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   font-size: 11px;
   font-weight: bold;
 }
 
 .portfolio-export-btn {
   background: transparent;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  border: 1px solid rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 13px;
   line-height: 1;
@@ -66,7 +66,7 @@
 }
 
 .portfolio-export-btn:hover {
-  background: rgba(201, 151, 31, 0.2);
+  background: rgba(74, 58, 130, 0.2);
 }
 
 .portfolio-export-btn:disabled {
@@ -77,10 +77,10 @@
 .portfolio-cell-input {
   width: 100%;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 11px;
   padding: 2px 4px;
 }
@@ -98,14 +98,14 @@
   width: 100%;
   margin-top: 8px;
   background: transparent;
-  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border: 1px dashed rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 12px;
   padding: 6px;
 }
 
 .portfolio-add:hover {
-  background: rgba(201, 151, 31, 0.15);
+  background: rgba(74, 58, 130, 0.15);
 }

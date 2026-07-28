@@ -1,3 +1,5 @@
+import { initScrollActivity } from '../styles/scrollActivity.js';
+
 // Diacritic-stripped, for grouping only — the list itself is pre-sorted by
 // getAllCompaniesEverPresented() using localeCompare(..., 'fr'), which is
 // accent-aware and interleaves accented/unaccented forms of the same base
@@ -82,6 +84,7 @@ export function initLexiqueModal({ modalEl, searchInputEl, listEl, triggerBtn, c
     if (event.target === modalEl) close();
   });
   searchInputEl.addEventListener('input', () => render(searchInputEl.value));
+  initScrollActivity(listEl);
 
   return { open, close };
 }

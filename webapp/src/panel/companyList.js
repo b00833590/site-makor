@@ -64,7 +64,13 @@ function buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBullet
 
       li.append(textarea, buildColorDot(bulletColor, color => onColorChange(item, field, color)), delBtn);
     } else {
-      li.textContent = bullet;
+      const arrow = document.createElement('span');
+      arrow.className = 'panel-bullet-arrow';
+      arrow.textContent = '▶';
+      const text = document.createElement('span');
+      text.className = 'panel-bullet-text';
+      text.textContent = bullet;
+      li.append(arrow, text);
     }
     bullets.appendChild(li);
   });
