@@ -52,15 +52,15 @@
 /* Fades to var(--surface) rather than var(--navy): .week-timeline lives
    inside .top-banner, which Task 1 repaints to the light Group B surface —
    fading to the old dark navy here would draw a visible dark block over the
-   new white banner instead of blending into it. */
+   light banner instead of blending into it. */
 .week-timeline-fade-left {
   left: 0;
-  background: linear-gradient(to right, var(--surface, #ffffff), transparent);
+  background: linear-gradient(to right, var(--surface, #f3f1f8), transparent);
 }
 
 .week-timeline-fade-right {
   right: 0;
-  background: linear-gradient(to left, var(--surface, #ffffff), transparent);
+  background: linear-gradient(to left, var(--surface, #f3f1f8), transparent);
 }
 
 .week-timeline-fade.visible {
@@ -87,7 +87,7 @@
 }
 
 .week-tab.active {
-  color: var(--surface, #ffffff);
+  color: var(--surface, #f3f1f8);
   background: var(--accent, #4a3a82);
   font-weight: bold;
 }

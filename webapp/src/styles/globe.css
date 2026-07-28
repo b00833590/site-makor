@@ -15,11 +15,15 @@
      un violet plus profond, nécessaire pour un contraste correct sur fond
      blanc (repris du dégradé réel de makor-group.com). */
   --accent: #4a3a82;
-  --surface: #ffffff;
-  --surface-alt: #f6f5fa;
-  --border: #e3e1ec;
+  /* Fond "gris perle" légèrement lavande plutôt que blanc pur — transition
+     plus douce vers l'accent violet, moins de rupture visuelle qu'un blanc
+     éclatant. --surface-alt reste un cran en dessous (mêmes ratios de
+     contraste qu'avant le changement, juste translatés vers le bas). */
+  --surface: #f3f1f8;
+  --surface-alt: #e9e5f2;
+  --border: #d7d2e4;
   --text: #241c3d;
-  --text-muted: #6d6785;
+  --text-muted: #5c5575;
 }
 
 * {
