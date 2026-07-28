@@ -76,3 +76,13 @@ describe('setWeeks', () => {
     expect(onSelect).toHaveBeenCalledWith('w3');
   });
 });
+
+describe('wrapper and fade overlays', () => {
+  it('creates a wrap element and two fade overlays when container is attached to the DOM', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    initWeekTimeline({ container, weeks: WEEKS, activeWeekId: 'w1', onSelect: () => {} });
+    expect(document.querySelector('.week-timeline-wrap')).not.toBeNull();
+    expect(document.querySelectorAll('.week-timeline-fade')).toHaveLength(2);
+  });
+});

@@ -1,21 +1,70 @@
-.week-timeline {
+.week-timeline-wrap {
+  position: relative;
   flex: 1 1 auto;
   min-width: 0;
+  height: 100%;
+}
+
+.week-timeline {
+  width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   gap: 6px;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
   padding: 0 12px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(224, 181, 61, 0.25) transparent;
 }
 
 .week-timeline::-webkit-scrollbar {
-  height: 4px;
+  height: 5px;
+}
+
+.week-timeline::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.week-timeline::-webkit-scrollbar-thumb {
+  background: rgba(224, 181, 61, 0.25);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.week-timeline:hover::-webkit-scrollbar-thumb,
+.week-timeline.is-scrolling::-webkit-scrollbar-thumb {
+  background: rgba(224, 181, 61, 0.7);
+}
+
+.week-timeline-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+
+.week-timeline-fade-left {
+  left: 0;
+  background: linear-gradient(to right, var(--navy, #0f1730), transparent);
+}
+
+.week-timeline-fade-right {
+  right: 0;
+  background: linear-gradient(to left, var(--navy, #0f1730), transparent);
+}
+
+.week-timeline-fade.visible {
+  opacity: 1;
 }
 
 .week-tab {
+  scroll-snap-align: start;
   flex: 0 0 auto;
   background: transparent;
   border: 1px solid transparent;
