@@ -23,6 +23,20 @@ describe('renderCompanies', () => {
     expect(card.querySelector('.panel-company-cap').textContent).toBe('210 Md$');
   });
 
+  it('tags the card with the company name via a data attribute, in both read-only and editing modes (used by search-navigation to find the card even while its name is replaced by an input)', () => {
+    const container = document.createElement('div');
+    renderCompanies(container, [COMPANY_A], [], { onToggle: () => {}, onOpenChart: () => {} });
+    expect(container.querySelector('.panel-company-card').dataset.companyName).toBe('Reliance Industries');
+
+    const editingContainer = document.createElement('div');
+    renderCompanies(editingContainer, [COMPANY_A], [], {
+      onToggle: () => {}, onOpenChart: () => {}, isEditing: true,
+      onEditItem: () => {}, onAddItem: () => {}, onDeleteItem: () => {},
+      onBulletAdd: () => {}, onBulletEdit: () => {}, onBulletDelete: () => {},
+    });
+    expect(editingContainer.querySelector('.panel-company-card').dataset.companyName).toBe('Reliance Industries');
+  });
+
   it('renders the 4-stat grid with values', () => {
     const container = document.createElement('div');
     renderCompanies(container, [COMPANY_A], [], { onToggle: () => {}, onOpenChart: () => {} });
