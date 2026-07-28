@@ -13,16 +13,18 @@ import './admin/presentationUploadModal.css';
 import './panel/presentations.css';
 import './panel/panelToggle.css';
 import './panel/presentationsModal.css';
+import './panel/lexiqueModal.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
 import { createFirestoreClient, loadAllWithRetry } from './data/firestoreClient.js';
 import { getWeeks, getMarketItemsForWeekAndRegion, getNewsItemsForWeekAndRegion, getCompanyItemsForWeekAndRegion, getIaFintechItemsForWeek, getWeekContentKeys, getAllMarketItemsForWeek, getAllNewsItemsForWeek, getAllCompanyItemsForWeek, getAllCompaniesEverPresented, getPresentations } from './data/selectors.js';
-import { normalizeRegionLabel } from './data/regionMatch.js';
 import { getPortfolioEntriesForRegion, getPortfolioRegion, PORTFOLIO_REGION_BY_GLOBE_REGION } from './data/portfolioSelectors.js';
+import { normalizeRegionLabel } from './data/regionMatch.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initPanelToggle } from './panel/panelToggle.js';
 import { initPresentationsModal } from './panel/presentationsModal.js';
+import { initLexiqueModal } from './panel/lexiqueModal.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
 import { buildExportFilename, buildPortfolioExportFilename } from './panel/pdfExport.js';
 import { generateReportPDF } from './panel/pdfReportBuilder.js';
@@ -629,6 +631,43 @@ initPresentationsModal({
   modalEl: document.getElementById('presentations-modal'),
   closeBtn: document.getElementById('presentations-modal-close'),
   triggerBtn: document.getElementById('presentations-trigger-btn'),
+});
+
+function handleLexiqueSelectCompany(company) {
+  activeWeekId = company.weekId;
+  if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+
+  const targetRegionId = normalizeRegionLabel(company.region);
+  if (targetRegionId && targetRegionId !== activeRegionId) {
+    scene.goToRegion(targetRegionId);
+  } else {
+    renderPanelForCurrentSelection();
+  }
+
+  panelToggleHandle.open();
+
+  setTimeout(() => {
+    // Looked up via the card's own data-companyName attribute, not
+    // .panel-company-name's textContent: while editing, that span holds an
+    // <input> instead of plain text (companyList.js), so a textContent match
+    // would silently miss the card whenever edit mode is on (found in review).
+    const card = [...document.querySelectorAll('.panel-company-card')]
+      .find(el => el.dataset.companyName === company.name);
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('search-highlight');
+    setTimeout(() => card.classList.remove('search-highlight'), 1500);
+  }, 400);
+}
+
+initLexiqueModal({
+  modalEl: document.getElementById('lexique-modal'),
+  searchInputEl: document.getElementById('lexique-search-input'),
+  listEl: document.getElementById('lexique-list'),
+  triggerBtn: document.getElementById('lexique-trigger-btn'),
+  closeBtn: document.getElementById('lexique-modal-close'),
+  getAllCompanies: () => getAllCompaniesEverPresented(db),
+  onSelectCompany: handleLexiqueSelectCompany,
 });
 
 const editToggleBtn = document.getElementById('edit-toggle-btn');

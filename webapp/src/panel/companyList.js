@@ -90,9 +90,9 @@ export function renderCompanies(container, items, selectedIds, { onToggle, onOpe
     card.className = 'panel-company-card';
     // Independent of isEditing: while editing, .panel-company-name's text is
     // replaced by an <input> (see below), so textContent-based lookups (e.g.
-    // the search-navigation "scroll to this card" feature) would silently
-    // fail to find the card whenever edit mode is on. A dedicated attribute
-    // on the card itself works in both modes.
+    // the top-banner search and Lexique's "scroll to this card" navigation)
+    // would silently fail to find the card whenever edit mode is on. A
+    // dedicated attribute on the card itself works in both modes.
     card.dataset.companyName = item.name;
 
     const header = document.createElement('div');
