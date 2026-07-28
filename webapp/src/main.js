@@ -49,6 +49,8 @@ const GROUP_LABEL_BY_REGION = {
   'north-america': 'AMÉRIQUE DU NORD',
 };
 
+const OLD_SITE_URL = 'https://makor-morning-news.vercel.app/';
+
 const container = document.getElementById('globe-container');
 const indicator = document.getElementById('region-indicator');
 const prevBtn = document.getElementById('arrow-prev');
@@ -73,6 +75,7 @@ let liveRefreshHandle = null;
 let liveRefreshRegionId = null;
 let isEditing = false;
 let weekTimelineHandle = null;
+let lastFocusedCompanyKey = null;
 // Deep copy of db taken when edit mode is unlocked, so "Tout annuler" can
 // restore the session's starting point. null whenever edit mode is off.
 let sessionSnapshot = null;
@@ -632,6 +635,7 @@ const panelToggleHandle = initPanelToggle({
 });
 
 function handleSearchSelectCompany(company) {
+  lastFocusedCompanyKey = `mkg:content:entreprises:${company.weekId}:${company.id}`;
   activeWeekId = company.weekId;
   if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
 
@@ -677,6 +681,7 @@ initPresentationsModal({
 });
 
 function handleLexiqueSelectCompany(company) {
+  lastFocusedCompanyKey = `mkg:content:entreprises:${company.weekId}:${company.id}`;
   activeWeekId = company.weekId;
   if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
 
@@ -744,16 +749,17 @@ const presentationUploadModal = initPresentationUploadModal({
 });
 
 editToggleBtn.addEventListener('click', () => {
-  if (isEditing) {
-    isEditing = false;
-    sessionSnapshot = null;
-    editToggleBtn.textContent = '✏️ Éditer';
-    editToggleBtn.classList.remove('active');
-    undoAllBtn.classList.remove('visible');
-    renderPanelForCurrentSelection();
-  } else {
-    passwordModal.open();
+  const params = new URLSearchParams({ week: activeWeekId || '', cat: 'entreprises' });
+  // mkg:content:entreprises:{weekId}:{id} splits into 5 parts on ':' —
+  // ['mkg', 'content', 'entreprises', weekId, id] — weekId is index 3.
+  // generateId() output is base-36, never contains ':', so this split is
+  // unambiguous (same assumption already relied on elsewhere in this
+  // project, see phase 12 of the project memory).
+  const focusedWeekId = (lastFocusedCompanyKey || '').split(':')[3];
+  if (lastFocusedCompanyKey && focusedWeekId === activeWeekId) {
+    params.set('key', lastFocusedCompanyKey);
   }
+  window.open(`${OLD_SITE_URL}?${params.toString()}`, '_blank', 'noopener');
 });
 
 function handleUndoAll() {
