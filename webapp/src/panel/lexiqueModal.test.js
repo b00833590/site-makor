@@ -34,6 +34,22 @@ describe('initLexiqueModal', () => {
     expect(letters).toEqual(['A', 'E']); // Asia Cement, then Evergreen Marine + EVT Ltd share "E"
   });
 
+  it('groups an accented name under the same letter as its unaccented neighbors, even though it sorts between them (localeCompare("fr") interleaves "Ecole"/"École"/"Edison" as E, É, E)', () => {
+    const withAccent = [
+      { id: 'd1', name: 'Dell', yahooSymbol: '', region: 'Asie', weekId: 'w1' },
+      { id: 'd2', name: 'Ecole ABC', yahooSymbol: '', region: 'Asie', weekId: 'w1' },
+      { id: 'd3', name: 'École XYZ', yahooSymbol: '', region: 'Asie', weekId: 'w1' },
+      { id: 'd4', name: 'Edison', yahooSymbol: '', region: 'Asie', weekId: 'w1' },
+      { id: 'd5', name: 'Fanuc', yahooSymbol: '', region: 'Asie', weekId: 'w1' },
+    ];
+    const { listEl, triggerBtn } = setup(withAccent);
+    triggerBtn.click();
+    const letters = [...listEl.querySelectorAll('.lexique-letter')].map(el => el.textContent);
+    expect(letters).toEqual(['D', 'E', 'F']); // not ['D', 'E', 'É', 'E', 'F']
+    const eGroupItems = [...listEl.querySelectorAll('.lexique-item')].slice(1, 4).map(el => el.childNodes[0].textContent);
+    expect(eGroupItems).toEqual(['Ecole ABC', 'École XYZ', 'Edison']);
+  });
+
   it('filters the list live as the search input changes', () => {
     const { searchInputEl, listEl, triggerBtn } = setup();
     triggerBtn.click();
