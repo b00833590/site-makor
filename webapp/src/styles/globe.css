@@ -1,8 +1,25 @@
 :root {
+  /* Fond de la scène globe/espace — INCHANGÉ, reste sombre pour que le
+     globe 3D et le champ d'étoiles restent lisibles. */
   --navy: #0f1730;
   --navy2: #1a2340;
-  --gold: #c9971f;
-  --gold-light: #e0b53d;
+
+  /* Accent conservé pour le Groupe A uniquement (chrome "verre sombre" qui
+     flotte encore au-dessus du globe) — reteinté du doré vers un lavande
+     clair pour garder un contraste fort sur fond sombre, exactement le même
+     rôle qu'avant (accent clair sur fond sombre), juste une autre teinte. */
+  --gold: #8a7cc0;
+  --gold-light: #b3a5e0;
+
+  /* Nouveaux tokens pour le Groupe B (bandeau, panneau, cartes, modales) —
+     un violet plus profond, nécessaire pour un contraste correct sur fond
+     blanc (repris du dégradé réel de makor-group.com). */
+  --accent: #4a3a82;
+  --surface: #ffffff;
+  --surface-alt: #f6f5fa;
+  --border: #e3e1ec;
+  --text: #241c3d;
+  --text-muted: #6d6785;
 }
 
 * {
@@ -35,7 +52,7 @@ body.panel-open #globe-container {
   left: 50%;
   transform: translateX(-50%);
   background: rgba(15, 23, 48, 0.85);
-  border: 1px solid rgba(224, 181, 61, 0.3);
+  border: 1px solid rgba(179, 165, 224, 0.3);
   border-radius: 20px;
   padding: 6px 16px;
   color: #fff;
@@ -57,7 +74,7 @@ body.panel-open .region-indicator {
   height: 38px;
   border-radius: 50%;
   background: rgba(15, 23, 48, 0.85);
-  border: 1px solid rgba(224, 181, 61, 0.35);
+  border: 1px solid rgba(179, 165, 224, 0.35);
   color: var(--gold-light);
   font-size: 18px;
   line-height: 1;
@@ -67,7 +84,7 @@ body.panel-open .region-indicator {
 }
 
 .arrow-btn:hover {
-  background: rgba(201, 151, 31, 0.25);
+  background: rgba(138, 124, 192, 0.25);
 }
 
 .arrow-prev {
@@ -89,16 +106,16 @@ body.panel-open .arrow-next {
   right: 16px;
   z-index: 15;
   background: rgba(15, 23, 48, 0.9);
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  border: 1px solid rgba(179, 165, 224, 0.4);
   border-radius: 6px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--gold-light, #b3a5e0);
   cursor: pointer;
   font-size: 12px;
   padding: 8px 14px;
 }
 
 .edit-toggle-btn.active {
-  background: rgba(201, 151, 31, 0.25);
+  background: rgba(138, 124, 192, 0.25);
 }
 
 /* Hidden by default; main.js reveals it only while edit mode is unlocked,
@@ -132,14 +149,14 @@ body.panel-open .arrow-next {
   right: 160px;
   z-index: 15;
   background: rgba(15, 23, 48, 0.9);
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  border: 1px solid rgba(179, 165, 224, 0.4);
   border-radius: 6px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--gold-light, #b3a5e0);
   cursor: pointer;
   font-size: 12px;
   padding: 8px 14px;
 }
 
 .export-pdf-btn:hover {
-  background: rgba(201, 151, 31, 0.2);
+  background: rgba(138, 124, 192, 0.2);
 }

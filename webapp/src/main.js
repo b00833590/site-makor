@@ -1,4 +1,5 @@
 import './styles/globe.css';
+import './styles/scrollbar.css';
 import './panel/sidePanel.css';
 import './panel/companyList.css';
 import './panel/portfolioTable.css';
@@ -41,6 +42,7 @@ import { generateId } from './admin/uid.js';
 import { ADMIN_PASSWORD } from './admin/config.js';
 import { computeSessionRestore, splitUnrestorablePresentationDeletes } from './admin/sessionUndo.js';
 import { arrayBufferToBase64, validatePresentationFile, uploadPresentation, MAX_FILE_SIZE_BYTES } from './panel/presentationUpload.js';
+import { initScrollActivity } from './styles/scrollActivity.js';
 
 const GROUP_LABEL_BY_REGION = {
   asia: 'ASIE',
@@ -563,6 +565,11 @@ const panel = initSidePanel({
   onPresentationAddClick: handlePresentationAddClick,
 });
 
+// .side-panel has no id in index.html (only a class) — queried directly
+// rather than assuming a specific nesting/id, per the same caution the panel
+// itself already needs when its DOM structure changes.
+initScrollActivity(document.querySelector('.side-panel'));
+
 function updateIndicator(regionId) {
   const region = REGIONS.find(r => r.id === regionId);
   const { index, total } = regionPosition(REGIONS, regionId);
@@ -673,6 +680,7 @@ initTopBanner({
   getAllCompanies: () => getAllCompaniesEverPresented(db),
   onSelectCompany: handleSearchSelectCompany,
 });
+initScrollActivity(document.getElementById('top-banner-search-results'));
 
 initPresentationsModal({
   modalEl: document.getElementById('presentations-modal'),

@@ -4,8 +4,8 @@
   left: 0;
   right: 0;
   height: 48px;
-  background: rgba(15, 23, 48, 0.92);
-  border-bottom: 1px solid rgba(224, 181, 61, 0.25);
+  background: var(--surface);
+  border-bottom: 1px solid rgba(74, 58, 130, 0.25);
   display: flex;
   align-items: center;
   z-index: 20;
@@ -20,21 +20,21 @@
 .top-banner-search-input {
   width: 100%;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(224, 181, 61, 0.3);
+  background: var(--surface-alt);
+  border: 1px solid rgba(74, 58, 130, 0.3);
   border-radius: 6px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
   padding: 7px 10px;
 }
 
 .top-banner-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-muted);
 }
 
 .top-banner-search-input:focus {
   outline: none;
-  border-color: var(--gold-light, #e0b53d);
+  border-color: var(--accent, #4a3a82);
 }
 
 .top-banner-search-results {
@@ -43,9 +43,10 @@
   left: 0;
   right: 0;
   margin-top: 4px;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid rgba(74, 58, 130, 0.4);
   border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(36, 28, 61, 0.12);
   max-height: 280px;
   overflow-y: auto;
   z-index: 25;
@@ -57,8 +58,8 @@
   text-align: left;
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: #fff;
+  border-bottom: 1px solid rgba(36, 28, 61, 0.08);
+  color: var(--text);
   font-size: 12px;
   padding: 8px 10px;
   cursor: pointer;
@@ -70,18 +71,18 @@
 
 .top-banner-search-result:hover,
 .top-banner-search-result.highlighted {
-  background: rgba(201, 151, 31, 0.2);
+  background: rgba(74, 58, 130, 0.2);
 }
 
 .top-banner-search-result-symbol {
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   margin-left: 4px;
   font-size: 11px;
 }
 
 .top-banner-search-empty {
   padding: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
   font-size: 12px;
 }
 
@@ -91,6 +92,6 @@
 }
 
 @keyframes search-highlight-pulse {
-  0% { box-shadow: 0 0 0 2px var(--gold-light, #e0b53d); }
+  0% { box-shadow: 0 0 0 2px var(--accent, #4a3a82); }
   100% { box-shadow: 0 0 0 2px transparent; }
 }

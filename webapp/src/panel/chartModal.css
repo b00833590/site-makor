@@ -30,7 +30,7 @@
 }
 
 .chart-modal-header span {
-  color: #0f1730;
+  color: var(--text);
   font-weight: bold;
   font-family: Georgia, serif;
   font-size: 20px;
@@ -84,7 +84,7 @@
 .chart-price {
   font-size: 22px;
   font-weight: 800;
-  color: #0f1730;
+  color: var(--text);
 }
 
 .chart-price-change {

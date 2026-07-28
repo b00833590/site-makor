@@ -8,13 +8,13 @@
   right: 0;
   bottom: 0;
   width: var(--panel-width);
-  background: rgba(15, 23, 48, 0.98);
-  border-left: 2px solid rgba(224, 181, 61, 0.5);
-  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.45);
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -12px 0 32px rgba(36, 28, 61, 0.1);
   padding: 16px;
   box-sizing: border-box;
   overflow-y: auto;
-  color: #fff;
+  color: var(--text);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   z-index: 4;
   transform: translateX(100%);
@@ -26,7 +26,7 @@ body.panel-open .side-panel {
 }
 
 .panel-region-label {
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   font-size: 13px;
   font-weight: bold;
   letter-spacing: 0.5px;
@@ -48,7 +48,7 @@ body.panel-open .side-panel {
   align-items: center;
   gap: 8px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(36, 28, 61, 0.08);
   font-size: 12px;
 }
 
@@ -66,7 +66,7 @@ body.panel-open .side-panel {
 
 .panel-news-block {
   padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(36, 28, 61, 0.08);
 }
 
 .panel-news-block h3 {
@@ -77,16 +77,16 @@ body.panel-open .side-panel {
 .panel-news-block p {
   margin: 0;
   font-size: 12px;
-  color: #b7bdd6;
+  color: var(--text-muted);
 }
 
 .panel-index-name-input {
   width: 100%;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
   padding: 2px 4px;
 }
@@ -95,23 +95,23 @@ body.panel-open .side-panel {
 .panel-index-change-input {
   width: 64px;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
   padding: 2px 4px;
 }
 
-/* Overrides the shared color:#fff above so a custom color set on the parent
-   .panel-index-name/.panel-index-value/.panel-index-change span (via the
-   color picker) is visible while editing too, not just in the read-only
+/* Overrides the shared color:var(--text) above so a custom color set on the
+   parent .panel-index-name/.panel-index-value/.panel-index-change span (via
+   the color picker) is visible while editing too, not just in the read-only
    view — an explicit color on this input would otherwise always win over
    the parent's inline style regardless of specificity, since inline styles
    don't cascade onto child elements that have their own explicit color.
-   Resolves to the same white by default (inherited from .side-panel's own
-   color:#fff, or from .positive/.negative for weekChange) when no custom
-   color is set. */
+   Resolves to the same default text color (inherited from .side-panel's own
+   color:var(--text), or from .positive/.negative for weekChange) when no
+   custom color is set. */
 .panel-index-name-input,
 .panel-index-value-input,
 .panel-index-change-input {
@@ -132,25 +132,25 @@ body.panel-open .side-panel {
   width: 100%;
   margin-top: 8px;
   background: transparent;
-  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border: 1px dashed rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 12px;
   padding: 6px;
 }
 
 .panel-index-add:hover {
-  background: rgba(201, 151, 31, 0.15);
+  background: rgba(74, 58, 130, 0.15);
 }
 
 .panel-news-title-input {
   width: 100%;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 13px;
   font-weight: bold;
   padding: 4px 6px;
@@ -160,10 +160,10 @@ body.panel-open .side-panel {
   width: 100%;
   min-height: 60px;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
   padding: 4px 6px;
   margin-top: 4px;
@@ -187,20 +187,22 @@ body.panel-open .side-panel {
   width: 100%;
   margin-top: 10px;
   background: transparent;
-  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border: 1px dashed rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 12px;
   padding: 6px;
 }
 
 .panel-news-add:hover {
-  background: rgba(201, 151, 31, 0.15);
+  background: rgba(74, 58, 130, 0.15);
 }
 
 .panel-iafintech-card {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(36, 28, 61, 0.08);
   border-radius: 8px;
   padding: 10px;
   margin-bottom: 10px;
@@ -215,15 +217,15 @@ body.panel-open .side-panel {
 .panel-iafintech-card p {
   margin: 0;
   font-size: 12px;
-  color: #b7bdd6;
+  color: var(--text-muted);
 }
 
 .panel-iafintech-tag {
   display: inline-block;
-  background: rgba(201, 151, 31, 0.2);
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: rgba(74, 58, 130, 0.2);
+  border: 1px solid rgba(74, 58, 130, 0.4);
   border-radius: 10px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -232,14 +234,14 @@ body.panel-open .side-panel {
 
 .panel-iafintech-stat {
   margin-top: 6px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
 }
 
 .panel-iafintech-link {
   display: inline-block;
   margin-top: 6px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   font-size: 11px;
   text-decoration: none;
 }
@@ -255,10 +257,10 @@ body.panel-open .side-panel {
 .panel-iafintech-link-input {
   width: 100%;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
   padding: 2px 4px;
   margin-top: 2px;
@@ -268,10 +270,10 @@ body.panel-open .side-panel {
   width: 100%;
   min-height: 60px;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
   padding: 4px 6px;
   margin-top: 4px;
@@ -296,14 +298,14 @@ body.panel-open .side-panel {
   width: 100%;
   margin-top: 10px;
   background: transparent;
-  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border: 1px dashed rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 12px;
   padding: 6px;
 }
 
 .panel-iafintech-add:hover {
-  background: rgba(201, 151, 31, 0.15);
+  background: rgba(74, 58, 130, 0.15);
 }

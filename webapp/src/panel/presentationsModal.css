@@ -5,16 +5,16 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(15, 23, 48, 0.9);
-  border: 1px solid rgba(224, 181, 61, 0.4);
-  color: var(--gold-light, #e0b53d);
+  background: var(--surface);
+  border: 1px solid rgba(74, 58, 130, 0.4);
+  color: var(--accent, #4a3a82);
   font-size: 16px;
   cursor: pointer;
   z-index: 6;
 }
 
 .presentations-trigger-btn:hover {
-  background: rgba(201, 151, 31, 0.25);
+  background: rgba(74, 58, 130, 0.25);
 }
 
 .presentations-modal {
@@ -32,8 +32,8 @@
 }
 
 .presentations-modal-content {
-  background: rgba(15, 23, 48, 0.98);
-  border: 1px solid rgba(224, 181, 61, 0.3);
+  background: var(--surface);
+  border: 1px solid rgba(74, 58, 130, 0.3);
   border-radius: 8px;
   padding: 20px;
   width: 90%;
@@ -51,7 +51,7 @@
 }
 
 .presentations-modal-header h3 {
-  color: #fff;
+  color: var(--text);
   font-size: 15px;
   margin: 0;
 }
@@ -59,7 +59,7 @@
 .presentations-modal-header button {
   background: transparent;
   border: none;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 16px;
 }

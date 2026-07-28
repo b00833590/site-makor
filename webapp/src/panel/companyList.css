@@ -1,8 +1,10 @@
 .panel-company-card {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(36, 28, 61, 0.08);
+  padding: 16px;
+  margin-bottom: 14px;
   font-size: 12px;
 }
 
@@ -15,14 +17,15 @@
 
 .panel-company-name {
   font-weight: bold;
-  color: #fff;
+  font-size: 15px;
+  color: var(--text);
 }
 
 .panel-compare-toggle {
   background: transparent;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  border: 1px solid rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 13px;
   line-height: 1;
@@ -30,14 +33,14 @@
 }
 
 .panel-compare-toggle.active {
-  background: rgba(201, 151, 31, 0.35);
+  background: rgba(74, 58, 130, 0.35);
 }
 
 .panel-chart-toggle {
   background: transparent;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  border: 1px solid rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 13px;
   line-height: 1;
@@ -45,7 +48,7 @@
 }
 
 .panel-chart-toggle:hover {
-  background: rgba(201, 151, 31, 0.2);
+  background: rgba(74, 58, 130, 0.2);
 }
 
 .panel-company-sub {
@@ -54,15 +57,17 @@
 }
 
 .panel-company-cap {
-  color: #b7bdd6;
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
 .panel-company-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 12px 16px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
 }
 
 .panel-company-stat {
@@ -77,13 +82,7 @@
 }
 
 .panel-company-stat-value {
-  color: #fff;
-}
-
-.panel-company-bullets {
-  margin: 8px 0 0;
-  padding-left: 16px;
-  color: #b7bdd6;
+  color: var(--text);
 }
 
 .panel-compare-table {
@@ -95,10 +94,10 @@
 
 .panel-compare-table th,
 .panel-compare-table td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(36, 28, 61, 0.08);
   padding: 5px 4px;
   text-align: left;
-  color: #fff;
+  color: var(--text);
 }
 
 .panel-company-name-input,
@@ -108,10 +107,10 @@
 .panel-company-stat-label-input {
   width: 100%;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
   padding: 2px 4px;
   margin-top: 2px;
@@ -145,33 +144,72 @@
   width: 100%;
   margin-top: 10px;
   background: transparent;
-  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border: 1px dashed rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 12px;
   padding: 6px;
 }
 
 .panel-company-add:hover {
-  background: rgba(201, 151, 31, 0.15);
+  background: rgba(74, 58, 130, 0.15);
+}
+
+.panel-company-bullets {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
 }
 
 .panel-company-bullets li {
   display: flex;
   align-items: flex-start;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.panel-company-bullets li:last-of-type {
+  border-bottom: none;
+}
+
+.panel-bullet-arrow {
+  color: var(--accent);
+  font-size: 11px;
+  line-height: 1.7;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.panel-bullet-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  white-space: pre-line;
+}
+
+/* A custom per-bullet color (item.colors['bullet-N'], read-only mode only) is
+   applied as an inline color on the <li> by companyList.js. Without this
+   override, .panel-bullet-arrow/.panel-bullet-text's own explicit colors
+   above would always win over the inherited inline style regardless of
+   specificity — same reasoning as the analogous override in sidePanel.css
+   for .panel-index-name-input etc. — so the stagiaires' chosen bullet color
+   would silently stop rendering once the arrow/text split landed. */
+.panel-company-bullets li[style] .panel-bullet-arrow,
+.panel-company-bullets li[style] .panel-bullet-text {
+  color: inherit;
 }
 
 .panel-company-bullet-input {
   flex: 1;
   min-height: 40px;
   box-sizing: border-box;
-  background: #0f1730;
-  border: 1px solid rgba(224, 181, 61, 0.4);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: #fff;
+  color: var(--text);
   font-size: 12px;
   padding: 4px;
   resize: vertical;
@@ -188,9 +226,9 @@
 
 .panel-company-bullet-add {
   background: transparent;
-  border: 1px dashed rgba(224, 181, 61, 0.4);
+  border: 1px dashed rgba(74, 58, 130, 0.4);
   border-radius: 4px;
-  color: var(--gold-light, #e0b53d);
+  color: var(--accent, #4a3a82);
   cursor: pointer;
   font-size: 11px;
   padding: 4px 8px;

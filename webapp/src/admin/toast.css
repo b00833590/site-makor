@@ -3,9 +3,10 @@
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: rgba(15, 23, 48, 0.98);
-  border: 1px solid rgba(224, 181, 61, 0.4);
-  color: #fff;
+  background: var(--surface);
+  border: 1px solid rgba(74, 58, 130, 0.4);
+  box-shadow: 0 4px 12px rgba(36, 28, 61, 0.15);
+  color: var(--text);
   font-size: 13px;
   padding: 10px 16px;
   border-radius: 6px;

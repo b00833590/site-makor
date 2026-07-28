@@ -16,7 +16,7 @@
   padding: 0 12px;
   scroll-snap-type: x proximity;
   scrollbar-width: thin;
-  scrollbar-color: rgba(224, 181, 61, 0.25) transparent;
+  scrollbar-color: rgba(74, 58, 130, 0.25) transparent;
 }
 
 .week-timeline::-webkit-scrollbar {
@@ -28,14 +28,14 @@
 }
 
 .week-timeline::-webkit-scrollbar-thumb {
-  background: rgba(224, 181, 61, 0.25);
+  background: rgba(74, 58, 130, 0.25);
   border-radius: 3px;
   transition: background-color 0.2s ease;
 }
 
 .week-timeline:hover::-webkit-scrollbar-thumb,
 .week-timeline.is-scrolling::-webkit-scrollbar-thumb {
-  background: rgba(224, 181, 61, 0.7);
+  background: rgba(74, 58, 130, 0.7);
 }
 
 .week-timeline-fade {
@@ -49,14 +49,18 @@
   z-index: 1;
 }
 
+/* Fades to var(--surface) rather than var(--navy): .week-timeline lives
+   inside .top-banner, which Task 1 repaints to the light Group B surface —
+   fading to the old dark navy here would draw a visible dark block over the
+   new white banner instead of blending into it. */
 .week-timeline-fade-left {
   left: 0;
-  background: linear-gradient(to right, var(--navy, #0f1730), transparent);
+  background: linear-gradient(to right, var(--surface, #ffffff), transparent);
 }
 
 .week-timeline-fade-right {
   right: 0;
-  background: linear-gradient(to left, var(--navy, #0f1730), transparent);
+  background: linear-gradient(to left, var(--surface, #ffffff), transparent);
 }
 
 .week-timeline-fade.visible {
@@ -70,7 +74,7 @@
   border: 1px solid transparent;
   border-radius: 6px;
   padding: 6px 10px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-muted);
   font-size: 11px;
   white-space: nowrap;
   cursor: pointer;
@@ -78,12 +82,12 @@
 }
 
 .week-tab:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  background: rgba(74, 58, 130, 0.1);
 }
 
 .week-tab.active {
-  color: var(--navy, #0f1730);
-  background: var(--gold-light, #e0b53d);
+  color: var(--surface, #ffffff);
+  background: var(--accent, #4a3a82);
   font-weight: bold;
 }
