@@ -910,6 +910,17 @@ async function bootstrap() {
     });
 
     renderPanelForCurrentSelection();
+
+    // Keeps this tab in sync with edits made elsewhere (the old site is now
+    // the sole edit interface — see the "editer-redirect-old-site" plan)
+    // without requiring a manual reload. Attached only after the app has
+    // finished its first successful render, so an early snapshot can never
+    // race ahead of activeWeekId/weekTimelineHandle being ready.
+    client.subscribeToChanges(newDb => {
+      db = newDb;
+      if (weekTimelineHandle) weekTimelineHandle.setWeeks(getWeeks(db), activeWeekId);
+      renderPanelForCurrentSelection();
+    });
   } catch (error) {
     console.error('Failed to load Firestore data', error);
     panel.showRegion('Données indisponibles', { marketItems: [], newsItems: [] });

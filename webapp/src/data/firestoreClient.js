@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp, writeBatch, query, where, documentId } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp, writeBatch, query, where, documentId, onSnapshot } from 'firebase/firestore';
 
 const DEFAULT_CONFIG = {
   apiKey: 'AIzaSyDSq-wkq28uEsU3CO5WT6aW0CQgU1SW7bk',
@@ -22,6 +22,20 @@ export function collectionForKey(key) {
   return key.startsWith(PDF_PREFIX) ? PDF_COLLECTION : MAIN_COLLECTION;
 }
 
+// Shared by loadAllOnce and subscribeToChanges — both turn a Firestore
+// query snapshot into the same {key: parsedValue} shape.
+export function docsToDb(docs) {
+  const out = {};
+  for (const d of docs) {
+    try {
+      out[d.id] = JSON.parse(d.data().value);
+    } catch {
+      // corrupt row — skip, matches production behavior
+    }
+  }
+  return out;
+}
+
 export async function writeWithRetry(writeFn, retries = WRITE_RETRY_COUNT, delayMs = WRITE_RETRY_DELAY_MS) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -40,15 +54,19 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
 
   async function loadAllOnce() {
     const snapshot = await getDocs(collection(db, MAIN_COLLECTION));
-    const out = {};
-    snapshot.forEach(doc => {
-      try {
-        out[doc.id] = JSON.parse(doc.data().value);
-      } catch {
-        // corrupt row — skip, matches production behavior
-      }
-    });
-    return out;
+    return docsToDb(snapshot.docs);
+  }
+
+  // Live-updates onChange(dbShape) every time anything in mkg_data changes,
+  // starting with the current state (fires once immediately, then again on
+  // every subsequent change). Lets a save made on the old site propagate to
+  // an already-open makor-globe tab without a manual reload.
+  function subscribeToChanges(onChange) {
+    return onSnapshot(
+      collection(db, MAIN_COLLECTION),
+      snapshot => onChange(docsToDb(snapshot.docs)),
+      error => console.error('Firestore live sync error', error),
+    );
   }
 
   async function writeDoc(key, value) {
@@ -129,7 +147,7 @@ export function createFirestoreClient(config = DEFAULT_CONFIG) {
     return snap.exists() ? snap.data().value : null;
   }
 
-  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch, writeDocsBatch, fetchKeysWithPrefix, fetchRawValue, applyBatch };
+  return { loadAllOnce, writeDoc, deleteDocByKey, deleteDocsBatch, writeDocsBatch, fetchKeysWithPrefix, fetchRawValue, applyBatch, subscribeToChanges };
 }
 
 export async function loadAllWithRetry(loadOnceFn, delayMs = EMPTY_RETRY_DELAY_MS) {

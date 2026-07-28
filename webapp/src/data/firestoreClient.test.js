@@ -1,5 +1,27 @@
 import { describe, it, expect, vi } from 'vitest';
-import { loadAllWithRetry, writeWithRetry, collectionForKey } from './firestoreClient.js';
+import { loadAllWithRetry, writeWithRetry, collectionForKey, docsToDb } from './firestoreClient.js';
+
+describe('docsToDb', () => {
+  it('parses each document\'s JSON value into the output object, keyed by document id', () => {
+    const docs = [
+      { id: 'mkg:week:a', data: () => ({ value: JSON.stringify({ id: 'a' }) }) },
+      { id: 'mkg:week:b', data: () => ({ value: JSON.stringify({ id: 'b' }) }) },
+    ];
+    expect(docsToDb(docs)).toEqual({ 'mkg:week:a': { id: 'a' }, 'mkg:week:b': { id: 'b' } });
+  });
+
+  it('skips a document whose value is not valid JSON, without throwing', () => {
+    const docs = [
+      { id: 'mkg:week:a', data: () => ({ value: 'not json' }) },
+      { id: 'mkg:week:b', data: () => ({ value: JSON.stringify({ id: 'b' }) }) },
+    ];
+    expect(docsToDb(docs)).toEqual({ 'mkg:week:b': { id: 'b' } });
+  });
+
+  it('returns an empty object for an empty document list', () => {
+    expect(docsToDb([])).toEqual({});
+  });
+});
 
 describe('loadAllWithRetry', () => {
   it('returns the first result immediately when it is non-empty', async () => {
