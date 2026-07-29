@@ -245,3 +245,36 @@
 .panel-company-bullet-input {
   color: inherit;
 }
+
+/* ---------- Mode Présentation : grand écran ---------- */
+body.presentation-mode .panel-company-card {
+  padding: 24px;
+  font-size: 16px;
+}
+
+body.presentation-mode .panel-company-name {
+  font-size: 22px;
+}
+
+body.presentation-mode .panel-company-sub,
+body.presentation-mode .panel-company-cap {
+  font-size: 15px;
+}
+
+body.presentation-mode .panel-company-stat-label {
+  font-size: 13px;
+}
+
+body.presentation-mode .panel-company-stat-value {
+  font-size: 20px;
+  padding: 4px 12px;
+}
+
+body.presentation-mode .panel-bullet-text {
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+body.presentation-mode .panel-bullet-arrow {
+  font-size: 15px;
+}

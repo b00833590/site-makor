@@ -99,3 +99,25 @@
 .chart-price-change.negative {
   color: #c0392b;
 }
+
+/* ---------- Mode Présentation : grand écran ---------- */
+body.presentation-mode .chart-modal-content {
+  max-width: 900px;
+  padding: 40px;
+}
+
+body.presentation-mode .chart-modal-header span {
+  font-size: 28px;
+}
+
+body.presentation-mode .chart-modal-sub {
+  font-size: 15px;
+}
+
+body.presentation-mode .chart-price {
+  font-size: 32px;
+}
+
+body.presentation-mode .chart-price-change {
+  font-size: 20px;
+}

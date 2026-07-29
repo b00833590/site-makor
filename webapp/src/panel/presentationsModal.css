@@ -1,20 +1,41 @@
+/* Primary access button, not a subtle icon-only control — this and
+   .lexique-trigger-btn are the two most important entry points on the
+   whole screen (real content, not navigation chrome), so they get a real
+   label, a bold solid --accent fill (the one strong-contrast color this
+   theme reserves for CTAs/active state), and a stacked left-bottom
+   position with real width, instead of blending into the row of plain
+   circular navigation controls. */
 .presentations-trigger-btn {
   position: fixed;
-  bottom: 20px;
-  left: 54px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--surface-button);
-  border: 1px solid rgba(74, 58, 130, 0.4);
-  color: var(--accent, #4a3a82);
-  font-size: 16px;
-  cursor: pointer;
+  bottom: 78px;
+  left: 20px;
   z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  padding: 0 20px;
+  border-radius: 25px;
+  background: var(--accent, #4a3a82);
+  border: 1px solid rgba(179, 165, 224, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.presentations-trigger-btn .trigger-btn-icon {
+  font-size: 20px;
+  line-height: 1;
 }
 
 .presentations-trigger-btn:hover {
-  background: rgba(74, 58, 130, 0.25);
+  background: #5b4699;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px) scale(1.03);
 }
 
 .presentations-modal {

@@ -315,3 +315,42 @@ body.panel-open .side-panel {
 .panel-iafintech-add:hover {
   background: rgba(74, 58, 130, 0.15);
 }
+
+/* ---------- Mode Présentation : grand écran ---------- */
+/* --panel-width is a :root custom property — redeclaring it on body cascades
+   to every descendant that reads it (the panel itself, plus every
+   body.panel-open rule elsewhere that reads var(--panel-width, 460px)),
+   without needing to touch those rules individually. */
+body.presentation-mode {
+  --panel-width: 760px;
+}
+
+body.presentation-mode .panel-region-label {
+  font-size: 20px;
+}
+
+body.presentation-mode .panel-section-label {
+  font-size: 14px;
+  padding: 5px 12px;
+}
+
+body.presentation-mode .panel-index-row {
+  font-size: 17px;
+  padding: 12px 14px;
+}
+
+body.presentation-mode .panel-news-block h3 {
+  font-size: 19px;
+}
+
+body.presentation-mode .panel-news-block p {
+  font-size: 16px;
+}
+
+body.presentation-mode .panel-iafintech-card {
+  font-size: 16px;
+}
+
+body.presentation-mode .panel-iafintech-card h3 {
+  font-size: 18px;
+}

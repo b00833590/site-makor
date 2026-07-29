@@ -1,20 +1,36 @@
+/* Same primary-access treatment as .presentations-trigger-btn (see that
+   file's comment) — stacked directly below it at the same left offset. */
 .lexique-trigger-btn {
   position: fixed;
   bottom: 20px;
-  left: 106px;
+  left: 20px;
   z-index: 15;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--surface-button);
-  border: 1px solid rgba(74, 58, 130, 0.4);
-  color: var(--accent, #4a3a82);
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  padding: 0 20px;
+  border-radius: 25px;
+  background: var(--accent, #4a3a82);
+  border: 1px solid rgba(179, 165, 224, 0.5);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.lexique-trigger-btn .trigger-btn-icon {
+  font-size: 20px;
+  line-height: 1;
 }
 
 .lexique-trigger-btn:hover {
-  background: rgba(74, 58, 130, 0.2);
+  background: #5b4699;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px) scale(1.03);
 }
 
 .lexique-modal {

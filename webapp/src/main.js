@@ -15,6 +15,7 @@ import './panel/presentations.css';
 import './panel/panelToggle.css';
 import './panel/presentationsModal.css';
 import './panel/lexiqueModal.css';
+import './panel/presentationMode.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
@@ -25,6 +26,7 @@ import { normalizeRegionLabel } from './data/regionMatch.js';
 import { fridayOfCurrentWeekDDMM } from './data/dateUtils.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initPanelToggle } from './panel/panelToggle.js';
+import { initPresentationMode } from './panel/presentationMode.js';
 import { initPresentationsModal } from './panel/presentationsModal.js';
 import { initLexiqueModal } from './panel/lexiqueModal.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
@@ -639,6 +641,12 @@ nextBtn.addEventListener('click', () => scene.goToNextRegion());
 const panelToggleHandle = initPanelToggle({
   toggleBtn: document.getElementById('panel-toggle-btn'),
   bodyEl: document.body,
+});
+
+initPresentationMode({
+  toggleBtn: document.getElementById('presentation-mode-btn'),
+  bodyEl: document.body,
+  onEnter: () => panelToggleHandle.open(),
 });
 
 function handleSearchSelectCompany(company) {

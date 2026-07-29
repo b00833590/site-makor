@@ -19,11 +19,16 @@
   <button id="edit-toggle-btn" class="edit-toggle-btn" type="button">✏️ Éditer</button>
   <button id="undo-all-btn" class="undo-all-btn" type="button" title="Annuler toutes les modifications de cette session d'édition">↺ Tout annuler</button>
   <button id="export-pdf-btn" class="export-pdf-btn" type="button">📄 Exporter en PDF</button>
+  <button id="presentation-mode-btn" class="presentation-mode-btn" type="button" aria-pressed="false">🖥️ Mode Présentation</button>
   <button id="arrow-prev" class="arrow-btn arrow-prev" aria-label="Région précédente">‹</button>
   <button id="arrow-next" class="arrow-btn arrow-next" aria-label="Région suivante">›</button>
   <button id="panel-toggle-btn" class="panel-toggle-btn" type="button" aria-expanded="false" aria-label="Afficher le panneau d'informations">‹</button>
-  <button id="presentations-trigger-btn" class="presentations-trigger-btn" type="button" aria-label="Présentations IA & Fintech" title="Présentations IA & Fintech">📊</button>
-  <button id="lexique-trigger-btn" class="lexique-trigger-btn" type="button" aria-label="Lexique des entreprises" title="Lexique des entreprises">📖</button>
+  <button id="presentations-trigger-btn" class="presentations-trigger-btn" type="button" aria-label="Présentations IA & Fintech" title="Présentations IA & Fintech">
+    <span class="trigger-btn-icon">📊</span><span class="trigger-btn-label">Présentations IA & Fintech</span>
+  </button>
+  <button id="lexique-trigger-btn" class="lexique-trigger-btn" type="button" aria-label="Lexique des entreprises" title="Lexique des entreprises">
+    <span class="trigger-btn-icon">📖</span><span class="trigger-btn-label">Lexique</span>
+  </button>
   <div id="lexique-modal" class="lexique-modal">
     <div class="lexique-modal-content">
       <div class="lexique-modal-header">
