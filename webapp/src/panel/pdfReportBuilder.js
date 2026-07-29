@@ -47,6 +47,28 @@ function ensureSpace(pdf, y, neededMm) {
   return CONTENT_MARGIN_TOP_MM;
 }
 
+const PRESENTATION_TAG = 'Morning News - Intern Presentation';
+const PAGE_CENTER_MM = A4_WIDTH_MM / 2;
+
+// Report masthead: centered above the region title on every generated PDF,
+// so the document reads as one named deliverable (this presentation) rather
+// than a per-region data dump. Sized and weighted above the region title
+// (which stays the largest LEFT-aligned element) so the two don't compete —
+// this is the one thing on the page meant to be read first.
+function drawMainTitle(pdf, y) {
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(20);
+  pdf.setTextColor(...NAVY);
+  pdf.text(safeText(PRESENTATION_TAG), PAGE_CENTER_MM, y, { align: 'center' });
+
+  const ruleWidth = 26;
+  pdf.setDrawColor(...GOLD);
+  pdf.setLineWidth(0.5);
+  pdf.line(PAGE_CENTER_MM - ruleWidth / 2, y + 4, PAGE_CENTER_MM + ruleWidth / 2, y + 4);
+
+  return y + 15;
+}
+
 function drawTitle(pdf, regionLabel, weekLabel, y) {
   pdf.setFont('times', 'bold');
   pdf.setFontSize(24);
@@ -220,7 +242,8 @@ export async function generateReportPDF({
   // (a straight gap under the header banner), but pdf.text()'s y is the text
   // BASELINE — a 24pt bold title's cap-height reaches ~6mm above its baseline, which
   // without this extra clearance put "Asie" almost touching the header banner.
-  let y = drawTitle(pdf, regionLabel, weekLabel, CONTENT_MARGIN_TOP_MM + 8);
+  let y = drawMainTitle(pdf, CONTENT_MARGIN_TOP_MM + 8);
+  y = drawTitle(pdf, regionLabel, weekLabel, y);
 
   if (sections.includes('indices') && marketItems.length) {
     y = drawSectionLabel(pdf, 'Indices régionaux', y);
