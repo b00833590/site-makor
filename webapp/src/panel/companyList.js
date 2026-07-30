@@ -1,5 +1,6 @@
 import { buildEditableInput } from '../admin/editableInput.js';
 import { buildColorDot } from '../admin/colorPicker.js';
+import { buildFlagImageEl, appendJoinedParts } from '../admin/flagImage.js';
 
 const STAT_FIELDS = [
   ['salesGrowthLabel', 'salesGrowth', 'Croissance CA'],
@@ -140,7 +141,7 @@ export function renderCompanies(container, items, selectedIds, { onToggle, onOpe
         buildEditableInput(item.country, 'text', 'panel-company-sub-input', v => onEditItem(item, { country: v })),
       );
     } else {
-      sub.textContent = [item.yahooSymbol, item.flag, item.country].filter(Boolean).join(' · ');
+      appendJoinedParts(sub, [item.yahooSymbol, buildFlagImageEl(item.flag) || item.flag, item.country], ' · ');
     }
 
     const cap = document.createElement('div');

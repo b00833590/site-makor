@@ -41,6 +41,7 @@ function baseOptions(overrides = {}) {
     pdf,
     autoTableFn: vi.fn(),
     loadHeaderImageFn: vi.fn().mockResolvedValue('data:image/png;base64,xxx'),
+    loadFlagImageFn: vi.fn().mockResolvedValue('data:image/png;base64,flag'),
     pdfFactory: vi.fn(() => pdf),
     ...overrides,
   };
@@ -65,36 +66,49 @@ describe('generateReportPDF', () => {
   });
 
   it('draws every market index and colors weekChange green for positive, red for negative', async () => {
-    const { pdf, autoTableFn, loadHeaderImageFn, pdfFactory } = baseOptions();
-    await generateReportPDF({ regionLabel: 'Europe', weekLabel: 'W', marketItems: MARKET_ITEMS }, 'test.pdf', { autoTableFn, loadHeaderImageFn, pdfFactory });
+    const { pdf, autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory } = baseOptions();
+    await generateReportPDF({ regionLabel: 'Europe', weekLabel: 'W', marketItems: MARKET_ITEMS }, 'test.pdf', { autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory });
     expect(pdf.text).toHaveBeenCalledWith('-0.83%', expect.any(Number), expect.any(Number), { align: 'right' });
     expect(pdf.setTextColor).toHaveBeenCalledWith(192, 57, 43); // negative
     expect(pdf.setTextColor).toHaveBeenCalledWith(28, 138, 75); // positive
   });
 
-  it('draws only the index name, no flag or country code (dropped for both aesthetics and to avoid a jsPDF emoji-width bug)', async () => {
-    const { pdf, autoTableFn, loadHeaderImageFn, pdfFactory } = baseOptions();
-    await generateReportPDF({ regionLabel: 'Europe', weekLabel: 'W', marketItems: MARKET_ITEMS }, 'test.pdf', { autoTableFn, loadHeaderImageFn, pdfFactory });
+  it('draws the index name plus its flag as a real image (not text, not dropped) — same Twemoji asset the live panel UI uses', async () => {
+    const { pdf, autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory } = baseOptions();
+    await generateReportPDF({ regionLabel: 'Europe', weekLabel: 'W', marketItems: MARKET_ITEMS }, 'test.pdf', { autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory });
     expect(pdf.text).toHaveBeenCalledWith('CAC 40', expect.any(Number), expect.any(Number));
     expect(pdf.text).toHaveBeenCalledWith('DAX 40', expect.any(Number), expect.any(Number));
     expect(pdf.text).not.toHaveBeenCalledWith(expect.stringContaining('🇫🇷'), expect.anything(), expect.anything());
-    expect(pdf.text).not.toHaveBeenCalledWith(expect.stringContaining('FR'), expect.anything(), expect.anything());
+    // Header image (once) + one addImage per unique flag (2: FR, DE).
+    expect(loadFlagImageFn).toHaveBeenCalledWith('https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/72x72/1f1eb-1f1f7.png');
+    expect(loadFlagImageFn).toHaveBeenCalledWith('https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/72x72/1f1e9-1f1ea.png');
+    expect(pdf.addImage).toHaveBeenCalledWith('data:image/png;base64,flag', 'PNG', expect.any(Number), expect.any(Number), expect.any(Number), expect.any(Number));
   });
 
-  it('draws every company name, sub (with the flag converted to a code), stats, and bullets', async () => {
-    const { pdf, autoTableFn, loadHeaderImageFn, pdfFactory } = baseOptions();
-    await generateReportPDF({ regionLabel: 'Europe', weekLabel: 'W', companyItems: COMPANY_ITEMS }, 'test.pdf', { autoTableFn, loadHeaderImageFn, pdfFactory });
+  it('draws every company name, sub (with the flag as a real image, not a text code), stats, and bullets', async () => {
+    const { pdf, autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory } = baseOptions();
+    await generateReportPDF({ regionLabel: 'Europe', weekLabel: 'W', companyItems: COMPANY_ITEMS }, 'test.pdf', { autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory });
     expect(pdf.text).toHaveBeenCalledWith('ARM Holdings', expect.any(Number), expect.any(Number));
-    expect(pdf.text).toHaveBeenCalledWith('ARM · GB · UK', expect.any(Number), expect.any(Number), { align: 'right' });
+    expect(loadFlagImageFn).toHaveBeenCalledWith('https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/72x72/1f1ec-1f1e7.png');
+    expect(pdf.text).not.toHaveBeenCalledWith(expect.stringContaining('GB'), expect.anything(), expect.anything());
     expect(pdf.text).toHaveBeenCalledWith('+26,35%', expect.any(Number), expect.any(Number));
     expect(pdf.text).toHaveBeenCalledWith('•  Point clé 1', expect.any(Number), expect.any(Number));
   });
 
+  it('falls back to plain text for a flag field that is not a real flag emoji (e.g. stray literal "FR")', async () => {
+    const { pdf, autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory } = baseOptions();
+    const items = [{ flag: 'FR', name: 'CAC 40', value: '8 268 pts', weekChange: 1 }];
+    await generateReportPDF({ regionLabel: 'Europe', weekLabel: 'W', marketItems: items }, 'test.pdf', { autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory });
+    expect(loadFlagImageFn).not.toHaveBeenCalled();
+    expect(pdf.text).toHaveBeenCalledWith('FR', expect.any(Number), expect.any(Number));
+    expect(pdf.addImage).not.toHaveBeenCalledWith(expect.anything(), 'PNG', expect.any(Number), expect.any(Number), 3.4, 3.4);
+  });
+
   it('omits a section entirely when its data is empty, and respects the sections filter', async () => {
-    const { pdf, autoTableFn, loadHeaderImageFn, pdfFactory } = baseOptions();
+    const { pdf, autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory } = baseOptions();
     await generateReportPDF({
       regionLabel: 'Europe', weekLabel: 'W', marketItems: MARKET_ITEMS, newsItems: [],
-    }, 'test.pdf', { autoTableFn, loadHeaderImageFn, pdfFactory });
+    }, 'test.pdf', { autoTableFn, loadHeaderImageFn, loadFlagImageFn, pdfFactory });
     expect(pdf.text).not.toHaveBeenCalledWith('NEWS MACRO', expect.any(Number), expect.any(Number));
 
     const second = baseOptions();

@@ -4,6 +4,7 @@ import {
   HEADER_IMAGE_URL, loadImageAsDataURL, addHeaderToEveryPage,
 } from './pdfExport.js';
 import { safeText } from './pdfTextSanitize.js';
+import { isFlagSequence, flagImageUrl } from '../admin/flagImage.js';
 
 const PAGE_HEIGHT_MM = 297;
 const USABLE_WIDTH_MM = A4_WIDTH_MM - MARGIN_SIDE_MM * 2;
@@ -16,21 +17,54 @@ const LINE = [228, 230, 236];
 const POSITIVE = [28, 138, 75];
 const NEGATIVE = [192, 57, 43];
 
+const FLAG_ICON_SIZE_MM = 3.4;
+const FLAG_ICON_GAP_MM = 1.3;
+
 // jsPDF's standard built-in fonts (Helvetica/Times/Courier) have no glyphs for
-// emoji — a flag like 🇯🇵 is a 2-codepoint regional-indicator sequence that gets
-// silently mis-encoded, producing garbage bytes with unpredictable measured width.
-// That's what broke the indices row specifically: it's the only place manual
-// getTextWidth() math relies on an accurate width for right-alignment, so the
-// garbled flag threw off spacing and caused the value/change text to overlap.
-// Regional-indicator codepoints are just A-Z offset from U+1F1E6, so a flag emoji
-// converts losslessly back to its 2-letter code, which every standard font renders
-// correctly.
-function flagToCountryCode(flag) {
-  if (!flag) return '';
-  const codePoints = [...flag].map(ch => ch.codePointAt(0));
-  const isFlagSequence = codePoints.length === 2 && codePoints.every(cp => cp >= 0x1f1e6 && cp <= 0x1f1ff);
-  if (!isFlagSequence) return flag;
-  return codePoints.map(cp => String.fromCharCode(cp - 0x1f1e6 + 65)).join('');
+// emoji — a flag like 🇯🇵 is a 2-codepoint regional-indicator sequence that used
+// to get silently mis-encoded as text, producing garbage bytes with unpredictable
+// measured width (this broke the indices row specifically, since it's the only
+// place manual getTextWidth() math relies on an accurate width for right
+// alignment). Flags are now drawn as real images via pdf.addImage() instead —
+// same Twemoji PNG asset the live panel UI uses (admin/flagImage.js) — pre-fetched
+// once per unique flag before drawing (see preloadFlagImages), since addImage
+// needs the image data already in hand, unlike pdf.text().
+async function preloadFlagImages(items, loadFlagImageFn) {
+  const uniqueFlags = [...new Set(items.map(item => item.flag).filter(isFlagSequence))];
+  const entries = await Promise.all(uniqueFlags.map(async flag => {
+    try {
+      return [flag, await loadFlagImageFn(flagImageUrl(flag))];
+    } catch {
+      return [flag, null]; // failed to load — callers fall back to plain text
+    }
+  }));
+  return new Map(entries);
+}
+
+// Draws `segments` (each `{ text }` or `{ imageDataUrl }`, falsy/empty ones
+// skipped) as one right-aligned unit ending at `rightX`, joined by " · " —
+// used for the company sub-line, which mixes plain text (symbol/country) with
+// an inline flag image and must still line up as a single right-aligned run,
+// like the plain-text version this replaces.
+function drawRightAlignedSegments(pdf, segments, rightX, y) {
+  const parts = segments.filter(s => s && (s.text || s.imageDataUrl));
+  if (parts.length === 0) return;
+  const gapWidth = pdf.getTextWidth(' · ');
+  const widths = parts.map(part => (part.imageDataUrl ? FLAG_ICON_SIZE_MM : pdf.getTextWidth(safeText(part.text))));
+  const totalWidth = widths.reduce((sum, w) => sum + w, 0) + gapWidth * (parts.length - 1);
+  let x = rightX - totalWidth;
+  parts.forEach((part, i) => {
+    if (part.imageDataUrl) {
+      pdf.addImage(part.imageDataUrl, 'PNG', x, y - FLAG_ICON_SIZE_MM + 1, FLAG_ICON_SIZE_MM, FLAG_ICON_SIZE_MM);
+    } else {
+      pdf.text(safeText(part.text), x, y);
+    }
+    x += widths[i];
+    if (i < parts.length - 1) {
+      pdf.text(' · ', x, y);
+      x += gapWidth;
+    }
+  });
 }
 
 // Everything below is drawn as native jsPDF text/line/table content, not captured
@@ -100,11 +134,23 @@ function indexChangeColor(value) {
   return Number(value) < 0 ? NEGATIVE : POSITIVE;
 }
 
-function drawIndexCell(pdf, item, x, y, width) {
+function drawIndexCell(pdf, item, x, y, width, flagImages) {
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(10);
   pdf.setTextColor(...NAVY);
-  pdf.text(safeText(item.name), x, y);
+
+  let nameX = x;
+  const flagDataUrl = flagImages && flagImages.get(item.flag);
+  if (flagDataUrl) {
+    pdf.addImage(flagDataUrl, 'PNG', x, y - FLAG_ICON_SIZE_MM + 1, FLAG_ICON_SIZE_MM, FLAG_ICON_SIZE_MM);
+    nameX = x + FLAG_ICON_SIZE_MM + FLAG_ICON_GAP_MM;
+  } else if (item.flag && !isFlagSequence(item.flag)) {
+    // Not a real flag emoji (e.g. stray literal text like "FR") — show as-is
+    // rather than silently dropping it, same fallback as the live panel UI.
+    pdf.text(safeText(item.flag), x, y);
+    nameX = x + pdf.getTextWidth(safeText(item.flag)) + FLAG_ICON_GAP_MM;
+  }
+  pdf.text(safeText(item.name), nameX, y);
 
   const changeText = `${item.weekChange}%`;
   pdf.setFont('helvetica', 'bold');
@@ -117,14 +163,14 @@ function drawIndexCell(pdf, item, x, y, width) {
   pdf.text(safeText(item.value), x + width - changeWidth, y, { align: 'right' });
 }
 
-function drawIndices(pdf, marketItems, y) {
+function drawIndices(pdf, marketItems, y, flagImages) {
   const gap = 10;
   const colWidth = (USABLE_WIDTH_MM - gap) / 2;
   const rowHeight = 7;
   for (let i = 0; i < marketItems.length; i += 2) {
     y = ensureSpace(pdf, y, rowHeight);
-    drawIndexCell(pdf, marketItems[i], MARGIN_SIDE_MM, y, colWidth);
-    if (marketItems[i + 1]) drawIndexCell(pdf, marketItems[i + 1], MARGIN_SIDE_MM + colWidth + gap, y, colWidth);
+    drawIndexCell(pdf, marketItems[i], MARGIN_SIDE_MM, y, colWidth, flagImages);
+    if (marketItems[i + 1]) drawIndexCell(pdf, marketItems[i + 1], MARGIN_SIDE_MM + colWidth + gap, y, colWidth, flagImages);
     pdf.setDrawColor(...LINE);
     pdf.setLineWidth(0.2);
     pdf.line(MARGIN_SIDE_MM, y + 2, MARGIN_SIDE_MM + colWidth, y + 2);
@@ -164,7 +210,7 @@ const STAT_FIELDS = [
   ['targetPriceLabel', 'targetPrice', 'Objectif'],
 ];
 
-function drawCompanies(pdf, companyItems, y) {
+function drawCompanies(pdf, companyItems, y, flagImages) {
   companyItems.forEach((item, index) => {
     if (index > 0) {
       y = ensureSpace(pdf, y, 8);
@@ -182,7 +228,15 @@ function drawCompanies(pdf, companyItems, y) {
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(9);
     pdf.setTextColor(...MUTED);
-    pdf.text(safeText([item.yahooSymbol, flagToCountryCode(item.flag), item.country].filter(Boolean).join(' · ')), A4_WIDTH_MM - MARGIN_SIDE_MM, y, { align: 'right' });
+    const flagDataUrl = flagImages && flagImages.get(item.flag);
+    const flagSegment = flagDataUrl
+      ? { imageDataUrl: flagDataUrl }
+      : { text: item.flag && !isFlagSequence(item.flag) ? item.flag : '' };
+    drawRightAlignedSegments(pdf, [
+      { text: item.yahooSymbol },
+      flagSegment,
+      { text: item.country },
+    ], A4_WIDTH_MM - MARGIN_SIDE_MM, y);
     y += 5;
 
     if (item.marketCap) {
@@ -234,8 +288,9 @@ export async function generateReportPDF({
   regionLabel, weekLabel, portfolioRegionLabel = '',
   marketItems = [], newsItems = [], companyItems = [], portfolioEntries = [],
   sections = ['indices', 'news', 'companies', 'portfolio'],
-}, filename, { loadHeaderImageFn = loadImageAsDataURL, autoTableFn, pdfFactory = defaultPdfFactory } = {}) {
+}, filename, { loadHeaderImageFn = loadImageAsDataURL, loadFlagImageFn = loadImageAsDataURL, autoTableFn, pdfFactory = defaultPdfFactory } = {}) {
   const headerDataUrl = await loadHeaderImageFn(HEADER_IMAGE_URL);
+  const flagImages = await preloadFlagImages([...marketItems, ...companyItems], loadFlagImageFn);
   const pdf = await pdfFactory();
 
   // +8mm on top of CONTENT_MARGIN_TOP_MM: that margin was tuned for image placement
@@ -247,7 +302,7 @@ export async function generateReportPDF({
 
   if (sections.includes('indices') && marketItems.length) {
     y = drawSectionLabel(pdf, 'Indices régionaux', y);
-    y = drawIndices(pdf, marketItems, y);
+    y = drawIndices(pdf, marketItems, y, flagImages);
   }
   if (sections.includes('news') && newsItems.length) {
     y = drawSectionLabel(pdf, 'News macro', y);
@@ -255,7 +310,7 @@ export async function generateReportPDF({
   }
   if (sections.includes('companies') && companyItems.length) {
     y = drawSectionLabel(pdf, 'Entreprises présentées', y);
-    y = drawCompanies(pdf, companyItems, y);
+    y = drawCompanies(pdf, companyItems, y, flagImages);
   }
   if (sections.includes('portfolio') && portfolioEntries.length) {
     await drawPortfolioTable(pdf, portfolioEntries, portfolioRegionLabel, { autoTableFn });

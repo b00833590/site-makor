@@ -50,6 +50,16 @@ html, body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
+/* Twemoji's own recommended sizing (see admin/flagImage.js) — without this,
+   the flag <img> has no intrinsic CSS size and renders at its native (huge)
+   pixel dimensions instead of inline with surrounding text. */
+img.flag-emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 0.15em 0 0.05em;
+  vertical-align: -0.1em;
+}
+
 #globe-container {
   position: fixed;
   inset: 0;

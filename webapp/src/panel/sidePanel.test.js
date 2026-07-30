@@ -28,7 +28,12 @@ describe('initSidePanel', () => {
       newsItems: [],
     });
     const row = indicesEl.querySelector('.panel-index-row');
-    expect(row.querySelector('.panel-index-name').textContent).toBe('🇫🇷 CAC 40');
+    const nameEl = row.querySelector('.panel-index-name');
+    // Flag renders as a real <img> (Twemoji), not text, so it contributes an
+    // "alt" attribute rather than characters to textContent — see flagImage.js.
+    const flagImg = nameEl.querySelector('img.flag-emoji');
+    expect(flagImg.alt).toBe('🇫🇷');
+    expect(nameEl.textContent.trim()).toBe('CAC 40');
     expect(row.querySelector('.panel-index-value').textContent).toBe('7 500');
     expect(row.querySelector('.panel-index-change').textContent).toBe('1.2%');
   });

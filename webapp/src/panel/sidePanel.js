@@ -4,6 +4,7 @@ import { sortPortfolioEntries, nextSort } from './portfolioSort.js';
 import { renderPortfolioTable } from './portfolioTable.js';
 import { buildEditableInput } from '../admin/editableInput.js';
 import { buildColorDot } from '../admin/colorPicker.js';
+import { buildFlagImageEl, appendJoinedParts } from '../admin/flagImage.js';
 import { renderPresentations } from './presentations.js';
 
 function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, onAddItem, onColorChange }) {
@@ -21,7 +22,7 @@ function renderIndices(container, items, isEditing, { onEditItem, onDeleteItem, 
       name.appendChild(buildEditableInput(item.name, 'text', 'panel-index-name-input', v => onEditItem(item, { name: v })));
       name.appendChild(buildColorDot(nameColor, color => onColorChange(item, 'name', color)));
     } else {
-      name.textContent = [item.flag, item.name].filter(Boolean).join(' ');
+      appendJoinedParts(name, [buildFlagImageEl(item.flag) || item.flag, item.name], ' ');
     }
 
     const value = document.createElement('span');

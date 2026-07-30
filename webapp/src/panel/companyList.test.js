@@ -19,7 +19,10 @@ describe('renderCompanies', () => {
     renderCompanies(container, [COMPANY_A], [], { onToggle: () => {}, onOpenChart: () => {} });
     const card = container.querySelector('.panel-company-card');
     expect(card.querySelector('.panel-company-name').textContent).toBe('Reliance Industries');
-    expect(card.querySelector('.panel-company-sub').textContent).toBe('RELIANCE.NS · 🇮🇳 · Inde');
+    const sub = card.querySelector('.panel-company-sub');
+    // Flag renders as a real <img> (Twemoji), not text — see flagImage.js.
+    expect(sub.querySelector('img.flag-emoji').alt).toBe('🇮🇳');
+    expect(sub.textContent.replace(/\s+/g, ' ').trim()).toBe('RELIANCE.NS · · Inde');
     expect(card.querySelector('.panel-company-cap').textContent).toBe('210 Md$');
   });
 
@@ -79,7 +82,10 @@ describe('renderCompanies', () => {
     const container = document.createElement('div');
     renderCompanies(container, [{ ...COMPANY_A, name: '<img src=x onerror=alert(1)>' }], [], { onToggle: () => {}, onOpenChart: () => {} });
     expect(container.querySelector('.panel-company-name').textContent).toBe('<img src=x onerror=alert(1)>');
-    expect(container.querySelector('img')).toBeNull();
+    // The company's own flag legitimately renders as an <img> (see flagImage.js)
+    // — the point of this test is that the malicious `name` field specifically
+    // was never interpreted as HTML, i.e. no <img> came from *that* field.
+    expect(container.querySelector('.panel-company-name img')).toBeNull();
   });
 
   it('renders a chart button for each company', () => {
