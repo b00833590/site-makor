@@ -11,6 +11,7 @@ import './admin/passwordModal.css';
 import './admin/toast.css';
 import './admin/colorPicker.css';
 import './admin/presentationUploadModal.css';
+import './admin/pdfSectionsModal.css';
 import './panel/presentations.css';
 import './panel/panelToggle.css';
 import './panel/presentationsModal.css';
@@ -39,6 +40,7 @@ import { renderWeekAdmin } from './timeline/weekAdmin.js';
 import { startPortfolioLiveRefresh } from './panel/portfolioLiveRefresh.js';
 import { initPasswordModal } from './admin/passwordModal.js';
 import { initPresentationUploadModal } from './admin/presentationUploadModal.js';
+import { initPdfSectionsModal } from './admin/pdfSectionsModal.js';
 import { showToast } from './admin/toast.js';
 import { generateId } from './admin/uid.js';
 import { ADMIN_PASSWORD } from './admin/config.js';
@@ -857,31 +859,52 @@ undoAllBtn.addEventListener('click', handleUndoAll);
 
 const exportPdfBtn = document.getElementById('export-pdf-btn');
 
-exportPdfBtn.addEventListener('click', async () => {
-  const region = REGIONS.find(r => r.id === activeRegionId);
-  const activeWeek = getWeeks(db).find(w => w.id === activeWeekId);
-  const portfolioRegion = getPortfolioRegion(db, activeRegionId);
-  const filename = buildExportFilename(region ? region.label : '', activeWeek ? activeWeek.label : '');
+// Full export goes through a section-picker modal (same 4 sections/labels as
+// the old site's own "Exporter en PDF" button, kept consistent across both):
+// the button no longer generates immediately, it opens the modal, which then
+// drives the actual export via onConfirm. generateReportPDF already accepts
+// a `sections` filter (pdfReportBuilder.js) — the same option the per-region
+// portfolio export below already relies on — so no new export logic is
+// needed here, just the selection UI in front of the existing call.
+const pdfSectionsModal = initPdfSectionsModal({
+  modalEl: document.getElementById('pdf-sections-modal'),
+  checkboxEls: Array.from(document.querySelectorAll('#pdf-sections-modal .pdf-sections-modal-checkbox')),
+  cancelBtn: document.getElementById('pdf-sections-cancel'),
+  okBtn: document.getElementById('pdf-sections-ok'),
+  onConfirm: async (sections) => {
+    if (sections.length === 0) {
+      showToast('Sélectionne au moins une section');
+      return;
+    }
 
-  exportPdfBtn.disabled = true;
-  exportPdfBtn.textContent = '⏳ Génération...';
-  try {
-    await generateReportPDF({
-      regionLabel: region ? region.label : '',
-      weekLabel: activeWeek ? activeWeek.label : '',
-      portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
-      marketItems: getMarketItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
-      newsItems: getNewsItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
-      companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
-      portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
-    }, filename);
-  } catch (error) {
-    console.error('PDF export failed', error);
-  } finally {
-    exportPdfBtn.disabled = false;
-    exportPdfBtn.textContent = '📄 Exporter en PDF';
-  }
+    const region = REGIONS.find(r => r.id === activeRegionId);
+    const activeWeek = getWeeks(db).find(w => w.id === activeWeekId);
+    const portfolioRegion = getPortfolioRegion(db, activeRegionId);
+    const filename = buildExportFilename(region ? region.label : '', activeWeek ? activeWeek.label : '');
+
+    exportPdfBtn.disabled = true;
+    exportPdfBtn.textContent = '⏳ Génération...';
+    try {
+      await generateReportPDF({
+        regionLabel: region ? region.label : '',
+        weekLabel: activeWeek ? activeWeek.label : '',
+        portfolioRegionLabel: portfolioRegion ? portfolioRegion.label : '',
+        marketItems: getMarketItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+        newsItems: getNewsItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+        companyItems: getCompanyItemsForWeekAndRegion(db, activeWeekId, activeRegionId),
+        portfolioEntries: getPortfolioEntriesForRegion(db, activeRegionId),
+        sections,
+      }, filename);
+    } catch (error) {
+      console.error('PDF export failed', error);
+    } finally {
+      exportPdfBtn.disabled = false;
+      exportPdfBtn.textContent = '📄 Exporter en PDF';
+    }
+  },
 });
+
+exportPdfBtn.addEventListener('click', () => pdfSectionsModal.open());
 
 const exportPortfolioPdfBtn = document.getElementById('export-portfolio-pdf-btn');
 

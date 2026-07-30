@@ -98,6 +98,34 @@
       </div>
     </div>
   </div>
+  <div id="pdf-sections-modal" class="pdf-sections-modal">
+    <div class="pdf-sections-modal-content">
+      <h3>📄 Exporter en PDF</h3>
+      <div class="pdf-sections-modal-sub">Choisis les sections à inclure dans le document.</div>
+      <div class="pdf-sections-modal-list">
+        <label class="pdf-sections-modal-row">
+          <input type="checkbox" class="pdf-sections-modal-checkbox" value="indices" checked />
+          <span>Indices</span>
+        </label>
+        <label class="pdf-sections-modal-row">
+          <input type="checkbox" class="pdf-sections-modal-checkbox" value="news" checked />
+          <span>News macro</span>
+        </label>
+        <label class="pdf-sections-modal-row">
+          <input type="checkbox" class="pdf-sections-modal-checkbox" value="companies" checked />
+          <span>Entreprises</span>
+        </label>
+        <label class="pdf-sections-modal-row">
+          <input type="checkbox" class="pdf-sections-modal-checkbox" value="portfolio" checked />
+          <span>Suivi du portefeuille</span>
+        </label>
+      </div>
+      <div class="pdf-sections-modal-actions">
+        <button id="pdf-sections-cancel" type="button">Annuler</button>
+        <button id="pdf-sections-ok" type="button">Générer le PDF</button>
+      </div>
+    </div>
+  </div>
   <div id="admin-toast" class="admin-toast"></div>
   <script type="module" src="/src/main.js"></script>
 </body>
