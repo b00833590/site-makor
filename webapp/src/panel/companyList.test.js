@@ -330,14 +330,22 @@ describe('renderCompanies — color picker', () => {
     expect(container.querySelector('.color-dot')).toBeNull();
   });
 
-  it('applies a stored color as inline style on name, marketCap, a stat value, and a bullet in read-only mode', () => {
+  it('applies a stored color as inline style on name, marketCap, and a bullet in read-only mode', () => {
     const container = document.createElement('div');
-    const colored = { ...COMPANY_A, colors: { name: '#2f6fed', marketCap: '#c0392b', salesGrowth: '#16a34a', 'bullet-0': '#9b59b6' } };
+    const colored = { ...COMPANY_A, colors: { name: '#2f6fed', marketCap: '#c0392b', 'bullet-0': '#9b59b6' } };
     renderCompanies(container, [colored], [], { onToggle: () => {}, onOpenChart: () => {} });
     expect(container.querySelector('.panel-company-name').style.color).toBe('rgb(47, 111, 237)');
     expect(container.querySelector('.panel-company-cap').style.color).toBe('rgb(192, 57, 43)');
-    expect(container.querySelectorAll('.panel-company-stat-value')[0].style.color).toBe('rgb(22, 163, 74)');
     expect(container.querySelectorAll('.panel-company-bullets li')[0].style.color).toBe('rgb(155, 89, 182)');
+  });
+
+  it('never applies a stored color to a stat value, even if one is set — the 4 key indicators have no per-company color override, so they cannot drift from the default white/text color (root-cause fix for the inconsistent stat colors reported by the user)', () => {
+    const container = document.createElement('div');
+    const colored = { ...COMPANY_A, colors: { salesGrowth: '#16a34a', evEbitda: '#16a34a', coursActuel: '#16a34a', targetPrice: '#16a34a' } };
+    renderCompanies(container, [colored], [], { onToggle: () => {}, onOpenChart: () => {} });
+    const values = container.querySelectorAll('.panel-company-stat-value');
+    expect(values).toHaveLength(4);
+    values.forEach(value => expect(value.style.color).toBe(''));
   });
 
   it('renders a color dot next to name/marketCap in edit mode and calls onColorChange with the right field', () => {
@@ -359,7 +367,7 @@ describe('renderCompanies — color picker', () => {
     expect(onColorChange).toHaveBeenCalledWith(COMPANY_A, 'marketCap', expect.any(String));
   });
 
-  it('renders a color dot for each of the 4 stat values in edit mode and calls onColorChange with the correct value field', () => {
+  it('renders no color dot for any of the 4 stat values in edit mode — they are not individually colorable, by design', () => {
     const container = document.createElement('div');
     const onColorChange = vi.fn();
     renderCompanies(container, [COMPANY_A], [], {
@@ -368,14 +376,7 @@ describe('renderCompanies — color picker', () => {
       onBulletAdd: () => {}, onBulletEdit: () => {}, onBulletDelete: () => {},
       onColorChange,
     });
-    const fields = ['salesGrowth', 'evEbitda', 'coursActuel', 'targetPrice'];
-    const dots = container.querySelectorAll('.panel-company-stat-value .color-dot');
-    expect(dots).toHaveLength(4);
-    dots.forEach((dot, i) => {
-      dot.click();
-      document.querySelector('.color-swatch').click();
-      expect(onColorChange).toHaveBeenNthCalledWith(i + 1, COMPANY_A, fields[i], expect.any(String));
-    });
+    expect(container.querySelectorAll('.panel-company-stat-value .color-dot')).toHaveLength(0);
   });
 
   it('renders one color dot per bullet in edit mode and calls onColorChange with the correct bullet-index field', () => {

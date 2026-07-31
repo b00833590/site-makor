@@ -51,13 +51,17 @@
   background: rgba(74, 58, 130, 0.2);
 }
 
+/* Ticker/flag/country and market cap: were var(--text-muted) (#9490b0),
+   too low-contrast to read on a big screen in a lit room — same reasoning
+   as .panel-bullet-text above. There's no per-company color-picker override
+   for .panel-company-sub, so this default is the only thing controlling it. */
 .panel-company-sub {
-  color: var(--text-muted);
+  color: var(--text);
   margin-top: 4px;
 }
 
 .panel-company-cap {
-  color: var(--text-muted);
+  color: var(--text);
   margin-top: 4px;
 }
 

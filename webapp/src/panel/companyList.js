@@ -9,7 +9,17 @@ const STAT_FIELDS = [
   ['targetPriceLabel', 'targetPrice', 'Objectif'],
 ];
 
-function buildStatsGrid(item, isEditing, { onEditItem, onColorChange }) {
+// Deliberately does NOT read item.colors[valueField] or render a color dot
+// for the value span: that per-company override (still used by name/
+// marketCap/bullets below) was the root cause of the 4 key stat values
+// showing inconsistent colors across companies — whichever ones an admin
+// had happened to recolor via the dot stayed off-white forever, with no way
+// to tell from the UI alone. Removing the read (not just overriding it with
+// CSS) means any stale colors.<field> value left over in Firestore from
+// before this fix is inert — these 4 values now always render in the
+// default .panel-company-stat-value text color, for every company, with no
+// mechanism left that could ever make them diverge again.
+function buildStatsGrid(item, isEditing, { onEditItem }) {
   const stats = document.createElement('div');
   stats.className = 'panel-company-stats';
   for (const [labelField, valueField, defaultLabel] of STAT_FIELDS) {
@@ -26,11 +36,8 @@ function buildStatsGrid(item, isEditing, { onEditItem, onColorChange }) {
 
     const value = document.createElement('span');
     value.className = 'panel-company-stat-value';
-    const valueColor = item.colors && item.colors[valueField];
-    if (valueColor) value.style.color = valueColor;
     if (isEditing) {
       value.appendChild(buildEditableInput(item[valueField], 'text', 'panel-company-stat-input', v => onEditItem(item, { [valueField]: v })));
-      value.appendChild(buildColorDot(valueColor, color => onColorChange(item, valueField, color)));
     } else {
       value.textContent = item[valueField] ?? '';
     }
@@ -155,7 +162,7 @@ export function renderCompanies(container, items, selectedIds, { onToggle, onOpe
       cap.textContent = item.marketCap ?? '';
     }
 
-    card.append(header, sub, cap, buildStatsGrid(item, isEditing, { onEditItem, onColorChange }), buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBulletDelete, onColorChange }));
+    card.append(header, sub, cap, buildStatsGrid(item, isEditing, { onEditItem }), buildBulletsList(item, isEditing, { onBulletAdd, onBulletEdit, onBulletDelete, onColorChange }));
 
     if (isEditing) {
       const delBtn = document.createElement('button');
