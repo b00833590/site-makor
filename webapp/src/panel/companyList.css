@@ -191,7 +191,12 @@
   flex: 1;
   font-size: 13px;
   line-height: 1.7;
-  color: var(--text-muted);
+  /* Was var(--text-muted) (#9490b0): too low-contrast against the card
+     background to read from a few meters away during a presentation.
+     var(--text) is the same near-white already used for the company name
+     and stat values, so this stays visually consistent while maximizing
+     contrast for the bullet points specifically. */
+  color: var(--text);
   white-space: pre-line;
 }
 

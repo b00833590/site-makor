@@ -20,6 +20,7 @@
   <button id="undo-all-btn" class="undo-all-btn" type="button" title="Annuler toutes les modifications de cette session d'édition">↺ Tout annuler</button>
   <button id="export-pdf-btn" class="export-pdf-btn" type="button">📄 Exporter en PDF</button>
   <button id="presentation-mode-btn" class="presentation-mode-btn" type="button" aria-pressed="false">🖥️ Mode Présentation</button>
+  <button id="brightness-mode-btn" class="brightness-mode-btn" type="button">☀️ Luminosité : Standard</button>
   <button id="arrow-prev" class="arrow-btn arrow-prev" aria-label="Région précédente">‹</button>
   <button id="arrow-next" class="arrow-btn arrow-next" aria-label="Région suivante">›</button>
   <button id="panel-toggle-btn" class="panel-toggle-btn" type="button" aria-expanded="false" aria-label="Afficher le panneau d'informations">‹</button>
@@ -49,6 +50,7 @@
     </div>
   </div>
   <aside class="side-panel scroll-y-styled">
+    <div id="panel-resize-handle" class="panel-resize-handle" title="Redimensionner le panneau" aria-hidden="true"></div>
     <div id="panel-region-label" class="panel-region-label"></div>
     <div class="panel-section-label">Indices régionaux</div>
     <div id="panel-indices"></div>

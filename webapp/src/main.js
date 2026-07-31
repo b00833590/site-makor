@@ -17,6 +17,8 @@ import './panel/panelToggle.css';
 import './panel/presentationsModal.css';
 import './panel/lexiqueModal.css';
 import './panel/presentationMode.css';
+import './panel/panelResize.css';
+import './panel/brightnessMode.css';
 import { REGIONS } from './globe/regions.js';
 import { regionPosition } from './globe/cycle.js';
 import { initGlobeScene } from './globe/globeScene.js';
@@ -28,6 +30,8 @@ import { fridayOfCurrentWeekDDMM } from './data/dateUtils.js';
 import { initSidePanel } from './panel/sidePanel.js';
 import { initPanelToggle } from './panel/panelToggle.js';
 import { initPresentationMode } from './panel/presentationMode.js';
+import { initPanelResize } from './panel/panelResize.js';
+import { initBrightnessMode } from './panel/brightnessMode.js';
 import { initPresentationsModal } from './panel/presentationsModal.js';
 import { initLexiqueModal } from './panel/lexiqueModal.js';
 import { initCompanyChartModal } from './panel/chartModal.js';
@@ -649,6 +653,16 @@ initPresentationMode({
   toggleBtn: document.getElementById('presentation-mode-btn'),
   bodyEl: document.body,
   onEnter: () => panelToggleHandle.open(),
+});
+
+initPanelResize({
+  handleEl: document.getElementById('panel-resize-handle'),
+  bodyEl: document.body,
+});
+
+initBrightnessMode({
+  toggleBtn: document.getElementById('brightness-mode-btn'),
+  bodyEl: document.body,
 });
 
 function handleSearchSelectCompany(company) {
